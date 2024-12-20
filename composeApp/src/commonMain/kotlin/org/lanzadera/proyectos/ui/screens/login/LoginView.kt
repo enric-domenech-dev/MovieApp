@@ -22,13 +22,16 @@ import facturas.composeapp.generated.resources.Res
 import facturas.composeapp.generated.resources.factura
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.lanzadera.proyectos.navigation.NavigationController
 import org.lanzadera.proyectos.ui.components.EmailInput
 import org.lanzadera.proyectos.ui.components.PasswordInput
 import org.lanzadera.proyectos.ui.components.PrimaryButton
 
 @Composable
 @Preview
-fun LoginView(){
+fun LoginView(
+    navigation: NavigationController
+){
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -71,7 +74,7 @@ fun LoginView(){
         Spacer(modifier = Modifier.height(16.dp))
 
         PrimaryButton(
-            onClick = { /*navigateToHome()*/ },
+            onClick = { navigation.navigateToHome() },
             modifier = Modifier.fillMaxWidth(),
             text = "Log In",
             description = "Log In Button",
