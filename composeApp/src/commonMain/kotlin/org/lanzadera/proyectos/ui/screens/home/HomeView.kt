@@ -12,13 +12,17 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import facturas.composeapp.generated.resources.Res
-import facturas.composeapp.generated.resources.factura
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.lanzadera.proyectos.navigation.NavigationController
 import org.lanzadera.proyectos.ui.components.DrawerAppBar
@@ -28,8 +32,20 @@ import org.lanzadera.proyectos.ui.components.DrawerAppBar
 @Composable
 @Preview
 fun HomeView(
-    navigation: NavigationController
+    navigation: NavigationController, homeViewModel: HomeViewModel
 ) {
+
+    val scope = rememberCoroutineScope()
+    var text by remember { mutableStateOf("Loading") }
+    LaunchedEffect(true) {
+        scope.launch {
+            text = try {
+                homeViewModel.greeting()
+            } catch (e: Exception) {
+                e.message ?: "error"
+            }
+        }
+    }
     val number = remember { mutableIntStateOf(0) }
 
     DrawerAppBar(
@@ -54,8 +70,15 @@ fun HomeView(
                 Text("Home Screen")
                 Spacer(modifier = Modifier.height(8.dp))
                 Text("${number.value}")
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text)
             }
         }
     )
 
+}
+
+@Composable
+fun GreetingView(text: String) {
+    Text(text = text)
 }
