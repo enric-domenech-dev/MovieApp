@@ -1,5 +1,9 @@
 package org.lanzadera.proyectos.ui.screens.login
 
-class LoginViewModel {
+import androidx.lifecycle.ViewModel
+
+class LoginViewModel() : ViewModel() {
+
+
 
 }

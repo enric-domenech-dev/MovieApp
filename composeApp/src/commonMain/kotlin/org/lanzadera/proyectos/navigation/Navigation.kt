@@ -32,7 +32,7 @@ fun Navigation(
             // SplashScreen(navController = navHost)
         }
         composable(Constants.Screen.Home.route) {
-            HomeView()
+            HomeView(navigation = navigation)
         }
         composable(Constants.Screen.Login.route) {
             LoginView(navigation = navigation)

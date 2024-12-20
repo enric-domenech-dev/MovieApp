@@ -58,6 +58,7 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
+            implementation(libs.androidx.biometric)
         }
         commonMain.dependencies {
             implementation(libs.navigation.compose)
@@ -107,6 +108,8 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.fragment.ktx)
     debugImplementation(compose.uiTooling)
 }
 
