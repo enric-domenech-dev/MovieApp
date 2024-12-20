@@ -341,7 +341,7 @@ fun SingleChoiceSegmentedButtonAlternative(
 
                 modifier = Modifier
                     .padding(horizontal = 4.dp)
-                    .size(height = 32.dp, width = 72.dp)
+                    .size(height = 32.dp, width = 64.dp)
                     .clip(RoundedCornerShape(50))
                     .background(
                         if (index == selectedIndex) MaterialTheme.colors.background

@@ -2,11 +2,13 @@ package org.lanzadera.proyectos.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import org.lanzadera.proyectos.utils.Constants
 import org.lanzadera.proyectos.ui.screens.home.HomeView
+import org.lanzadera.proyectos.ui.screens.home.HomeViewModel
 import org.lanzadera.proyectos.ui.screens.login.LoginView
 
 @Composable
@@ -32,7 +34,7 @@ fun Navigation(
             // SplashScreen(navController = navHost)
         }
         composable(Constants.Screen.Home.route) {
-            HomeView(navigation = navigation)
+            HomeView(navigation = navigation, homeViewModel = HomeViewModel())
         }
         composable(Constants.Screen.Login.route) {
             LoginView(navigation = navigation)

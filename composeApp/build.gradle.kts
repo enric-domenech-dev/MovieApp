@@ -56,11 +56,16 @@ kotlin {
         val desktopMain by getting
         
         androidMain.dependencies {
+            implementation(libs.kotlinx.coroutines.android)
+            implementation(libs.ktor.client.okhttp)
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.biometric)
         }
         commonMain.dependencies {
+            implementation(libs.ktor.client.core)
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.ktor.client.core)
             implementation(libs.navigation.compose)
             implementation(compose.runtime)
             implementation(compose.foundation)
@@ -78,6 +83,9 @@ kotlin {
         }
         wasmJsMain.dependencies {
             implementation(npm("@js-joda/timezone", "2.3.0"))
+        }
+        iosMain.dependencies {
+            implementation(libs.ktor.client.darwin)
         }
     }
 }
