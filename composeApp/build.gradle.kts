@@ -60,6 +60,7 @@ kotlin {
             implementation(libs.androidx.activity.compose)
         }
         commonMain.dependencies {
+            implementation(libs.navigation.compose)
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material)
@@ -97,9 +98,7 @@ android {
         }
     }
     buildTypes {
-        getByName("release") {
-            isMinifyEnabled = false
-        }
+
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
