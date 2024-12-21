@@ -8,16 +8,20 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import movieapp.composeapp.generated.resources.Res
 import org.jetbrains.compose.resources.stringResource
+import org.lanzadera.proyectos.models.movie.Movie
+import org.lanzadera.proyectos.models.movie.MovieResponse
+import org.lanzadera.proyectos.utils.Constants
 
 
 class HomeViewModel : ViewModel() {
 
     private val client = HttpClient()
-    suspend fun data(apiKey: String): String {
-        println(apiKey)
-        val response: HttpResponse = client.get("https://api.themoviedb.org/3/discover/movie?language=en-US&page=1&sort_by=popularity.desc") {
+    suspend fun data(): List<Movie> {
+        println(Constants.API_KEY)
+        val response: HttpResponse = client.get("https://api.themoviedb.org/3/discover/movie?language=en-US&sort_by=popularity.desc") {
             headers {
                 append("accept", "application/json")
                 append(
@@ -26,11 +30,7 @@ class HomeViewModel : ViewModel() {
                 )
             }
         }
-
-        val responseBody: String = response.body()
-        val body = response.bodyAsText()
-        println(responseBody)
-        println(body)
-        return body
+        println(response.bodyAsText())
+        return Json.decodeFromString<MovieResponse>(response.body()).results
     }
 }

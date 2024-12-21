@@ -1,5 +1,0 @@
-<resources>
-    <string name="apiKey">800a32af317f42e6cf74c042ea14a2a8</string>
-    <string name="baseUrl">https://api.themoviedb.org</string>
-    <string name="token">eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4MDBhMzJhZjMxN2Y0MmU2Y2Y3NGMwNDJlYTE0YTJhOCIsIm5iZiI6MTczNDc4NDgxMi40MjUsInN1YiI6IjY3NjZiNzJjMGIyZmJiOWRlYTVlMWQ0MiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.wGnX7P8oJrWpXdpxd3wQXw2hjw5API7MU3ucBwAKIWU</string>
-</resources>

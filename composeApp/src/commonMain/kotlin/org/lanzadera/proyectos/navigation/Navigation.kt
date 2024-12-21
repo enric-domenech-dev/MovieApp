@@ -37,7 +37,7 @@ fun Navigation(
             HomeView(navigation = navigation, vm = HomeViewModel())
         }
         composable(Constants.Screen.Login.route) {
-            LoginView(navigation = navigation, viewModel = LoginViewModel())
+            LoginView(nav = navigation, vm = LoginViewModel())
         }
 
 

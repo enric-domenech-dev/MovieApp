@@ -29,10 +29,10 @@ class LoginViewModel : ViewModel() {
     fun login(email: String, password: String) {
         viewModelScope.launch {
             _isLoading.value = true
+            _isLoginSuccessful.value = null
             try {
                 val response = client.get("https://6764320b52b2a7619f5bc6d6.mockapi.io/garmindata")
                 val body = response.bodyAsText()
-                client.close()
 
                 println("--> ${response.request.method.value}  ${response.request.url} ")
                 println(body)
@@ -42,6 +42,7 @@ class LoginViewModel : ViewModel() {
                 val users: List<User> = Json.decodeFromString(body)
 
                 val user = users.find { it.email == email && it.password == password }
+
                 if (user != null) {
                     _userState.value = user
                     _isLoginSuccessful.value = true
