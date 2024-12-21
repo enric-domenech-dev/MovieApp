@@ -26,8 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
-import facturas.composeapp.generated.resources.Res
-import facturas.composeapp.generated.resources.factura
+import movieapp.composeapp.generated.resources.Res
+import movieapp.composeapp.generated.resources.factura
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview

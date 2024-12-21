@@ -67,8 +67,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import facturas.composeapp.generated.resources.Res
-import facturas.composeapp.generated.resources.*
+import movieapp.composeapp.generated.resources.Res
+import movieapp.composeapp.generated.resources.*
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource

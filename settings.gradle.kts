@@ -1,4 +1,4 @@
-rootProject.name = "Facturas"
+rootProject.name = "MovieApp"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {

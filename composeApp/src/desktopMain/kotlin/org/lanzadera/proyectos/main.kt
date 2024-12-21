@@ -12,7 +12,7 @@ fun main() = application {
         size = DpSize(400.dp, 800.dp),
         position = WindowPosition(300.dp, 300.dp)
     )
-    Window(title = "Facturas", onCloseRequest = ::exitApplication, state = state) {
+    Window(title = "MovieApp", onCloseRequest = ::exitApplication, state = state) {
         App()
     }
 }

@@ -81,11 +81,11 @@ kotlin {
             implementation(libs.kotlinx.datetime)
         }
         desktopMain.dependencies {
+            implementation(libs.ktor.client.okhttp)
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
         }
         wasmJsMain.dependencies {
-            implementation(npm("@js-joda/timezone", "2.3.0"))
             implementation(libs.kotlinx.serialization.json)
         }
         iosMain.dependencies {
