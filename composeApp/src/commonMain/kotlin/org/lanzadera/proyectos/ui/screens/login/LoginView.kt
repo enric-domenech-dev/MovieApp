@@ -10,21 +10,28 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.viewmodel.compose.viewModel
 import facturas.composeapp.generated.resources.Res
 import facturas.composeapp.generated.resources.factura
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.lanzadera.proyectos.models.user.User
 import org.lanzadera.proyectos.navigation.NavigationController
 import org.lanzadera.proyectos.ui.components.DevelopingDialog
 import org.lanzadera.proyectos.ui.components.EmailInput
@@ -35,12 +42,23 @@ import org.lanzadera.proyectos.ui.components.PrimaryButton
 @Composable
 @Preview
 fun LoginView(
-    navigation: NavigationController
+    navigation: NavigationController, viewModel: LoginViewModel
 ) {
+    val user by viewModel.userState.collectAsState()
+    val scope = rememberCoroutineScope()
+    var text by remember { mutableStateOf("Loading") }
     var showDialog by remember { mutableStateOf(false) }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+    val isLoginSuccessful by viewModel.isLoginSuccessful.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+
+    LaunchedEffect(isLoginSuccessful) {
+        if (isLoginSuccessful == true) {
+            navigation.navigateToHome()// Reemplaza con la ruta adecuada
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -80,13 +98,22 @@ fun LoginView(
         Spacer(modifier = Modifier.height(16.dp))
 
         PrimaryButton(
-            onClick = { navigation.navigateToHome() },
+            onClick = {
+                viewModel.login(email, password)
+            },
             modifier = Modifier.fillMaxWidth(),
             text = "Log In",
             description = "Log In Button",
             enabled = true,
             icon = null
         )
+
+        // Mensaje de carga o error
+        if (isLoading) {
+            CircularProgressIndicator()
+        } else if (isLoginSuccessful == false) {
+            Text("Credenciales incorrectas. Intenta nuevamente.")
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -97,7 +124,7 @@ fun LoginView(
                     showDialog = true
                 }
         )
-        if (showDialog){
+        if (showDialog) {
             DevelopingDialog(
                 showDialog = showDialog,
                 onDismiss = { showDialog = false },
