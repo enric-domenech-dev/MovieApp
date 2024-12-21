@@ -32,21 +32,22 @@ import org.lanzadera.proyectos.ui.components.DrawerAppBar
 @Composable
 @Preview
 fun HomeView(
-    navigation: NavigationController, homeViewModel: HomeViewModel
+    navigation: NavigationController, viewModel: HomeViewModel
 ) {
-
+    val number = remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
     var text by remember { mutableStateOf("Loading") }
-    LaunchedEffect(true) {
-        scope.launch {
-            text = try {
-                homeViewModel.greeting()
-            } catch (e: Exception) {
-                e.message ?: "error"
-            }
-        }
-    }
-    val number = remember { mutableIntStateOf(0) }
+
+//    LaunchedEffect(true) {
+//        scope.launch {
+//            text = try {
+//                homeViewModel.greeting()
+//            } catch (e: Exception) {
+//                e.message ?: "error"
+//            }
+//        }
+//    }
+
 
     DrawerAppBar(
         navViewModel = navigation,
@@ -70,8 +71,6 @@ fun HomeView(
                 Text("Home Screen")
                 Spacer(modifier = Modifier.height(8.dp))
                 Text("${number.value}")
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text)
             }
         }
     )

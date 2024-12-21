@@ -10,6 +10,7 @@ import org.lanzadera.proyectos.utils.Constants
 import org.lanzadera.proyectos.ui.screens.home.HomeView
 import org.lanzadera.proyectos.ui.screens.home.HomeViewModel
 import org.lanzadera.proyectos.ui.screens.login.LoginView
+import org.lanzadera.proyectos.ui.screens.login.LoginViewModel
 
 @Composable
 fun Navigation(
@@ -34,10 +35,10 @@ fun Navigation(
             // SplashScreen(navController = navHost)
         }
         composable(Constants.Screen.Home.route) {
-            HomeView(navigation = navigation, homeViewModel = HomeViewModel())
+            HomeView(navigation = navigation, viewModel = HomeViewModel())
         }
         composable(Constants.Screen.Login.route) {
-            LoginView(navigation = navigation)
+            LoginView(navigation = navigation, viewModel = LoginViewModel())
         }
 
 
