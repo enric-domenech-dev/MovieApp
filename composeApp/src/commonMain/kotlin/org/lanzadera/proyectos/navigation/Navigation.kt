@@ -2,7 +2,6 @@ package org.lanzadera.proyectos.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -35,7 +34,7 @@ fun Navigation(
             // SplashScreen(navController = navHost)
         }
         composable(Constants.Screen.Home.route) {
-            HomeView(navigation = navigation, viewModel = HomeViewModel())
+            HomeView(navigation = navigation, vm = HomeViewModel())
         }
         composable(Constants.Screen.Login.route) {
             LoginView(navigation = navigation, viewModel = LoginViewModel())
