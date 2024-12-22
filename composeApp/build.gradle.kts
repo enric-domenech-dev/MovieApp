@@ -57,6 +57,7 @@ kotlin {
         val desktopMain by getting
         
         androidMain.dependencies {
+            implementation (libs.google.accompanist.permissions)
             implementation(libs.kotlinx.coroutines.android)
             implementation(libs.ktor.client.okhttp)
             implementation(compose.preview)

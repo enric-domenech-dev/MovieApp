@@ -28,6 +28,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import movieapp.composeapp.generated.resources.Res
 import movieapp.composeapp.generated.resources.factura
+import movieapp.composeapp.generated.resources.unicorn
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.lanzadera.proyectos.navigation.NavigationController
@@ -84,7 +85,7 @@ fun LoginView(
         Spacer(modifier = Modifier.height(16.dp))
 
         Image(
-            painter = painterResource(resource = Res.drawable.factura),
+            painter = painterResource(resource = Res.drawable.unicorn),
             contentDescription = null,
             modifier = Modifier.size(200.dp)
         )

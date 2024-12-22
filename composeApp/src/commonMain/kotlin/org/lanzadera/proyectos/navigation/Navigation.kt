@@ -10,6 +10,7 @@ import org.lanzadera.proyectos.ui.screens.home.HomeView
 import org.lanzadera.proyectos.ui.screens.home.HomeViewModel
 import org.lanzadera.proyectos.ui.screens.login.LoginView
 import org.lanzadera.proyectos.ui.screens.login.LoginViewModel
+import org.lanzadera.proyectos.ui.screens.splash_screen.SplashView
 
 @Composable
 fun Navigation(
@@ -29,12 +30,12 @@ fun Navigation(
         }
     }
 
-    NavHost(navController = navHost, startDestination = Constants.Screen.Home.route) {
+    NavHost(navController = navHost, startDestination = Constants.Screen.SplashScreen.route) {
         composable(Constants.Screen.SplashScreen.route) {
-            // SplashScreen(navController = navHost)
+            SplashView(nav = navigation)
         }
         composable(Constants.Screen.Home.route) {
-            HomeView(navigation = navigation, vm = HomeViewModel())
+            HomeView(nav = navigation, vm = HomeViewModel())
         }
         composable(Constants.Screen.Login.route) {
             LoginView(nav = navigation, vm = LoginViewModel())
