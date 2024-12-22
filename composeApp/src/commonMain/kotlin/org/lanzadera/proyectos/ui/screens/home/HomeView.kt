@@ -31,6 +31,7 @@ import kotlinx.coroutines.launch
 import movieapp.composeapp.generated.resources.Res
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.lanzadera.proyectos.CameraView
 import org.lanzadera.proyectos.models.movie.Movie
 import org.lanzadera.proyectos.navigation.NavigationController
 import org.lanzadera.proyectos.ui.components.DrawerAppBar
@@ -46,6 +47,7 @@ fun HomeView(
     val number = remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
     var text by remember { mutableStateOf("Loading") }
+    var isClicked by remember { mutableStateOf(true) }
 
     LaunchedEffect(true) {
         scope.launch {
@@ -65,11 +67,16 @@ fun HomeView(
         actionButton = {
             FloatingActionButton(
                 onClick = {
+                    isClicked = true
                     number.value++
                 },
                 backgroundColor = MaterialTheme.colors.primary,
             ) {
+
                 Icon(Icons.Default.Add, contentDescription = "Add")
+                if (isClicked) {
+                    CameraView()
+                }
             }
         },
         screenContent = {
