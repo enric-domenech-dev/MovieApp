@@ -5,6 +5,8 @@ import androidx.compose.runtime.*
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import org.lanzadera.proyectos.models.movie.Movie
+import org.lanzadera.proyectos.ui.screens.detail.DetailView
 import org.lanzadera.proyectos.utils.Constants
 import org.lanzadera.proyectos.ui.screens.home.HomeView
 import org.lanzadera.proyectos.ui.screens.home.HomeViewModel
@@ -25,12 +27,13 @@ fun Navigation(
                 Constants.NavigationEvent.NavigateToLogin -> navHost.navigate(Constants.Screen.Login.route)
                 Constants.NavigationEvent.NavigateToRegister -> navHost.navigate(Constants.Screen.SignIn.route)
                 Constants.NavigationEvent.NavigateToSplashScreen -> navHost.navigate(Constants.Screen.SplashScreen.route)
+                Constants.NavigationEvent.NavigateToDetail -> navHost.navigate(Constants.Screen.Detail.route)
                 Constants.NavigationEvent.NavigateBack -> navHost.popBackStack()
             }
         }
     }
 
-    NavHost(navController = navHost, startDestination = Constants.Screen.SplashScreen.route) {
+    NavHost(navController = navHost, startDestination = Constants.Screen.Home.route) {
         composable(Constants.Screen.SplashScreen.route) {
             SplashView(nav = navigation)
         }
@@ -40,7 +43,9 @@ fun Navigation(
         composable(Constants.Screen.Login.route) {
             LoginView(nav = navigation, vm = LoginViewModel())
         }
-
+        composable(Constants.Screen.Detail.route) {
+            DetailView(nav = navigation, movie = navigation.selectedMovie)
+        }
 
     }
 

@@ -1,9 +1,7 @@
 package org.lanzadera.proyectos.ui.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,13 +17,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.ButtonElevation
 import androidx.compose.material.Divider
 import androidx.compose.material.DrawerValue
 import androidx.compose.material.DropdownMenu
@@ -41,10 +41,15 @@ import androidx.compose.material.TextButton
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ExitToApp
+import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.automirrored.outlined.Send
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Info
@@ -63,16 +68,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import movieapp.composeapp.generated.resources.Res
 import movieapp.composeapp.generated.resources.*
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.toLocalDate
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.lanzadera.proyectos.models.movie.Movie
 import org.lanzadera.proyectos.navigation.NavigationController
+import kotlin.math.round
 
 
 @Composable
@@ -216,9 +227,6 @@ fun DrawerAppBar(
                     content = { /* Add content */ },
                     onClick = { /* Do something... */ }
                 )
-
-
-
 
                 DropdownMenuItem(
                     content = {
@@ -641,6 +649,27 @@ fun LogoutConfirmationDialog(
     }
 }
 
+
+//@Composable
+//fun MovieImage(movie: Movie) {
+//    val resource = asyncPainterResource("https://image.tmdb.org/t/p/w500${movie.posterPath}")
+//
+//    when (resource) {
+//        is Resource.Loading -> {
+//            Text("Cargando...")
+//        }
+//        is Resource.Success -> {
+//            val painter = resource.value
+//            Image(painter = painter, contentDescription = "Poster")
+//        }
+//        is Resource.Failure -> {
+//            println("Error: ${resource.exception.message}")
+//            Text("Error al cargar imagen: ${resource.exception.message}")
+//        }
+//    }
+//}
+
+
 @Composable
 fun DevelopingDialog(
     showDialog: Boolean,
@@ -659,5 +688,116 @@ fun DevelopingDialog(
             },
             confirmButton = { }
         )
+    }
+}
+
+@Composable
+fun MovieItem(nav: NavigationController, movie: Movie) {
+    AsyncImage(
+        model = "https://image.tmdb.org/t/p/w500${movie.posterPath}",
+        contentDescription = "Movie Poster",
+        contentScale = ContentScale.Crop,
+        modifier = Modifier.fillMaxWidth()
+            .aspectRatio(2 / 3f)
+            .clip(MaterialTheme.shapes.small)
+            .clickable { nav.navigateToDetail(movie) }
+    )
+}
+
+@Composable
+fun MovieExtendedItem(movie: Movie?) {
+
+    if (movie != null) {
+        var isFilled by remember { mutableStateOf(false) }
+
+        Column {
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                AsyncImage(
+                    model = "https://image.tmdb.org/t/p/w500${movie.backdropPath}",
+                    contentDescription = "Movie Poster",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxWidth()
+                        .aspectRatio(16 / 9f)
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(45.dp)
+                        .clip(CircleShape)
+                        .background(if (movie.adult == false) MaterialTheme.colors.error else MaterialTheme.colors.primary),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (movie.adult == true) {
+                        Text(
+                            text = "18+",
+                            style = MaterialTheme.typography.body1,
+                            color = MaterialTheme.colors.onPrimary
+                        )
+                    } else {
+
+                        val rounded = round(movie.voteAverage?.times(10) ?: 0.0) / 10
+
+                        Text(
+                            text = rounded.toString(),
+                            style = MaterialTheme.typography.body1,
+                            color = MaterialTheme.colors.onPrimary
+                        )
+                    }
+
+                }
+
+                Icon(
+                    modifier = Modifier.size(25.dp)
+                        .clickable { isFilled = !isFilled },
+                    imageVector = if (isFilled) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                    contentDescription = "Star Icon",
+                    tint = MaterialTheme.colors.primary
+                )
+            }
+
+            LazyColumn (
+                modifier = Modifier.fillMaxWidth().padding(16.dp)
+            ) {
+                item {
+                    movie.title?.let {
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.h5,
+                        )
+                    }
+
+                    movie.releaseDate?.let {
+
+                        val date : LocalDate = LocalDate.parse(it)
+                        val formattedDate = "${date.dayOfMonth.toString().padStart(2, '0')}-${date.monthNumber.toString().padStart(2, '0')}-${date.year}"
+
+                        Text(
+                            text = formattedDate,
+                            style = MaterialTheme.typography.h6,
+                            color = MaterialTheme.colors.primaryVariant
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    movie.overview?.let {
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.body2
+                        )
+                    }
+                }
+            }
+        }
     }
 }

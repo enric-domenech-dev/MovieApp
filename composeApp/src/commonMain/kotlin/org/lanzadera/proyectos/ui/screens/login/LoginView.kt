@@ -52,13 +52,8 @@ fun LoginView(
     var passwordVisible by remember { mutableStateOf(false) }
     val isLoginSuccessful by vm.isLoginSuccessful.collectAsState()
     val isLoading by vm.isLoading.collectAsState()
-
-    // Mensaje de error
     var errorMessage by remember { mutableStateOf("") }
-
-    // Contador de intentos fallidos
     var failedAttempts by remember { mutableStateOf(0) }
-
 
     // Observa el estado de login y navega cuando se haya realizado correctamente
     LaunchedEffect(isLoginSuccessful) {
