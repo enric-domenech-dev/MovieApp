@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
+import org.lanzadera.proyectos.models.movie.Movie
 import org.lanzadera.proyectos.utils.Constants
 
 class NavigationController() : ViewModel() {
@@ -12,6 +13,7 @@ class NavigationController() : ViewModel() {
     private val _navigationEvent = MutableSharedFlow<Constants.NavigationEvent>()
     val navigationEvent = _navigationEvent.asSharedFlow()
 
+    lateinit var selectedMovie: Movie
 
     fun navigateToHome() {
         viewModelScope.launch {
@@ -34,6 +36,13 @@ class NavigationController() : ViewModel() {
     fun navigateBack() {
         viewModelScope.launch {
             _navigationEvent.emit(Constants.NavigationEvent.NavigateBack)
+        }
+    }
+
+    fun navigateToDetail(movie: Movie) {
+        selectedMovie = movie
+        viewModelScope.launch {
+            _navigationEvent.emit(Constants.NavigationEvent.NavigateToDetail)
         }
     }
 

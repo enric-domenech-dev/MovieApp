@@ -24,14 +24,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import movieapp.composeapp.generated.resources.Res
 import movieapp.composeapp.generated.resources.factura
-import kotlinx.coroutines.launch
+import movieapp.composeapp.generated.resources.unicorn
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import org.lanzadera.proyectos.models.user.User
 import org.lanzadera.proyectos.navigation.NavigationController
 import org.lanzadera.proyectos.ui.components.DevelopingDialog
 import org.lanzadera.proyectos.ui.components.EmailInput
@@ -42,21 +41,32 @@ import org.lanzadera.proyectos.ui.components.PrimaryButton
 @Composable
 @Preview
 fun LoginView(
-    navigation: NavigationController, viewModel: LoginViewModel
+    nav: NavigationController, vm: LoginViewModel
 ) {
-    val user by viewModel.userState.collectAsState()
+    val user by vm.userState.collectAsState()
     val scope = rememberCoroutineScope()
     var text by remember { mutableStateOf("Loading") }
     var showDialog by remember { mutableStateOf(false) }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
-    val isLoginSuccessful by viewModel.isLoginSuccessful.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
+    val isLoginSuccessful by vm.isLoginSuccessful.collectAsState()
+    val isLoading by vm.isLoading.collectAsState()
+    var errorMessage by remember { mutableStateOf("") }
+    var failedAttempts by remember { mutableStateOf(0) }
 
+    // Observa el estado de login y navega cuando se haya realizado correctamente
     LaunchedEffect(isLoginSuccessful) {
         if (isLoginSuccessful == true) {
-            navigation.navigateToHome()// Reemplaza con la ruta adecuada
+            nav.navigateToHome()
+        } else {
+            // Si el login falla, incrementar el contador de intentos fallidos
+            if (failedAttempts < 3) {
+                failedAttempts++
+                errorMessage = "Login fallido: Usuario no encontrado o credenciales inválidas."
+            } else {
+                errorMessage = "Se ha alcanzado el límite de intentos fallidos."
+            }
         }
     }
 
@@ -70,7 +80,7 @@ fun LoginView(
         Spacer(modifier = Modifier.height(16.dp))
 
         Image(
-            painter = painterResource(resource = Res.drawable.factura),
+            painter = painterResource(resource = Res.drawable.unicorn),
             contentDescription = null,
             modifier = Modifier.size(200.dp)
         )
@@ -81,7 +91,7 @@ fun LoginView(
             email = email,
             onEmailChange = { email = it },
             isError = null
-            //isError = viewModel.emailError.value
+            //isError = vm.emailError.value
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -92,19 +102,23 @@ fun LoginView(
             onPasswordChange = { password = it },
             onPasswordVisibilityToggle = { passwordVisible = !passwordVisible },
             isError = null
-            //isError = viewModel.passwordError.value
+            //isError = vm.passwordError.value
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         PrimaryButton(
             onClick = {
-                viewModel.login(email, password)
+                // Reiniciar estado de error antes de intentar login
+                if (failedAttempts < 3) {
+                    errorMessage = ""
+                    vm.login(email, password)
+                }
             },
             modifier = Modifier.fillMaxWidth(),
             text = "Log In",
             description = "Log In Button",
-            enabled = true,
+            enabled = !isLoading && failedAttempts < 3,
             icon = null
         )
 
@@ -112,7 +126,7 @@ fun LoginView(
         if (isLoading) {
             CircularProgressIndicator()
         } else if (isLoginSuccessful == false) {
-            Text("Credenciales incorrectas. Intenta nuevamente.")
+            Text(errorMessage)
         }
 
         Spacer(modifier = Modifier.height(8.dp))
