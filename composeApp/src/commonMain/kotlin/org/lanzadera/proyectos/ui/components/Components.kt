@@ -2,6 +2,7 @@ package org.lanzadera.proyectos.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
@@ -47,13 +49,13 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -74,16 +76,17 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import movieapp.composeapp.generated.resources.Res
-import movieapp.composeapp.generated.resources.*
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.toLocalDate
+import movieapp.composeapp.generated.resources.Res
+import movieapp.composeapp.generated.resources.film
+import movieapp.composeapp.generated.resources.huella
+import movieapp.composeapp.generated.resources.visibility
+import movieapp.composeapp.generated.resources.visibility_off
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.lanzadera.proyectos.models.movie.Movie
 import org.lanzadera.proyectos.navigation.NavigationController
-import kotlin.math.round
 
 
 @Composable
@@ -334,8 +337,10 @@ fun CustomBottomAppBar(
 @Composable
 fun SingleChoiceSegmentedButtonAlternative(
     modifier: Modifier = Modifier,
-    options: List<String> = listOf("User", "Shop", "Home", "Game", "News"),
-    initialSelectedIndex: Int = 2
+    content: @Composable (Int) -> Unit,
+    optionsCount: Int,
+    initialSelectedIndex: Int = 2,
+    onIndexSelected: (Int) -> Unit = {}
 ) {
     var selectedIndex by remember { mutableIntStateOf(initialSelectedIndex) }
 
@@ -343,67 +348,78 @@ fun SingleChoiceSegmentedButtonAlternative(
         modifier = modifier,
         horizontalArrangement = Arrangement.Center
     ) {
-        options.forEachIndexed { index, label ->
-
+        for (index in 0 until optionsCount) {
             Box(
-
                 modifier = Modifier
                     .padding(horizontal = 4.dp)
                     .size(height = 32.dp, width = 64.dp)
                     .clip(RoundedCornerShape(50))
-                    .background(
-                        if (index == selectedIndex) MaterialTheme.colors.background
-                        else MaterialTheme.colors.primary
-                    )
-                    .clickable { selectedIndex = index }
-
-            ) {
-                Text(
-                    text = label.uppercase(),
-                    color = if (index == selectedIndex) MaterialTheme.colors.primary
-                    else MaterialTheme.colors.onBackground,
-                    style = MaterialTheme.typography.button,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-
-            }
-
-
-            /*Box(
-                modifier = Modifier
-                    .padding(horizontal = 5.dp)
-                    .background(
-                        if (index == selectedIndex) MaterialTheme.colors.background
-                        else MaterialTheme.colors.onBackground
-                    )
-                    .clickable { selectedIndex = index }
+                    .background(MaterialTheme.colors.background)
                     .border(
-                        BorderStroke(
-                            1.dp,
-                            if (index == selectedIndex) MaterialTheme.colors.primary
-                            else Color.Transparent
-                        ),
+                        width = if (index == selectedIndex) 2.dp else 0.dp,
+                        color = if (index == selectedIndex) MaterialTheme.colors.primary else Color.Transparent,
+                        shape = RoundedCornerShape(50)
                     )
+                    .clickable {
+                        selectedIndex = index
+                        onIndexSelected(index)
+                    },
+                contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = label.uppercase(),
-                    color = if (index == selectedIndex) MaterialTheme.colors.primary
-                    else MaterialTheme.colors.onPrimary,
-                    style = MaterialTheme.typography.h5,
-                    modifier = Modifier.align(Alignment.Center)
-                )
+                content(index)
             }
-
-             */
         }
     }
 }
 
 @Composable
-fun SingleChoiceSegmentedButtonAlternativeExample() {
+fun SingleChoiceSegmentedButtonAlternativeExample(
+    onClickNavigate: (Int) -> Unit = {}
+) {
+    var selectedIndex by remember { mutableIntStateOf(2) }
+
     SingleChoiceSegmentedButtonAlternative(
-        options = listOf("User", "Shop", "Home", "Game", "News"),
-        initialSelectedIndex = 2
+        optionsCount = 5,
+        initialSelectedIndex = 2,
+        modifier = Modifier,
+        onIndexSelected = { index ->
+            selectedIndex = index
+            onClickNavigate(index)
+        },
+        content = @Composable { index: Int ->
+            when (index) {
+                0 -> Icon(
+                    imageVector = Icons.Outlined.Search,
+                    contentDescription = "Fingerprint Icon",
+                    tint = MaterialTheme.colors.primary.copy(alpha = if (index == selectedIndex) 1f else 0.6f)
+                )
+
+                1 -> Icon(
+                    painter = painterResource(Res.drawable.film),
+                    contentDescription = "Fingerprint Icon",
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colors.primary.copy(alpha = if (index == selectedIndex) 1f else 0.6f)
+                )
+
+                2 -> Icon(
+                    imageVector = Icons.Default.Home,
+                    contentDescription = "Home",
+                    tint = MaterialTheme.colors.primary.copy(alpha = if (index == selectedIndex) 1f else 0.6f)
+                )
+
+                3 -> Icon(
+                    imageVector = Icons.AutoMirrored.Outlined.List,
+                    contentDescription = "List",
+                    tint = MaterialTheme.colors.primary.copy(alpha = if (index == selectedIndex) 1f else 0.6f)
+                )
+
+                4 -> Icon(
+                    imageVector = Icons.Outlined.Person,
+                    contentDescription = "Person",
+                    tint = MaterialTheme.colors.primary.copy(alpha = if (index == selectedIndex) 1f else 0.6f)
+                )
+            }
+        }
     )
 }
 
@@ -418,12 +434,7 @@ fun CustomTopAppBar(
     TopAppBar(
         elevation = (-1).dp,
         title = {
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = title, style = MaterialTheme.typography.h6)
-            }
+            Text(text = title, style = MaterialTheme.typography.h6)
         },
         navigationIcon = navigationIcon,
         actions = actions,
@@ -694,14 +705,49 @@ fun DevelopingDialog(
 @Composable
 fun MovieItem(nav: NavigationController, movie: Movie) {
     AsyncImage(
-        model = "https://image.tmdb.org/t/p/w500${movie.posterPath}",
+        model = "https://image.tmdb.org/t/p/original${movie.posterPath}",
         contentDescription = "Movie Poster",
-        contentScale = ContentScale.Crop,
-        modifier = Modifier.fillMaxWidth()
-            .aspectRatio(2 / 3f)
+//        contentScale = ContentScale.Crop,
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
             .clip(MaterialTheme.shapes.small)
             .clickable { nav.navigateToDetail(movie) }
     )
+}
+
+
+@Composable
+fun MovieHeader(nav: NavigationController, movie: Movie, index: Int? = null) {
+    Box {
+        AsyncImage(
+            model = "https://image.tmdb.org/t/p/original${movie.posterPath}",
+            contentDescription = "Movie Poster",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .wrapContentHeight(
+                    align = Alignment.CenterVertically
+                )
+                .padding(end = 16.dp, bottom = 16.dp)
+                .width(210.dp)
+                .clip(MaterialTheme.shapes.small)
+                .clickable { nav.navigateToDetail(movie) }
+        )
+
+        if (index != null) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "${index+1}",
+                    style = MaterialTheme.typography.h1,
+                    color = MaterialTheme.colors.primary
+                )
+            }
+        }
+    }
 }
 
 @Composable
@@ -717,11 +763,12 @@ fun MovieExtendedItem(movie: Movie?) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 AsyncImage(
-                    model = "https://image.tmdb.org/t/p/w500${movie.backdropPath}",
+                    model = "https://image.tmdb.org/t/p/original${movie.backdropPath}",
                     contentDescription = "Movie Poster",
-                    contentScale = ContentScale.Crop,
+                    contentScale = ContentScale.FillWidth,
                     modifier = Modifier.fillMaxWidth()
                         .aspectRatio(16 / 9f)
+                        .clip(MaterialTheme.shapes.small)
                 )
             }
 
@@ -745,10 +792,8 @@ fun MovieExtendedItem(movie: Movie?) {
                         )
                     } else {
 
-                        val rounded = round(movie.voteAverage?.times(10) ?: 0.0) / 10
-
                         Text(
-                            text = rounded.toString(),
+                            text = movie.voteAverage,
                             style = MaterialTheme.typography.body1,
                             color = MaterialTheme.colors.onPrimary
                         )
@@ -765,7 +810,7 @@ fun MovieExtendedItem(movie: Movie?) {
                 )
             }
 
-            LazyColumn (
+            LazyColumn(
                 modifier = Modifier.fillMaxWidth().padding(16.dp)
             ) {
                 item {
@@ -778,8 +823,10 @@ fun MovieExtendedItem(movie: Movie?) {
 
                     movie.releaseDate?.let {
 
-                        val date : LocalDate = LocalDate.parse(it)
-                        val formattedDate = "${date.dayOfMonth.toString().padStart(2, '0')}-${date.monthNumber.toString().padStart(2, '0')}-${date.year}"
+                        val date: LocalDate = LocalDate.parse(it)
+                        val formattedDate = "${
+                            date.dayOfMonth.toString().padStart(2, '0')
+                        }-${date.monthNumber.toString().padStart(2, '0')}-${date.year}"
 
                         Text(
                             text = formattedDate,
@@ -796,6 +843,10 @@ fun MovieExtendedItem(movie: Movie?) {
                             style = MaterialTheme.typography.body2
                         )
                     }
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    Text(movie.toString(), style = MaterialTheme.typography.body1)
                 }
             }
         }

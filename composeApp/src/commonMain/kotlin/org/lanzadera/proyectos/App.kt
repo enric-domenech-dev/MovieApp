@@ -1,6 +1,8 @@
 package org.lanzadera.proyectos
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.*
@@ -16,11 +18,32 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.lanzadera.proyectos.navigation.Navigation
 import org.lanzadera.proyectos.navigation.NavigationController
 
+// Enum para los diferentes temas disponibles
+enum class AppTheme {
+    SYSTEM,  // Sigue el tema del sistema (claro/oscuro)
+    LIGHT,   // Siempre tema claro
+    DARK,    // Siempre tema oscuro
+    NEON,    // Tema neon
+    RETRO    // Tema retro
+}
+
 @OptIn(ExperimentalCoilApi::class)
 @Composable
 @Preview
-internal fun App() {
-    MaterialTheme {
+internal fun App(
+    selectedTheme: AppTheme = AppTheme.SYSTEM,
+    darkTheme: Boolean = isSystemInDarkTheme()
+) {
+
+    val colors: Colors = when (selectedTheme) {
+        AppTheme.SYSTEM -> if (darkTheme) DarkColorPalette else LightColorPalette
+        AppTheme.LIGHT -> LightColorPalette
+        AppTheme.DARK -> DarkColorPalette
+        AppTheme.NEON -> NeonColorPalette
+        AppTheme.RETRO -> RetroColorPalette
+    }
+
+    MaterialTheme(colors = colors) {
 
         setSingletonImageLoaderFactory { context ->
             getAsyncImageLoader(context)
@@ -31,7 +54,12 @@ internal fun App() {
             color = MaterialTheme.colors.background
         ) {
             val navController = NavigationController()
-            Navigation(navHost = rememberNavController(), navigation = navController)
+            Navigation(
+                navHost = rememberNavController(),
+                navigation = navController,
+                selectedTheme = selectedTheme,
+                darkTheme = darkTheme
+            )
         }
     }
 }

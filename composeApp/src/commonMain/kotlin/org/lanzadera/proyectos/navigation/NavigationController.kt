@@ -46,4 +46,10 @@ class NavigationController() : ViewModel() {
         }
     }
 
+    fun navigateToSearch() {
+        viewModelScope.launch {
+            _navigationEvent.emit(Constants.NavigationEvent.NavigateToSearch)
+        }
+    }
+
 }
