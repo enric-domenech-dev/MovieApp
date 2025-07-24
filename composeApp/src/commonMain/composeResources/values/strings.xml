@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">FilmWay</string>
+    <string name="welcome_message">Welcome to Compose App!</string>
+    <string name="settings_title">Settings</string>
+    <string name="profile_title">Profile</string>
+    <string name="logout_button">Logout</string>
+    <string name="login_button">Login</string>
+    <string name="register_button">Register</string>
+    <string name="error_network">Network error, please try again.</string>
+    <string name="loading_message">Loading...</string>
+</resources>

@@ -9,6 +9,7 @@ object Constants {
         object SignIn : Screen("signIn")
         object SplashScreen : Screen("splashScreen")
         object Detail : Screen("detail")
+        object Search : Screen("search")
     }
 
     // NAVIGATION
@@ -19,6 +20,7 @@ object Constants {
         object NavigateBack : NavigationEvent()
         object NavigateToSplashScreen : NavigationEvent()
         object NavigateToDetail : NavigationEvent()
+        object NavigateToSearch : NavigationEvent()
     }
 
     //APY KEYS
