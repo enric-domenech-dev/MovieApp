@@ -29,7 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import org.lanzadera.proyectos.AppTheme
+import org.lanzadera.proyectos.models.movie.Movie
 import org.lanzadera.proyectos.navigation.NavigationController
 import org.lanzadera.proyectos.ui.components.CustomBottomAppBar
 import org.lanzadera.proyectos.ui.components.MovieHeader
@@ -40,8 +40,8 @@ import org.lanzadera.proyectos.ui.components.SingleChoiceSegmentedButtonAlternat
 @Preview
 fun HomeView(
     nav: NavigationController, vm: HomeViewModel,
-    selectedTheme: AppTheme = AppTheme.SYSTEM,
-    darkTheme: Boolean = false
+//    selectedTheme: AppTheme = AppTheme.SYSTEM,
+//    darkTheme: Boolean = false
 ) {
     var uiState by remember { mutableStateOf<HomeViewModel.UIState>(HomeViewModel.UIState.Loading) }
     val scope = rememberCoroutineScope()
@@ -52,7 +52,7 @@ fun HomeView(
         }
     }
 
-    Scaffold (
+    Scaffold(
         bottomBar = {
             CustomBottomAppBar(
                 containerColor = MaterialTheme.colors.background,
@@ -62,23 +62,17 @@ fun HomeView(
                     SingleChoiceSegmentedButtonAlternativeExample(
                         onClickNavigate = { selectedIndex ->
                             when (selectedIndex) {
-                                0 -> nav.navigateToSearch()
+//                                0 -> nav.navigateToSearch()
 //                                1 -> nav.navigateToFavorites()
                                 2 -> nav.navigateToHome()
 //                                3 -> nav.navigateToList()
 //                                4 -> nav.navigateToProfile()
                             }
-                        }
-                    )
-                }
-            )
-        }
-    ){
-        paddingValues ->
+                        })
+                })
+        }) { paddingValues ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
+            modifier = Modifier.fillMaxSize().padding(paddingValues),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -88,9 +82,6 @@ fun HomeView(
                 }
 
                 is HomeViewModel.UIState.Success -> {
-                    // Aquí puedes decidir mostrar todas las películas o solo las trending
-                    // En este ejemplo muestro todas las películas (movies)
-                    // También tienes disponible uiState.trendingMovies si las necesitas
 
                     if ((uiState as HomeViewModel.UIState.Success).movies.isEmpty()) {
                         Text(text = "No movies found.")
@@ -103,23 +94,26 @@ fun HomeView(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             modifier = Modifier.fillMaxSize()
                         ) {
-                            // Header
                             item(span = { GridItemSpan(maxLineSpan) }) {
                                 Text(
-                                    text = "Top 10 más vistas",
+                                    text = "Proximamente",
                                     style = MaterialTheme.typography.h6,
                                     modifier = Modifier.padding(bottom = 8.dp)
                                 )
                             }
 
-                            // Top 10 horizontal (con altura fija)
                             item(span = { GridItemSpan(maxLineSpan) }) {
                                 LazyRow(
                                     contentPadding = PaddingValues(horizontal = 16.dp),
                                     horizontalArrangement = Arrangement.spacedBy(32.dp),
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    itemsIndexed((uiState as HomeViewModel.UIState.Success).trendingMovies.take(10)) { index, movie ->
+                                    val successState = uiState as HomeViewModel.UIState.Success
+
+                                    val sortedMovies =
+                                        successState.trendingMovies.sortedWith(compareByDescending<Movie> { it.releaseDate }.thenByDescending { it.voteCount })
+
+                                    itemsIndexed(sortedMovies.take(10)) { index, movie ->
                                         Box {
                                             MovieHeader(nav, movie, index)
                                         }
@@ -127,7 +121,6 @@ fun HomeView(
                                 }
                             }
 
-                            // Título de sección
                             item(span = { GridItemSpan(maxLineSpan) }) {
                                 Text(
                                     text = "Más buscadas",
@@ -136,7 +129,6 @@ fun HomeView(
                                 )
                             }
 
-                            // Grid de películas más buscadas
                             items((uiState as HomeViewModel.UIState.Success).movies) { movie ->
                                 MovieItem(nav, movie)
                             }
