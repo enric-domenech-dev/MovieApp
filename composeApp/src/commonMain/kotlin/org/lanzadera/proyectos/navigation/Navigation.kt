@@ -5,6 +5,7 @@ import androidx.compose.runtime.*
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import org.koin.compose.koinInject
 import org.lanzadera.proyectos.AppTheme
 import org.lanzadera.proyectos.ui.screens.detail.DetailView
 import org.lanzadera.proyectos.ui.screens.home.HomeView
@@ -44,8 +45,8 @@ fun Navigation(
         }
         composable(Constants.Screen.Home.route) {
             HomeView(
-                nav = navigation, vm = HomeViewModel(),
-                selectedTheme = selectedTheme, darkTheme = darkTheme
+                nav = navigation, vm = HomeViewModel(koinInject()),
+                //selectedTheme = selectedTheme, darkTheme = darkTheme
             )
         }
         composable(Constants.Screen.Login.route) {
