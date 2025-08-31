@@ -14,7 +14,7 @@ import org.lanzadera.proyectos.ui.screens.login.LoginView
 import org.lanzadera.proyectos.ui.screens.login.LoginViewModel
 import org.lanzadera.proyectos.ui.screens.search.SearchView
 import org.lanzadera.proyectos.ui.screens.search.SearchViewModel
-import org.lanzadera.proyectos.ui.screens.splash_screen.SplashView
+import org.lanzadera.proyectos.ui.screens.splash.SplashView
 import org.lanzadera.proyectos.utils.Constants
 
 @Composable

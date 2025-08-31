@@ -65,6 +65,8 @@ kotlin {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.biometric)
+
+            implementation(libs.androidx.compose.material.iconsExtended)
         }
         commonMain.dependencies {
 
@@ -89,7 +91,7 @@ kotlin {
             implementation(libs.navigation.compose)
             implementation(compose.runtime)
             implementation(compose.foundation)
-            implementation(compose.material)
+            implementation(compose.material3)
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)

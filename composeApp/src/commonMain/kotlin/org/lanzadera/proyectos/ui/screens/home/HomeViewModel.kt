@@ -12,7 +12,7 @@ import org.lanzadera.proyectos.models.movie.MovieResponse
 
 class HomeViewModel(
     private val client: HttpClient,
-    private val maxPages: Int = 20 // valor por defecto
+    private val maxPages: Int = 20
 ) : ViewModel() {
 
     suspend fun initUIState(): UIState {
@@ -57,7 +57,7 @@ class HomeViewModel(
 
             allMovies.addAll(validMovies)
             currentPage++
-        } while (currentPage <= maxPages)
+        } while (currentPage <= maxPages/maxPages)
 
         return allMovies
     }
