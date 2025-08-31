@@ -2,9 +2,9 @@ package org.lanzadera.proyectos
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.Colors
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
@@ -35,7 +35,7 @@ internal fun App(
     darkTheme: Boolean = isSystemInDarkTheme()
 ) {
 
-    val colors: Colors = when (selectedTheme) {
+    val colors: ColorScheme = when (selectedTheme) {
         AppTheme.SYSTEM -> if (darkTheme) DarkColorPalette else LightColorPalette
         AppTheme.LIGHT -> LightColorPalette
         AppTheme.DARK -> DarkColorPalette
@@ -43,7 +43,7 @@ internal fun App(
         AppTheme.RETRO -> RetroColorPalette
     }
 
-    MaterialTheme(colors = colors) {
+    MaterialTheme(colorScheme = colors) {
 
         setSingletonImageLoaderFactory { context ->
             getAsyncImageLoader(context)
@@ -51,7 +51,7 @@ internal fun App(
 
         Surface(
             modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colors.background
+            color = MaterialTheme.colorScheme.background
         ) {
             val navController = NavigationController()
             Navigation(

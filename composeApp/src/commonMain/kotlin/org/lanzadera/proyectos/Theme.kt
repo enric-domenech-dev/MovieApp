@@ -1,65 +1,121 @@
 package org.lanzadera.proyectos
 
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
 // Definición de colores para el tema claro
-val LightColorPalette = lightColors(
-    primary = Color(0xFFD32F2F),        // Rojo principal
-    primaryVariant = Color(0xFFB71C1C),  // Rojo más oscuro
-    secondary = Color(0xFF757575),       // Gris secundario
-    background = Color(0xFFFFFFFF),      // Blanco
-    surface = Color(0xFFFFFFFF),         // Blanco
+val LightColorPalette = lightColorScheme(
+    primary = Green40,
     onPrimary = Color.White,
+    primaryContainer = Green90,
+    onPrimaryContainer = Green10,
+    secondary = DarkGreen40,
     onSecondary = Color.White,
-    onBackground = Color.Black,
-    onSurface = Color.Black,
-    error = Color(0xFFB00020),
-    onError = Color.White
+    secondaryContainer = DarkGreen90,
+    onSecondaryContainer = DarkGreen10,
+    tertiary = Teal40,
+    onTertiary = Color.White,
+    tertiaryContainer = Teal90,
+    onTertiaryContainer = Teal10,
+    error = Red40,
+    onError = Color.White,
+    errorContainer = Red90,
+    onErrorContainer = Red10,
+    background = DarkGreenGray99,
+    onBackground = DarkGreenGray10,
+    surface = DarkGreenGray95,
+    onSurface = DarkGreenGray10,
+    surfaceVariant = GreenGray90,
+    onSurfaceVariant = GreenGray10,
+    inverseSurface = DarkGreenGray10,
+    inverseOnSurface = DarkGreenGray99,
+    outline = GreenGray60
 )
 
 // Definición de colores para el tema oscuro
-val DarkColorPalette = darkColors(
-    primary = Color(0xFFEF5350),        // Rojo más claro para contraste
-    primaryVariant = Color(0xFFD32F2F),  // Rojo principal
-    secondary = Color(0xFF90A4AE),       // Gris azulado
-    background = Color(0xFF121212),      // Negro carbón
-    surface = Color(0xFF1E1E1E),         // Gris muy oscuro
-    onPrimary = Color.Black,
-    onSecondary = Color.Black,
-    onBackground = Color.White,
-    onSurface = Color.White,
-    error = Color(0xFFCF6679),
-    onError = Color.Black
+val DarkColorPalette = darkColorScheme(
+    primary = Green80,
+    onPrimary = Green20,
+    primaryContainer = Green30,
+    onPrimaryContainer = Green90,
+    secondary = DarkGreen80,
+    onSecondary = DarkGreen20,
+    secondaryContainer = DarkGreen30,
+    onSecondaryContainer = DarkGreen90,
+    tertiary = Teal80,
+    onTertiary = Teal20,
+    tertiaryContainer = Teal30,
+    onTertiaryContainer = Teal90,
+    error = Red80,
+    onError = Red20,
+    errorContainer = Red30,
+    onErrorContainer = Red90,
+    background = DarkGreenGray10,
+    onBackground = DarkGreenGray90,
+    surface = DarkGreenGray10,
+    onSurface = DarkGreenGray90,
+    surfaceVariant = GreenGray30,
+    onSurfaceVariant = GreenGray80,
+    inverseSurface = DarkGreenGray90,
+    inverseOnSurface = DarkGreenGray10,
+    outline = GreenGray60,
 )
 
 // Tema Neon - Inspirado en los años 80/90 con colores vibrantes
-val NeonColorPalette = darkColors(
-    primary = Color(0xFFFF0080),        // Rosa neón vibrante
-    primaryVariant = Color(0xFFE91E63), // Rosa más oscuro
-    secondary = Color(0xFF00FFFF),      // Cian neón
-    background = Color(0xFF0A0A0A),     // Negro profundo
-    surface = Color(0xFF1A1A2E),        // Azul muy oscuro
-    onPrimary = Color.Black,
-    onSecondary = Color.Black,
-    onBackground = Color(0xFF00FFFF),   // Texto cian
-    onSurface = Color(0xFF00FFFF),      // Texto cian
-    error = Color(0xFFFF0040),          // Rojo neón
-    onError = Color.Black
+val NeonColorPalette = darkColorScheme(
+    primary = Green80,
+    onPrimary = Green20,
+    primaryContainer = Green30,
+    onPrimaryContainer = Green90,
+    secondary = DarkGreen80,
+    onSecondary = DarkGreen20,
+    secondaryContainer = DarkGreen30,
+    onSecondaryContainer = DarkGreen90,
+    tertiary = Teal80,
+    onTertiary = Teal20,
+    tertiaryContainer = Teal30,
+    onTertiaryContainer = Teal90,
+    error = Red80,
+    onError = Red20,
+    errorContainer = Red30,
+    onErrorContainer = Red90,
+    background = DarkGreenGray10,
+    onBackground = DarkGreenGray90,
+    surface = DarkGreenGray10,
+    onSurface = DarkGreenGray90,
+    surfaceVariant = GreenGray30,
+    onSurfaceVariant = GreenGray80,
+    inverseSurface = DarkGreenGray90,
+    inverseOnSurface = DarkGreenGray10,
+    outline = GreenGray60
 )
 
 // Tema Retro - Inspirado en los años 70 con colores tierra
-val RetroColorPalette = lightColors(
-    primary = Color(0xFFD2691E),        // Naranja chocolate (muy retro)
-    primaryVariant = Color(0xFF8B4513),  // Marrón silla de montar
-    secondary = Color(0xFFCD853F),       // Beige dorado
-    background = Color(0xFFFDF5E6),      // Crema antiguo
-    surface = Color(0xFFF5DEB3),         // Trigo
+val RetroColorPalette = lightColorScheme(
+    primary = Green40,
     onPrimary = Color.White,
-    onSecondary = Color.Black,
-    onBackground = Color(0xFF654321),    // Marrón oscuro para texto
-    onSurface = Color(0xFF654321),       // Marrón oscuro para texto
-    error = Color(0xFFDC143C),           // Carmesí
-    onError = Color.White
+    primaryContainer = Green90,
+    onPrimaryContainer = Green10,
+    secondary = DarkGreen40,
+    onSecondary = Color.White,
+    secondaryContainer = DarkGreen90,
+    onSecondaryContainer = DarkGreen10,
+    tertiary = Teal40,
+    onTertiary = Color.White,
+    tertiaryContainer = Teal90,
+    onTertiaryContainer = Teal10,
+    error = Red40,
+    onError = Color.White,
+    errorContainer = Red90,
+    onErrorContainer = Red10,
+    background = DarkGreenGray99,
+    onBackground = DarkGreenGray10,
+    surface = DarkGreenGray95,
+    onSurface = DarkGreenGray10,
+    surfaceVariant = GreenGray90,
+    onSurfaceVariant = GreenGray10,
+    inverseSurface = DarkGreenGray10,
+    inverseOnSurface = DarkGreenGray99,
+    outline = GreenGray60
 )

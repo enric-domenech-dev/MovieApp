@@ -10,9 +10,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -69,103 +70,104 @@ fun LoginView(
             }
         }
     }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(8.dp)
-            .padding(top = 60.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Image(
-            painter = painterResource(resource = Res.drawable.unicorn),
-            contentDescription = null,
-            modifier = Modifier.size(200.dp)
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        EmailInput(
-            email = email,
-            onEmailChange = { email = it },
-            isError = null
-            //isError = vm.emailError.value
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        PasswordInput(
-            password = password,
-            passwordVisible = passwordVisible,
-            onPasswordChange = { password = it },
-            onPasswordVisibilityToggle = { passwordVisible = !passwordVisible },
-            isError = null
-            //isError = vm.passwordError.value
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        PrimaryButton(
-            onClick = {
-                // Reiniciar estado de error antes de intentar login
-                if (failedAttempts < 3) {
-                    errorMessage = ""
-                    vm.login(email, password)
-                }
-            },
-            modifier = Modifier.fillMaxWidth(),
-            text = "Log In",
-            description = "Log In Button",
-            enabled = !isLoading && failedAttempts < 3,
-            icon = null
-        )
-
-        // Mensaje de carga o error
-        if (isLoading) {
-            CircularProgressIndicator()
-        } else if (isLoginSuccessful == false) {
-            Text(errorMessage)
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        FingerPrintAuthentication(
+    Scaffold {
+        Column(
             modifier = Modifier
-                .clickable {
-                    // TODO()
-                    showDialog = true
-                }
-        )
-        if (showDialog) {
-            DevelopingDialog(
-                showDialog = showDialog,
-                onDismiss = { showDialog = false },
-                onConfirm = { }
+                .fillMaxSize()
+                .padding(8.dp)
+                .padding(top = 60.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Image(
+                painter = painterResource(resource = Res.drawable.unicorn),
+                contentDescription = null,
+                modifier = Modifier.size(200.dp)
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            EmailInput(
+                email = email,
+                onEmailChange = { email = it },
+                isError = null
+                //isError = vm.emailError.value
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            PasswordInput(
+                password = password,
+                passwordVisible = passwordVisible,
+                onPasswordChange = { password = it },
+                onPasswordVisibilityToggle = { passwordVisible = !passwordVisible },
+                isError = null
+                //isError = vm.passwordError.value
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            PrimaryButton(
+                onClick = {
+                    // Reiniciar estado de error antes de intentar login
+                    if (failedAttempts < 3) {
+                        errorMessage = ""
+                        vm.login(email, password)
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                text = "Log In",
+                description = "Log In Button",
+                enabled = !isLoading && failedAttempts < 3,
+                icon = null
+            )
+
+            // Mensaje de carga o error
+            if (isLoading) {
+                CircularProgressIndicator()
+            } else if (isLoginSuccessful == false) {
+                Text(errorMessage)
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            FingerPrintAuthentication(
+                modifier = Modifier
+                    .clickable {
+                        // TODO()
+                        showDialog = true
+                    }
+            )
+            if (showDialog) {
+                DevelopingDialog(
+                    showDialog = showDialog,
+                    onDismiss = { showDialog = false },
+                    onConfirm = { }
+                )
+            }
+
+            Spacer(modifier = Modifier.background(MaterialTheme.colorScheme.background).weight(1f))
+
+            Text(
+                "Don't have an account yet?",
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(horizontal = 10.dp),
+                style = MaterialTheme.typography.bodySmall
+            )
+
+            PrimaryButton(
+                onClick = { /*navigateToSignIn()*/ },
+                modifier = Modifier.fillMaxWidth(),
+                icon = null,
+                text = "Sign In",
+                description = "Sign In Button",
+                enabled = true,
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
         }
-
-        Spacer(modifier = Modifier.background(MaterialTheme.colors.background).weight(1f))
-
-        Text(
-            "Don't have an account yet?",
-            modifier = Modifier
-                .align(Alignment.Start)
-                .padding(horizontal = 10.dp),
-            style = MaterialTheme.typography.body2
-        )
-
-        PrimaryButton(
-            onClick = { /*navigateToSignIn()*/ },
-            modifier = Modifier.fillMaxWidth(),
-            icon = null,
-            text = "Sign In",
-            description = "Sign In Button",
-            enabled = true,
-        )
-
-        Spacer(modifier = Modifier.height(32.dp))
     }
 }
 

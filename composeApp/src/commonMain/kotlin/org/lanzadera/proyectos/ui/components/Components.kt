@@ -17,47 +17,40 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Divider
-import androidx.compose.material.DrawerValue
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ModalDrawer
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ExitToApp
 import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.automirrored.outlined.Send
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.rememberDrawerState
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -74,9 +67,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import movieapp.composeapp.generated.resources.Res
 import movieapp.composeapp.generated.resources.film
@@ -92,16 +86,13 @@ import org.lanzadera.proyectos.navigation.NavigationController
 @Composable
 fun DrawerAppBar(
     navViewModel: NavigationController,
-    pageTitle: String,
-    actionButton: @Composable () -> Unit,
-    screenContent: @Composable () -> Unit
+    drawerState: androidx.compose.material3.DrawerState,
+    content: @Composable () -> Unit
 ) {
     var showDialog by remember { mutableStateOf(false) }
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    ModalDrawer(
-        drawerBackgroundColor = MaterialTheme.colors.background,
+    ModalNavigationDrawer(
         drawerContent = {
             Column(
                 modifier = Modifier
@@ -122,10 +113,9 @@ fun DrawerAppBar(
                     Text(
                         "User Name".uppercase(),
                         modifier = Modifier.padding(16.dp),
-                        style = MaterialTheme.typography.body2
+                        style = MaterialTheme.typography.headlineSmall
                     )
                 }
-
                 Divider()
 
                 Column(
@@ -133,180 +123,163 @@ fun DrawerAppBar(
                         .fillMaxSize(),
                     verticalArrangement = Arrangement.SpaceAround,
                     horizontalAlignment = Alignment.CenterHorizontally
-
                 ) {
                     DropdownMenuItem(
-                        content = {
-                            Row {
-                                Icon(Icons.Outlined.Person, contentDescription = null)
-                                Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                                Text("Profile")
-
-                            }
-
-                        },
-                        onClick = { /* Do something... */ }
+                        text = { Text("Profile") },
+                        onClick = { navViewModel.navigateToSearch() },
+                        leadingIcon = {
+                            Icon(Icons.Outlined.Person, contentDescription = null)
+                        }
                     )
 
                     DropdownMenuItem(
-                        content = {
-                            Row {
-                                Icon(Icons.Outlined.Settings, contentDescription = null)
-                                Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                                Text("Settings")
-                            }
-                        },
-                        onClick = { /* Do something... */ }
+                        text = { Text("Settings") },
+                        onClick = { /* Do something... */ },
+                        leadingIcon = {
+                            Icon(Icons.Outlined.Settings, contentDescription = null)
+                        }
                     )
                 }
 
                 Divider()
 
                 DropdownMenuItem(
-                    content = {
-                        Row {
-                            Icon(Icons.Outlined.Email, contentDescription = null)
-                            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                            Text("Send Feedback")
-                            Spacer(modifier = Modifier.weight(1f))
-                            Icon(Icons.AutoMirrored.Outlined.Send, contentDescription = null)
-                        }
-
+                    text = { Text("Send Feedback") },
+                    onClick = { /* Do something... */ },
+                    leadingIcon = {
+                        Icon(Icons.Outlined.Email, contentDescription = null)
                     },
-                    onClick = { /* Do something... */ }
+                    trailingIcon = {
+                        Icon(Icons.AutoMirrored.Outlined.Send, contentDescription = null)
+                    }
                 )
 
                 Divider()
 
                 DropdownMenuItem(
-                    content = {
-                        Row {
-                            Icon(Icons.Outlined.Info, contentDescription = null)
-                            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                            Text("Help")
-                            Spacer(modifier = Modifier.weight(1f))
-                            Icon(Icons.AutoMirrored.Outlined.ExitToApp, contentDescription = null)
-                        }
+                    text = { Text("Help") },
+                    onClick = { /* Do something... */ },
+                    leadingIcon = {
+                        Icon(Icons.Outlined.Info, contentDescription = null)
                     },
+                    trailingIcon = {
+                        Icon(Icons.AutoMirrored.Outlined.ExitToApp, contentDescription = null)
+                    }
+                )
+
+                DropdownMenuItem(
+                    text = { Text("About") },
+                    onClick = { /* Do something... */ },
+                    leadingIcon = {
+                        Icon(Icons.Outlined.Info, contentDescription = null)
+                    }
+                )
+
+                DropdownMenuItem(
+                    text = { Text("Item") },
+                    onClick = { /* Do something... */ }
+                )
+                DropdownMenuItem(
+                    text = { Text("Item") },
+                    onClick = { /* Do something... */ }
+                )
+                DropdownMenuItem(
+                    text = { Text("Item") },
+                    onClick = { /* Do something... */ }
+                )
+                DropdownMenuItem(
+                    text = { Text("Item") },
+                    onClick = { /* Do something... */ }
+                )
+                DropdownMenuItem(
+                    text = { Text("Item") },
+                    onClick = { /* Do something... */ }
+                )
+                DropdownMenuItem(
+                    text = { Text("Item") },
+                    onClick = { /* Do something... */ }
+                )
+                DropdownMenuItem(
+                    text = { Text("Item") },
                     onClick = { /* Do something... */ }
                 )
 
                 DropdownMenuItem(
-                    content = {
-                        Row {
-                            Icon(Icons.Outlined.Info, contentDescription = null)
-                            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                            Text("About")
-                        }
-                    },
-                    onClick = { /* Do something... */ }
-                )
-
-                DropdownMenuItem(
-                    content = { /* Add content */ },
-                    onClick = { /* Do something... */ }
-                )
-                DropdownMenuItem(
-                    content = { /* Add content */ },
-                    onClick = { /* Do something... */ }
-                )
-                DropdownMenuItem(
-                    content = { /* Add content */ },
-                    onClick = { /* Do something... */ }
-                )
-                DropdownMenuItem(
-                    content = { /* Add content */ },
-                    onClick = { /* Do something... */ }
-                )
-                DropdownMenuItem(
-                    content = { /* Add content */ },
-                    onClick = { /* Do something... */ }
-                )
-                DropdownMenuItem(
-                    content = { /* Add content */ },
-                    onClick = { /* Do something... */ }
-                )
-                DropdownMenuItem(
-                    content = { /* Add content */ },
-                    onClick = { /* Do something... */ }
-                )
-
-                DropdownMenuItem(
-                    content = {
-                        LogoutButton(
-                            onClick = { showDialog = true },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(1f),
-                            enabled = true,
+                    text = { Text("Log Out") },
+                    onClick = { showDialog = true },
+                    leadingIcon = {
+                        Icon(
+                            Icons.AutoMirrored.Outlined.ExitToApp,
+                            contentDescription = "log out icon button"
                         )
-                        LogoutConfirmationDialog(
-                            showDialog = showDialog,
-                            onDismiss = { showDialog = false },
-                            onConfirm = { navViewModel.navigateToLogin() }
-                        )
-                    },
-                    onClick = { /* Do something... */ }
+                    }
+                )
+                LogoutConfirmationDialog(
+                    showDialog = showDialog,
+                    onDismiss = { showDialog = false },
+                    onConfirm = { navViewModel.navigateToLogin() }
                 )
             }
         },
         gesturesEnabled = true,
-        drawerState = drawerState
-    ) {
-        Scaffold(
-            topBar = {
-                CustomTopAppBar(
-                    title = pageTitle,
-                    contentColor = MaterialTheme.colors.onBackground,
-                    backgroundColor = MaterialTheme.colors.background,
-                    navigationIcon = {
-                        IconButton(onClick = {
-                            scope.launch {
-                                if (drawerState.isClosed) {
-                                    drawerState.open()
-                                } else {
-                                    drawerState.close()
-                                }
-                            }
-                        }) {
-                            Icon(
-                                modifier = Modifier.size(35.dp),
-                                imageVector = Icons.Filled.Menu,
-                                contentDescription = null
-                            )
-                        }
-                    },
-                    actions = {
-                        IconButton(
-                            onClick = { navViewModel.navigateBack() }) {
-                            Icon(
-                                imageVector = Icons.Filled.Close,
-                                contentDescription = "Configuration"
-                            )
-                        }
-                    },
-                )
-            },
-            bottomBar = {
-                CustomBottomAppBar(
-                    containerColor = MaterialTheme.colors.primary,
-                    contentColor = MaterialTheme.colors.onPrimary,
-                    modifier = Modifier.fillMaxWidth(),
-                    content = {
-                        SingleChoiceSegmentedButtonAlternativeExample(
-
-                        )
-                    }
-                )
-            },
-            floatingActionButton = { actionButton() },
-            content = { innerPadding ->
-                Box(modifier = Modifier.padding(innerPadding)) {
-                    screenContent()
-                }
-            }
-        )
-    }
+        drawerState = drawerState,
+        content = content
+    )
+//    {
+//        Scaffold(
+//            topBar = {
+//                CustomTopAppBar(
+//                    title = pageTitle,
+//                    contentColor = MaterialTheme.colorScheme.onBackground,
+//                    backgroundColor = MaterialTheme.colorScheme.background,
+//                    navigationIcon = {
+//                        IconButton(onClick = {
+//                            scope.launch {
+//                                if (drawerState.isClosed) {
+//                                    drawerState.open()
+//                                } else {
+//                                    drawerState.close()
+//                                }
+//                            }
+//                        }) {
+//                            Icon(
+//                                modifier = Modifier.size(35.dp),
+//                                imageVector = Icons.Filled.Menu,
+//                                contentDescription = null
+//                            )
+//                        }
+//                    },
+//                    actions = {
+//                        IconButton(
+//                            onClick = { navViewModel.navigateBack() }) {
+//                            Icon(
+//                                imageVector = Icons.Filled.Close,
+//                                contentDescription = "Configuration"
+//                            )
+//                        }
+//                    },
+//                )
+//            },
+//            bottomBar = {
+//                CustomBottomAppBar(
+//                    containerColor = MaterialTheme.colorScheme.primary,
+//                    contentColor = MaterialTheme.colorScheme.onPrimary,
+//                    modifier = Modifier.fillMaxWidth(),
+//                    content = {
+//                        SingleChoiceSegmentedButtonAlternativeExample(
+//
+//                        )
+//                    }
+//                )
+//            },
+//            floatingActionButton = { actionButton() },
+//            content = { innerPadding ->
+//                Box(modifier = Modifier.padding(innerPadding)) {
+//                    screenContent()
+//                }
+//            }
+//        )
+//    }
 }
 
 @Composable
@@ -354,10 +327,10 @@ fun SingleChoiceSegmentedButtonAlternative(
                     .padding(horizontal = 4.dp)
                     .size(height = 32.dp, width = 64.dp)
                     .clip(RoundedCornerShape(50))
-                    .background(MaterialTheme.colors.background)
+                    .background(MaterialTheme.colorScheme.background)
                     .border(
                         width = if (index == selectedIndex) 2.dp else 0.dp,
-                        color = if (index == selectedIndex) MaterialTheme.colors.primary else Color.Transparent,
+                        color = if (index == selectedIndex) MaterialTheme.colorScheme.primary else Color.Transparent,
                         shape = RoundedCornerShape(50)
                     )
                     .clickable {
@@ -391,55 +364,59 @@ fun SingleChoiceSegmentedButtonAlternativeExample(
                 0 -> Icon(
                     imageVector = Icons.Outlined.Search,
                     contentDescription = "Fingerprint Icon",
-                    tint = MaterialTheme.colors.primary.copy(alpha = if (index == selectedIndex) 1f else 0.6f)
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = if (index == selectedIndex) 1f else 0.6f)
                 )
 
                 1 -> Icon(
                     painter = painterResource(Res.drawable.film),
                     contentDescription = "Fingerprint Icon",
                     modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colors.primary.copy(alpha = if (index == selectedIndex) 1f else 0.6f)
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = if (index == selectedIndex) 1f else 0.6f)
                 )
 
                 2 -> Icon(
                     imageVector = Icons.Default.Home,
                     contentDescription = "Home",
-                    tint = MaterialTheme.colors.primary.copy(alpha = if (index == selectedIndex) 1f else 0.6f)
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = if (index == selectedIndex) 1f else 0.6f)
                 )
 
                 3 -> Icon(
                     imageVector = Icons.AutoMirrored.Outlined.List,
                     contentDescription = "List",
-                    tint = MaterialTheme.colors.primary.copy(alpha = if (index == selectedIndex) 1f else 0.6f)
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = if (index == selectedIndex) 1f else 0.6f)
                 )
 
                 4 -> Icon(
                     imageVector = Icons.Outlined.Person,
                     contentDescription = "Person",
-                    tint = MaterialTheme.colors.primary.copy(alpha = if (index == selectedIndex) 1f else 0.6f)
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = if (index == selectedIndex) 1f else 0.6f)
                 )
             }
         }
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomTopAppBar(
     title: String,
-    navigationIcon: @Composable (() -> Unit)? = null,
+    navigationIcon: (@Composable () -> Unit),
     actions: @Composable RowScope.() -> Unit = {},
     backgroundColor: Color,
     contentColor: Color
 ) {
     TopAppBar(
-        elevation = (-1).dp,
         title = {
-            Text(text = title, style = MaterialTheme.typography.h6)
+            Text(text = title, style = MaterialTheme.typography.headlineSmall)
         },
         navigationIcon = navigationIcon,
         actions = actions,
-        backgroundColor = backgroundColor,
-        contentColor = contentColor,
+        colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
+            containerColor = backgroundColor,
+            titleContentColor = contentColor,
+            actionIconContentColor = contentColor,
+            navigationIconContentColor = contentColor
+        )
     )
 }
 
@@ -462,13 +439,12 @@ fun DropdownMenu() {
         ) {
             items.forEach { item ->
                 DropdownMenuItem(
+                    text = { Text(text = item) },
                     onClick = {
                         selectedOption = item
                         expanded = false
                     }
-                ) {
-                    Text(text = item)
-                }
+                )
             }
         }
     }
@@ -487,7 +463,7 @@ fun FingerPrintAuthentication(
             "Authenticate with Biometrics",
             modifier = Modifier
                 .align(Alignment.CenterHorizontally),
-            style = MaterialTheme.typography.body2,
+            style = MaterialTheme.typography.bodySmall,
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -518,8 +494,8 @@ fun EmailInput(
     if (isError?.isNotEmpty() == true) {
         Text(
             text = isError,
-            color = MaterialTheme.colors.error,
-            style = MaterialTheme.typography.body2,
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.bodySmall,
             modifier = Modifier.padding(top = 4.dp)
         )
     }
@@ -563,8 +539,8 @@ fun PasswordInput(
     if (isError?.isNotEmpty() == true) {
         Text(
             text = isError,
-            color = MaterialTheme.colors.error,
-            style = MaterialTheme.typography.body2,
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.bodySmall,
             modifier = Modifier.padding(top = 4.dp)
         )
     }
@@ -596,7 +572,7 @@ fun PrimaryButton(
         }
 
         Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-        Text(text, style = MaterialTheme.typography.body1, fontWeight = FontWeight.Bold)
+        Text(text, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
     }
 }
 
@@ -613,18 +589,17 @@ fun LogoutButton(
         enabled = enabled,
         shape = RoundedCornerShape(15.dp),
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = Color.Red.copy(alpha = 0.7f),
+            containerColor = Color.Red.copy(alpha = 0.7f),
             contentColor = Color.Black
-        ),
-        elevation = ButtonDefaults.elevation(15.dp)
+        )
     ) {
         Icon(
-            Icons.AutoMirrored.Outlined.ExitToApp,
+            imageVector = Icons.AutoMirrored.Outlined.ExitToApp,
             contentDescription = "log out icon button",
             modifier = Modifier.size(ButtonDefaults.IconSize)
         )
         Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-        Text("Log Out", style = MaterialTheme.typography.body1, fontWeight = FontWeight.Bold)
+        Text("Log Out", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
     }
 }
 
@@ -660,27 +635,6 @@ fun LogoutConfirmationDialog(
     }
 }
 
-
-//@Composable
-//fun MovieImage(movie: Movie) {
-//    val resource = asyncPainterResource("https://image.tmdb.org/t/p/w500${movie.posterPath}")
-//
-//    when (resource) {
-//        is Resource.Loading -> {
-//            Text("Cargando...")
-//        }
-//        is Resource.Success -> {
-//            val painter = resource.value
-//            Image(painter = painter, contentDescription = "Poster")
-//        }
-//        is Resource.Failure -> {
-//            println("Error: ${resource.exception.message}")
-//            Text("Error al cargar imagen: ${resource.exception.message}")
-//        }
-//    }
-//}
-
-
 @Composable
 fun DevelopingDialog(
     showDialog: Boolean,
@@ -707,51 +661,110 @@ fun MovieItem(nav: NavigationController, movie: Movie) {
     AsyncImage(
         model = "https://image.tmdb.org/t/p/original${movie.posterPath}",
         contentDescription = "Movie Poster",
-//        contentScale = ContentScale.Crop,
+        contentScale = ContentScale.Crop,
         modifier = Modifier
             .fillMaxWidth()
-            .wrapContentHeight()
+            .aspectRatio(2 / 3f)
             .clip(MaterialTheme.shapes.small)
-            .clickable { nav.navigateToDetail(movie) }
+            .clickable { nav.navigateToDetail(movie) },
+        placeholder = painterResource(Res.drawable.film)
     )
 }
 
 
 @Composable
-fun MovieHeader(nav: NavigationController, movie: Movie, index: Int? = null) {
-    Box {
-        AsyncImage(
-            model = "https://image.tmdb.org/t/p/original${movie.posterPath}",
-            contentDescription = "Movie Poster",
-            contentScale = ContentScale.Crop,
+fun MovieHeader(nav: NavigationController, movie: Movie) {
+    val votePercentage = (movie.voteAverage.toDouble() * 10).toInt()
+    val borderColor = when {
+        votePercentage < 40 -> Color.Red
+        votePercentage < 70 -> Color.Yellow
+        else -> Color(0xFF2AE98E)
+    }
+    Column(
+        modifier = Modifier
+            .width(180.dp)
+            .padding(vertical = 8.dp)
+            .clickable { nav.navigateToDetail(movie) }
+    ) {
+        Box(
             modifier = Modifier
-                .wrapContentHeight(
-                    align = Alignment.CenterVertically
-                )
-                .padding(end = 16.dp, bottom = 16.dp)
-                .width(210.dp)
-                .clip(MaterialTheme.shapes.small)
-                .clickable { nav.navigateToDetail(movie) }
-        )
-
-        if (index != null) {
+                .aspectRatio(2f / 3f)
+                .clip(RoundedCornerShape(18.dp))
+        ) {
+            AsyncImage(
+                model = "https://image.tmdb.org/t/p/original${movie.posterPath}",
+                contentDescription = "Movie Poster",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+                placeholder = painterResource(Res.drawable.film)
+            )
             Box(
                 modifier = Modifier
-                    .align(Alignment.BottomEnd),
+                    .padding(start = 4.dp, bottom = 4.dp)
+                    .size(45.dp)
+                    .align(Alignment.TopEnd)
+                    .background(Color(0xFF18262B), CircleShape)
+                    .border(3.dp, borderColor, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "${index+1}",
-                    style = MaterialTheme.typography.h1,
-                    color = MaterialTheme.colors.primary
+                    "${votePercentage}%",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                 )
             }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        movie.title?.let {
+            Text(
+                text = it,
+                fontWeight = FontWeight.Bold,
+                fontSize = 17.sp,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        movie.releaseDate?.let {
+            Text(
+                text = it,
+                fontSize = 14.sp,
+                color = Color.Gray,
+            )
         }
     }
 }
 
 @Composable
-fun MovieExtendedItem(movie: Movie?) {
+fun CircularAvgVotes(movie: Movie) {
+    val votePercentage = (movie.voteAverage.toDouble() * 10).toInt()
+    val borderColor = when {
+        votePercentage < 40 -> Color.Red
+        votePercentage < 70 -> Color.Yellow
+        else -> Color(0xFF2AE98E)
+    }
+    Box(
+        modifier = Modifier
+            .padding(start = 4.dp, bottom = 4.dp)
+            .size(45.dp)
+            .background(Color(0xFF18262B), CircleShape)
+            .border(3.dp, borderColor, CircleShape),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            "$votePercentage%",
+            color = Color.White,
+            fontWeight = FontWeight.Bold,
+            fontSize = 12.sp,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+        )
+    }
+}
+
+@Composable
+fun MovieDetail(movie: Movie?) {
 
     if (movie != null) {
         var isFilled by remember { mutableStateOf(false) }
@@ -777,37 +790,7 @@ fun MovieExtendedItem(movie: Movie?) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(45.dp)
-                        .clip(CircleShape)
-                        .background(if (movie.adult == false) MaterialTheme.colors.error else MaterialTheme.colors.primary),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (movie.adult == true) {
-                        Text(
-                            text = "18+",
-                            style = MaterialTheme.typography.body1,
-                            color = MaterialTheme.colors.onPrimary
-                        )
-                    } else {
-
-                        Text(
-                            text = movie.voteAverage,
-                            style = MaterialTheme.typography.body1,
-                            color = MaterialTheme.colors.onPrimary
-                        )
-                    }
-
-                }
-
-                Icon(
-                    modifier = Modifier.size(25.dp)
-                        .clickable { isFilled = !isFilled },
-                    imageVector = if (isFilled) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                    contentDescription = "Star Icon",
-                    tint = MaterialTheme.colors.primary
-                )
+                CircularAvgVotes(movie)
             }
 
             LazyColumn(
@@ -817,7 +800,7 @@ fun MovieExtendedItem(movie: Movie?) {
                     movie.title?.let {
                         Text(
                             text = it,
-                            style = MaterialTheme.typography.h5,
+                            style = MaterialTheme.typography.headlineSmall,
                         )
                     }
 
@@ -830,8 +813,8 @@ fun MovieExtendedItem(movie: Movie?) {
 
                         Text(
                             text = formattedDate,
-                            style = MaterialTheme.typography.h6,
-                            color = MaterialTheme.colors.primaryVariant
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = MaterialTheme.colorScheme.secondary
                         )
                     }
 
@@ -840,13 +823,13 @@ fun MovieExtendedItem(movie: Movie?) {
                     movie.overview?.let {
                         Text(
                             text = it,
-                            style = MaterialTheme.typography.body2
+                            style = MaterialTheme.typography.bodySmall
                         )
                     }
 
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    Text(movie.toString(), style = MaterialTheme.typography.body1)
+                    Text(movie.toString(), style = MaterialTheme.typography.bodySmall)
                 }
             }
         }
