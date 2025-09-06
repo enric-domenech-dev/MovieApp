@@ -11,19 +11,9 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.automirrored.outlined.List
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.MailOutline
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.MailOutline
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
@@ -54,6 +44,10 @@ import org.lanzadera.proyectos.ui.components.navComponents.NiaNavigationBar
 import org.lanzadera.proyectos.ui.components.navComponents.NiaNavigationBarItem
 import org.lanzadera.proyectos.ui.components.tabs.NiaTab
 import org.lanzadera.proyectos.ui.components.tabs.NiaTabRow
+import org.lanzadera.proyectos.utils.Constants.MenuOptions.bottomBarIcons
+import org.lanzadera.proyectos.utils.Constants.MenuOptions.bottomBarSelectedIcons
+import org.lanzadera.proyectos.utils.Constants.MenuOptions.bottomBarTitles
+import org.lanzadera.proyectos.utils.Constants.MenuOptions.topBarTitles
 
 @Composable
 @Preview
@@ -67,6 +61,7 @@ fun HomeView(
     val movies by vm.movies.collectAsStateWithLifecycle()
     val trendingMovies by vm.trending.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
+    val listState = rememberLazyGridState()
 
     // Orden derivado y memoizado
     val sortedTrending by remember(trendingMovies) {
@@ -86,9 +81,8 @@ fun HomeView(
         Scaffold(
             topBar = {
                 var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
-                val titles = listOf("Tendencias", "Películas", "Series", "Favoritos")
                 NiaTabRow(selectedTabIndex = selectedTabIndex) {
-                    titles.forEachIndexed { index, title ->
+                    topBarTitles.forEachIndexed { index, title ->
                         NiaTab(
                             selected = selectedTabIndex == index,
                             onClick = { selectedTabIndex = index },
@@ -99,26 +93,21 @@ fun HomeView(
             },
             bottomBar = {
                 var selectedItem by rememberSaveable { mutableIntStateOf(navIndexBottomBar) }
-                val items = listOf("Menu", "Buscar", "Inicio", "Chat", "Perfil")
-                val icons = listOf(
-                    Icons.AutoMirrored.Outlined.List,
-                    Icons.Outlined.Search,
-                    Icons.Outlined.Home,
-                    Icons.Outlined.MailOutline,
-                    Icons.Outlined.Person
-                )
-                val selectedIcons = listOf(
-                    Icons.AutoMirrored.Filled.List,
-                    Icons.Filled.Search,
-                    Icons.Filled.Home,
-                    Icons.Filled.MailOutline,
-                    Icons.Filled.Person
-                )
                 NiaNavigationBar {
-                    items.forEachIndexed { index, item ->
+                    bottomBarTitles.forEachIndexed { index, item ->
                         NiaNavigationBarItem(
-                            icon = { Icon(imageVector = icons[index], contentDescription = item) },
-                            selectedIcon = { Icon(imageVector = selectedIcons[index], contentDescription = item) },
+                            icon = {
+                                Icon(
+                                    imageVector = bottomBarIcons[index],
+                                    contentDescription = item
+                                )
+                            },
+                            selectedIcon = {
+                                Icon(
+                                    imageVector = bottomBarSelectedIcons[index],
+                                    contentDescription = item
+                                )
+                            },
                             label = { Text(item) },
                             selected = selectedItem == index,
                             onClick = {
@@ -127,6 +116,7 @@ fun HomeView(
                                     0 -> scope.launch {
                                         if (drawerState.isClosed) drawerState.open() else drawerState.close()
                                     }
+
                                     1 -> nav.navigateToSearch()
                                     2 -> Unit
                                     3 -> nav.navigateToSearch()
@@ -138,27 +128,30 @@ fun HomeView(
                 }
             }
         ) { paddingValues ->
+            Text(if (uiState.isLoading) "Cargando..." else "Listo!")
             Column(
                 modifier = Modifier.fillMaxSize().padding(paddingValues),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+
                 when {
                     uiState.isLoading -> {
                         CircularProgressIndicator()
                     }
+
                     uiState.error != null -> {
                         Text(text = uiState.error ?: "", color = MaterialTheme.colorScheme.error)
                     }
-                    movies.isEmpty() && sortedTrending.isEmpty() -> {
-                        Text(text = "No hay contenido para mostrar.")
-                    }
+
                     else -> {
                         LazyVerticalGrid(
                             columns = GridCells.Adaptive(minSize = 120.dp),
+                            state = listState,
                             contentPadding = PaddingValues(horizontal = 16.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
+
                             modifier = Modifier.fillMaxSize()
                         ) {
                             // Tendencias (si hay)
@@ -177,7 +170,7 @@ fun HomeView(
                                     ) {
                                         itemsIndexed(
                                             items = sortedTrending,
-                                            key = { _, m -> m.id ?: m.hashCode() }
+                                            key = { index, m -> "${m.id}_$index" }
                                         ) { _, movie ->
                                             MovieHeader(nav, movie)
                                         }
@@ -194,10 +187,10 @@ fun HomeView(
                                         modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
                                     )
                                 }
-                                items(
+                                itemsIndexed(
                                     items = movies,
-                                    key = { it.id ?: it.hashCode() }
-                                ) { movie ->
+                                    key = { index, movie -> "${movie.id}_$index" }
+                                ) { _, movie ->
                                     MovieItem(nav, movie)
                                 }
                             }

@@ -1,5 +1,17 @@
 package org.lanzadera.proyectos.utils
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.automirrored.outlined.List
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.MailOutline
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.MailOutline
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Search
+
 object Constants {
 
     // SCREENS
@@ -11,6 +23,26 @@ object Constants {
         object Detail : Screen("detail")
         object Search : Screen("search")
     }
+
+    // MENU OPTIONS
+object MenuOptions {
+    val topBarTitles = listOf("Tendencias", "Películas", "Series", "Favoritos")
+    val bottomBarTitles = listOf("Menu", "Buscar", "Inicio", "Chat", "Perfil")
+    val bottomBarIcons = listOf(
+        Icons.AutoMirrored.Outlined.List,
+        Icons.Outlined.Search,
+        Icons.Outlined.Home,
+        Icons.Outlined.MailOutline,
+        Icons.Outlined.Person
+    )
+    val bottomBarSelectedIcons = listOf(
+        Icons.AutoMirrored.Filled.List,
+        Icons.Filled.Search,
+        Icons.Filled.Home,
+        Icons.Filled.MailOutline,
+        Icons.Filled.Person
+    )
+}
 
     // NAVIGATION
     sealed class NavigationEvent {
@@ -24,7 +56,8 @@ object Constants {
     }
 
     //APY KEYS
-    val API_KEY = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4MDBhMzJhZjMxN2Y0MmU2Y2Y3NGMwNDJlYTE0YTJhOCIsIm5iZiI6MTczNDc4NDgxMi40MjUsInN1YiI6IjY3NjZiNzJjMGIyZmJiOWRlYTVlMWQ0MiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.wGnX7P8oJrWpXdpxd3wQXw2hjw5API7MU3ucBwAKIWU"
+    val API_KEY =
+        "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4MDBhMzJhZjMxN2Y0MmU2Y2Y3NGMwNDJlYTE0YTJhOCIsIm5iZiI6MTczNDc4NDgxMi40MjUsInN1YiI6IjY3NjZiNzJjMGIyZmJiOWRlYTVlMWQ0MiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.wGnX7P8oJrWpXdpxd3wQXw2hjw5API7MU3ucBwAKIWU"
     val BASE_URL = "https://api.themoviedb.org"
 
     // VARIABLES
