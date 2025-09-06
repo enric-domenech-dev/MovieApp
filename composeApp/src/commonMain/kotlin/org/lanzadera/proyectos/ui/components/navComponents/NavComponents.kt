@@ -1,4 +1,4 @@
-package org.lanzadera.proyectos.ui.components.Navigation
+package org.lanzadera.proyectos.ui.components.navComponents
 
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.MaterialTheme

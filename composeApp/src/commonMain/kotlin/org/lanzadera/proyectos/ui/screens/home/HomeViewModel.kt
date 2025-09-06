@@ -1,103 +1,84 @@
 package org.lanzadera.proyectos.ui.screens.home
 
 import androidx.lifecycle.ViewModel
-import io.ktor.client.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
-import kotlinx.serialization.json.Json
-import org.lanzadera.proyectos.models.movie.Movie
-import org.lanzadera.proyectos.models.movie.MovieResponse
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import org.lanzadera.proyectos.domain.models.movie.Movie
+import org.lanzadera.proyectos.domain.usecase.load_initial_data.LoadInitialDataUseCase
 
 class HomeViewModel(
-    private val client: HttpClient,
-    private val maxPages: Int = 20
+    private val loadInitialData: LoadInitialDataUseCase
 ) : ViewModel() {
 
-    suspend fun initUIState(): UIState {
-        return try {
-            coroutineScope {
-                val trendingMoviesDeferred = async { fetchTrendingMovies() }
-                val allMoviesDeferred = async { fetchAllMovies() }
-
-                val trendingMovies = trendingMoviesDeferred.await()
-                val allMovies = allMoviesDeferred.await()
-
-                UIState.Success(
-                    movies = allMovies,
-                    trendingMovies = trendingMovies
-                )
+    // Flows de dominio -> StateFlow
+    val movies: StateFlow<List<Movie>> =
+        loadInitialData.moviesFlow
+            .onStart {
+                // Carga inicial automática al arrancar la VM
+                refreshIfNeeded()
             }
-        } catch (e: Exception) {
-            UIState.Error("Error al cargar las películas: ${e.message}")
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val trending: StateFlow<List<Movie>> =
+        loadInitialData.trendingMoviesFlow
+            .onStart {
+                // Carga inicial automática al arrancar la VM
+                refreshIfNeeded()
+            }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    // Flags propios de la VM
+    private val loading = MutableStateFlow(false)
+    private val error = MutableStateFlow<String?>(null)
+
+    // Evita refrescos concurrentes
+    private val refreshMutex = Mutex()
+
+    // UiState mínimo, sin listas
+    val uiState: StateFlow<UiState> =
+        combine(loading, error) { isLoading, err ->
+            UiState(isLoading = isLoading, error = err)
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5_000),
+            UiState(isLoading = true)
+        )
+
+    private fun refreshIfNeeded(force: Boolean = false) {
+        viewModelScope.launch {
+            // nota: si ya estás refrescando, sal temprano
+            if (loading.value) return@launch
+
+            refreshMutex.withLock {
+                val alreadyLoaded = movies.value.isNotEmpty() && trending.value.isNotEmpty()
+                if (!force && alreadyLoaded) return@withLock
+
+                loading.value = true
+                error.value = null
+                try {
+                    // Lanza ambas recargas en paralelo
+                    awaitAll(
+                        async { loadInitialData.refreshMovies() },
+                        async { loadInitialData.refreshTrendingMovies() }
+                    )
+                    // si OK, limpia error explícitamente
+                    error.value = null
+                } catch (t: Throwable) {
+                    error.value = t.message ?: "Ha ocurrido un error"
+                } finally {
+                    loading.value = false
+                }
+            }
         }
     }
 
-    private suspend fun fetchTrendingMovies(): List<Movie> {
-        val allMovies = mutableListOf<Movie>()
-        var currentPage = 1
-
-        do {
-            val response: HttpResponse = client.get("/3/trending/movie/week") {
-                url {
-                    parameters.append("language", "es")
-                    parameters.append("page", currentPage.toString())
-                }
-            }
-
-            val movieResponse: MovieResponse = Json.decodeFromString(response.bodyAsText())
-
-            val validMovies = movieResponse.results.filterNot { movie ->
-                movie.id == null || movie.title == null || movie.posterPath == null ||
-                        movie.overview == null || movie.releaseDate == null || movie.voteCount == null ||
-                        movie.popularity == null || movie.originalLanguage == null || movie.originalTitle == null ||
-                        movie.backdropPath == null || movie.adult == null || movie.video == null
-            }
-
-            allMovies.addAll(validMovies)
-            currentPage++
-        } while (currentPage <= maxPages/maxPages)
-
-        return allMovies
-    }
-
-    private suspend fun fetchAllMovies(): List<Movie> {
-        val allMovies = mutableListOf<Movie>()
-        var currentPage = 1
-
-        do {
-            val response: HttpResponse = client.get("/3/discover/movie") {
-                url {
-                    parameters.append("language", "es")
-                    parameters.append("sort_by", "popularity.desc")
-                    parameters.append("page", currentPage.toString())
-                }
-            }
-
-            val movieResponse: MovieResponse = Json.decodeFromString(response.bodyAsText())
-
-            val validMovies = movieResponse.results.filterNot { movie ->
-                movie.id == null || movie.title == null || movie.posterPath == null ||
-                        movie.overview == null || movie.releaseDate == null || movie.voteCount == null ||
-                        movie.popularity == null || movie.originalLanguage == null || movie.originalTitle == null ||
-                        movie.backdropPath == null || movie.adult == null || movie.video == null
-            }
-
-            allMovies.addAll(validMovies)
-            currentPage++
-        } while (currentPage <= maxPages)
-
-        return allMovies
-    }
-
-    open class UIState {
-        object Loading : UIState()
-        data class Success(
-            val movies: List<Movie>,
-            val trendingMovies: List<Movie>
-        ) : UIState()
-
-        data class Error(val message: String) : UIState()
-    }
+    data class UiState(
+        val isLoading: Boolean = false,
+        val error: String? = null
+    )
 }

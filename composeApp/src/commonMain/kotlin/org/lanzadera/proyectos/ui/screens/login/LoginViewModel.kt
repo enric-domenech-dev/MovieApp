@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
-import org.lanzadera.proyectos.models.user.User
+import org.lanzadera.proyectos.domain.models.user.User
 
 class LoginViewModel : ViewModel() {
 

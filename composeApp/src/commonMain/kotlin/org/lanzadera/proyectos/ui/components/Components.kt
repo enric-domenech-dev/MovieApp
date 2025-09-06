@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -28,6 +30,8 @@ import androidx.compose.material.icons.automirrored.outlined.ExitToApp
 import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.automirrored.outlined.Send
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.Email
@@ -42,6 +46,8 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -52,11 +58,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,6 +70,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -74,12 +81,15 @@ import coil3.compose.AsyncImage
 import kotlinx.datetime.LocalDate
 import movieapp.composeapp.generated.resources.Res
 import movieapp.composeapp.generated.resources.film
+import movieapp.composeapp.generated.resources.guardado
+import movieapp.composeapp.generated.resources.guardar
 import movieapp.composeapp.generated.resources.huella
 import movieapp.composeapp.generated.resources.visibility
 import movieapp.composeapp.generated.resources.visibility_off
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
-import org.lanzadera.proyectos.models.movie.Movie
+import org.lanzadera.proyectos.BuildConfig
+import org.lanzadera.proyectos.domain.models.movie.Movie
 import org.lanzadera.proyectos.navigation.NavigationController
 
 
@@ -87,16 +97,17 @@ import org.lanzadera.proyectos.navigation.NavigationController
 fun DrawerAppBar(
     navViewModel: NavigationController,
     drawerState: androidx.compose.material3.DrawerState,
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
     var showDialog by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
 
     ModalNavigationDrawer(
+        modifier = modifier,
         drawerContent = {
             Column(
                 modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 16.dp)
+                    .background(MaterialTheme.colorScheme.background)
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
             ) {
@@ -167,41 +178,14 @@ fun DrawerAppBar(
                     }
                 )
 
+                Spacer(modifier = Modifier.weight(1f))
+
                 DropdownMenuItem(
                     text = { Text("About") },
                     onClick = { /* Do something... */ },
                     leadingIcon = {
                         Icon(Icons.Outlined.Info, contentDescription = null)
-                    }
-                )
-
-                DropdownMenuItem(
-                    text = { Text("Item") },
-                    onClick = { /* Do something... */ }
-                )
-                DropdownMenuItem(
-                    text = { Text("Item") },
-                    onClick = { /* Do something... */ }
-                )
-                DropdownMenuItem(
-                    text = { Text("Item") },
-                    onClick = { /* Do something... */ }
-                )
-                DropdownMenuItem(
-                    text = { Text("Item") },
-                    onClick = { /* Do something... */ }
-                )
-                DropdownMenuItem(
-                    text = { Text("Item") },
-                    onClick = { /* Do something... */ }
-                )
-                DropdownMenuItem(
-                    text = { Text("Item") },
-                    onClick = { /* Do something... */ }
-                )
-                DropdownMenuItem(
-                    text = { Text("Item") },
-                    onClick = { /* Do something... */ }
+                    },
                 )
 
                 DropdownMenuItem(
@@ -219,67 +203,30 @@ fun DrawerAppBar(
                     onDismiss = { showDialog = false },
                     onConfirm = { navViewModel.navigateToLogin() }
                 )
+                CustomBottomAppBar(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp)
+                ) {
+                    Text(
+                        text = "v${BuildConfig.APP_VERSION}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.align(Alignment.CenterVertically),
+                        fontSize = 16.sp,
+                        fontFamily = FontFamily.SansSerif,
+                    )
+                }
+
             }
         },
         gesturesEnabled = true,
         drawerState = drawerState,
         content = content
     )
-//    {
-//        Scaffold(
-//            topBar = {
-//                CustomTopAppBar(
-//                    title = pageTitle,
-//                    contentColor = MaterialTheme.colorScheme.onBackground,
-//                    backgroundColor = MaterialTheme.colorScheme.background,
-//                    navigationIcon = {
-//                        IconButton(onClick = {
-//                            scope.launch {
-//                                if (drawerState.isClosed) {
-//                                    drawerState.open()
-//                                } else {
-//                                    drawerState.close()
-//                                }
-//                            }
-//                        }) {
-//                            Icon(
-//                                modifier = Modifier.size(35.dp),
-//                                imageVector = Icons.Filled.Menu,
-//                                contentDescription = null
-//                            )
-//                        }
-//                    },
-//                    actions = {
-//                        IconButton(
-//                            onClick = { navViewModel.navigateBack() }) {
-//                            Icon(
-//                                imageVector = Icons.Filled.Close,
-//                                contentDescription = "Configuration"
-//                            )
-//                        }
-//                    },
-//                )
-//            },
-//            bottomBar = {
-//                CustomBottomAppBar(
-//                    containerColor = MaterialTheme.colorScheme.primary,
-//                    contentColor = MaterialTheme.colorScheme.onPrimary,
-//                    modifier = Modifier.fillMaxWidth(),
-//                    content = {
-//                        SingleChoiceSegmentedButtonAlternativeExample(
-//
-//                        )
-//                    }
-//                )
-//            },
-//            floatingActionButton = { actionButton() },
-//            content = { innerPadding ->
-//                Box(modifier = Modifier.padding(innerPadding)) {
-//                    screenContent()
-//                }
-//            }
-//        )
-//    }
 }
 
 @Composable
@@ -674,12 +621,6 @@ fun MovieItem(nav: NavigationController, movie: Movie) {
 
 @Composable
 fun MovieHeader(nav: NavigationController, movie: Movie) {
-    val votePercentage = (movie.voteAverage.toDouble() * 10).toInt()
-    val borderColor = when {
-        votePercentage < 40 -> Color.Red
-        votePercentage < 70 -> Color.Yellow
-        else -> Color(0xFF2AE98E)
-    }
     Column(
         modifier = Modifier
             .width(180.dp)
@@ -698,23 +639,8 @@ fun MovieHeader(nav: NavigationController, movie: Movie) {
                 modifier = Modifier.fillMaxSize(),
                 placeholder = painterResource(Res.drawable.film)
             )
-            Box(
-                modifier = Modifier
-                    .padding(start = 4.dp, bottom = 4.dp)
-                    .size(45.dp)
-                    .align(Alignment.TopEnd)
-                    .background(Color(0xFF18262B), CircleShape)
-                    .border(3.dp, borderColor, CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    "${votePercentage}%",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                )
-            }
+
+
         }
         Spacer(modifier = Modifier.height(8.dp))
         movie.title?.let {
@@ -727,11 +653,82 @@ fun MovieHeader(nav: NavigationController, movie: Movie) {
                 overflow = TextOverflow.Ellipsis
             )
         }
-        movie.releaseDate?.let {
+movie.releaseDate?.let {
+    val date = LocalDate.parse(it)
+    val formattedDate = "${date.dayOfMonth} ${date.month.name.lowercase().replaceFirstChar { c -> c.uppercase() }} ${date.year}"
+    Text(
+        text = formattedDate,
+        fontSize = 14.sp,
+        color = Color.Gray,
+    )
+}
+    }
+}
+
+@Composable
+fun ButtonRow(
+    isSaved: MutableState<Boolean>,
+    buttonColor: Color,
+    movie: Movie,
+    isFavorite: MutableState<Boolean>
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min), // Ocupa solo el espacio mínimo necesario
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.Top // Alinea los botones arriba
+    ) {
+        FloatingActionButton(
+            onClick = { isSaved.value = !isSaved.value },
+            modifier = Modifier
+                .size(40.dp)
+                .offset(y = (-20).dp),
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            shape = CircleShape,
+            elevation = FloatingActionButtonDefaults.elevation(4.dp)
+        ) {
+            Icon(
+                painter = if (isSaved.value) painterResource(Res.drawable.guardado) else painterResource(
+                    Res.drawable.guardar
+                ),
+                contentDescription = "Add to Watchlist",
+                modifier = Modifier.size(20.dp)
+            )
+        }
+        Spacer(modifier = Modifier.width(16.dp))
+        FloatingActionButton(
+            onClick = { /* TODO: Show average votes */ },
+            modifier = Modifier
+                .size(40.dp)
+                .offset(y = (-20).dp),
+            containerColor = buttonColor,
+            contentColor = MaterialTheme.colorScheme.background,
+            shape = CircleShape,
+            elevation = FloatingActionButtonDefaults.elevation(4.dp)
+        ) {
             Text(
-                text = it,
-                fontSize = 14.sp,
-                color = Color.Gray,
+                text = "${(movie.voteAverage.toDouble() * 10).toInt()}%",
+                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp,
+            )
+        }
+        Spacer(modifier = Modifier.width(16.dp))
+        FloatingActionButton(
+            onClick = { isFavorite.value = !isFavorite.value },
+            modifier = Modifier
+                .size(40.dp)
+                .offset(y = (-20).dp),
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            shape = CircleShape,
+            elevation = FloatingActionButtonDefaults.elevation(4.dp)
+        ) {
+            Icon(
+                imageVector = if (isFavorite.value) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                contentDescription = "Add to Favorites",
+                modifier = Modifier.size(20.dp)
             )
         }
     }
@@ -747,8 +744,7 @@ fun CircularAvgVotes(movie: Movie) {
     }
     Box(
         modifier = Modifier
-            .padding(start = 4.dp, bottom = 4.dp)
-            .size(45.dp)
+            .size(50.dp)
             .background(Color(0xFF18262B), CircleShape)
             .border(3.dp, borderColor, CircleShape),
         contentAlignment = Alignment.Center
@@ -781,17 +777,16 @@ fun MovieDetail(movie: Movie?) {
                     contentScale = ContentScale.FillWidth,
                     modifier = Modifier.fillMaxWidth()
                         .aspectRatio(16 / 9f)
-                        .clip(MaterialTheme.shapes.small)
                 )
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                CircularAvgVotes(movie)
-            }
+//            Row(
+//                modifier = Modifier.fillMaxWidth(),
+//                horizontalArrangement = Arrangement.SpaceBetween,
+//                verticalAlignment = Alignment.CenterVertically
+//            ) {
+            CircularAvgVotes(movie)
+//            }
 
             LazyColumn(
                 modifier = Modifier.fillMaxWidth().padding(16.dp)

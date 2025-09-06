@@ -28,7 +28,7 @@ import movieapp.composeapp.generated.resources.navegacion
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.lanzadera.proyectos.AppTheme
-import org.lanzadera.proyectos.models.movie.Movie
+import org.lanzadera.proyectos.domain.models.movie.Movie
 import org.lanzadera.proyectos.navigation.NavigationController
 import org.lanzadera.proyectos.ui.components.CustomTopAppBar
 import org.lanzadera.proyectos.ui.components.MovieDetail

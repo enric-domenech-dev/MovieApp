@@ -1,27 +1,28 @@
 package org.lanzadera.proyectos.di
 
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import kotlinx.serialization.json.JsonElement
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.api.createClientPlugin
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.URLProtocol
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
 import org.koin.compose.viewmodel.dsl.viewModel
-import io.ktor.client.statement.bodyAsText
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
 import org.koin.core.qualifier.named
 import org.koin.dsl.KoinAppDeclaration
-import kotlinx.serialization.builtins.MapSerializer
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.builtins.serializer
-
 import org.koin.dsl.module
 import org.lanzadera.proyectos.BuildConfig
+import org.lanzadera.proyectos.data.repository.LoadInitialDataImpl
+import org.lanzadera.proyectos.domain.repository.LoadInitialData
+import org.lanzadera.proyectos.domain.usecase.load_initial_data.LoadInitialDataUseCase
 import org.lanzadera.proyectos.ui.screens.home.HomeViewModel
 
 val appModule = module {
@@ -77,8 +78,15 @@ val dataModule = module {
     // Json
     single {
         Json {
-            ignoreUnknownKeys = true
-            prettyPrint = true
+            ignoreUnknownKeys =
+                true // Ignora claves desconocidas en el JSON recibido, evitando errores por campos extra
+            prettyPrint =
+                true // Formatea el JSON de salida para que sea legible (solo útil para debug/logs)
+            isLenient =
+                true // Permite que el parser sea más tolerante con el formato del JSON (por ejemplo, comas finales)
+            coerceInputValues =
+                true // Convierte valores de entrada que no coinciden exactamente con el tipo esperado
+            encodeDefaults = true // Serializa valores nulos explícitamente en el JSON de salida
         }
     }
 
@@ -103,7 +111,15 @@ val dataModule = module {
 }
 
 val viewModelsModule = module {
-    viewModel { HomeViewModel(get(), get()) }
+
+    // UseCases
+    single { LoadInitialDataUseCase(get()) }
+
+    // Repositories
+    single<LoadInitialData> { LoadInitialDataImpl(get(), 20, get()) }
+
+    // ViewModels
+    viewModel { HomeViewModel(get()) }
 }
 
 expect val nativeModule: Module
