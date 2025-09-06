@@ -1,4 +1,4 @@
-package org.lanzadera.proyectos.models.movie
+package org.lanzadera.proyectos.domain.models.movie
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

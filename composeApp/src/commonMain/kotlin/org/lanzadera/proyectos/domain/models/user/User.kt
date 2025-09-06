@@ -1,4 +1,4 @@
-package org.lanzadera.proyectos.models.user
+package org.lanzadera.proyectos.domain.models.user
 
 import androidx.compose.ui.text.intl.Locale
 import kotlinx.serialization.Serializable

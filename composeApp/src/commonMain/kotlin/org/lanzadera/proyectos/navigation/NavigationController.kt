@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
-import org.lanzadera.proyectos.models.movie.Movie
+import org.lanzadera.proyectos.domain.models.movie.Movie
 import org.lanzadera.proyectos.utils.Constants
 
 class NavigationController() : ViewModel() {

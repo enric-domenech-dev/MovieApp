@@ -135,7 +135,6 @@ kotlin {
 android {
     namespace = "org.lanzadera.proyectos"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
-
     defaultConfig {
         applicationId = "org.lanzadera.proyectos"
         minSdk = libs.versions.android.minSdk.get().toInt()
@@ -149,17 +148,28 @@ android {
             properties.load(propertiesFile.reader())
         }
     }
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
     buildTypes {
-
+        debug {
+            isMinifyEnabled = false
+            isShrinkResources = false
+        }
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
     }
 }
 
@@ -205,7 +215,8 @@ buildConfig {
     }
 
     val apiBearerToken = properties.getProperty("API_BEARER_TOKEN", "")
+    val appVersion = properties.getProperty("APP_VERSION", "")
 
-    // 🔹 Especificar el tipo como "String"
     buildConfigField("String", "API_BEARER_TOKEN", "\"$apiBearerToken\"")
+    buildConfigField("String", "APP_VERSION", "\"$appVersion\"")
 }

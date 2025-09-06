@@ -24,8 +24,8 @@ import androidx.compose.ui.Modifier
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.lanzadera.proyectos.AppTheme
 import org.lanzadera.proyectos.navigation.NavigationController
-import org.lanzadera.proyectos.ui.components.Navigation.NiaNavigationBar
-import org.lanzadera.proyectos.ui.components.Navigation.NiaNavigationBarItem
+import org.lanzadera.proyectos.ui.components.navComponents.NiaNavigationBar
+import org.lanzadera.proyectos.ui.components.navComponents.NiaNavigationBarItem
 import org.lanzadera.proyectos.ui.components.tabs.NiaTab
 import org.lanzadera.proyectos.ui.components.tabs.NiaTabRow
 
