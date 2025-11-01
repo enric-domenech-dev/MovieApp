@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.lanzadera.proyectos.AppTheme
-import org.lanzadera.proyectos.navigation.NavigationController
+import androidx.navigation.NavHostController
 import org.lanzadera.proyectos.ui.components.navComponents.NiaNavigationBar
 import org.lanzadera.proyectos.ui.components.navComponents.NiaNavigationBarItem
 import org.lanzadera.proyectos.utils.Constants.MenuOptions.bottomBarIcons
@@ -42,7 +42,7 @@ import org.lanzadera.proyectos.utils.Constants.MenuOptions.bottomBarTitles
 @Preview
 fun SearchView(
     navIndexBottomBar: Int = 1,
-    nav: NavigationController, vm: SearchViewModel,
+    nav: NavHostController, vm: SearchViewModel,
     selectedTheme: AppTheme = AppTheme.SYSTEM,
     darkTheme: Boolean = false
 ) {
@@ -54,45 +54,7 @@ fun SearchView(
         topBar = {
 
         },
-        bottomBar = {
-
-            var selectedItem by rememberSaveable { mutableIntStateOf(navIndexBottomBar) }
-            NiaNavigationBar {
-                bottomBarTitles.forEachIndexed { index, item ->
-                    NiaNavigationBarItem(
-                        modifier = Modifier.weight(1f),
-                        icon = {
-                            Icon(
-                                imageVector = bottomBarIcons[index],
-                                contentDescription = item
-                            )
-                        },
-                        selectedIcon = {
-                            Icon(
-                                imageVector = bottomBarSelectedIcons[index],
-                                contentDescription = item
-                            )
-                        },
-                        label = { Text(item) },
-                        selected = selectedItem == index,
-                        onClick = {
-                            selectedItem = index
-                            when (index) {
-                                0 -> scope.launch {
-                                    if (drawerState.isClosed) drawerState.open() else drawerState.close()
-                                }
-
-                                1 -> Unit
-                                2 -> nav.navigateToHome()
-                                3 -> nav.navigateToSearch()
-                                4 -> nav.navigateToSearch()
-                            }
-                        },
-                    )
-                }
-            }
-
-        }
+        // bottomBar moved to top-level Navigation scaffold
     ) { paddingValues ->
 
         var text by rememberSaveable { mutableStateOf("") }

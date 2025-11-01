@@ -23,8 +23,8 @@ class HomeViewModel(
     private val loadInitialData: LoadInitialDataUseCase
 ) : ViewModel() {
 
-    // HomeTab: define qué dos feeds se muestran en cada pestaña
-    enum class HomeTab { TENDENCIAS, PELICULAS, SERIES, FAVORITOS }
+    // HomeTab: ahora con 5 pestañas: BOOKS, FILMS, SERIES, GAMES, <3
+    enum class HomeTab { BOOKS, FILMS, SERIES, GAMES, HEART }
 
     // --- todos los flows, calientes y listos ---
     val movies = loadInitialData.moviesFlow
@@ -54,29 +54,29 @@ class HomeViewModel(
     var didFirstLoad = false
 
     // tab seleccionado (lo guarda el VM; la UI solo lo notifica)
-    private val _selectedTab = MutableStateFlow(HomeTab.TENDENCIAS)
+    private val _selectedTab = MutableStateFlow(HomeTab.FILMS)
     val selectedTab: StateFlow<HomeTab> = _selectedTab
 
     fun selectTab(index: Int) {
         _selectedTab.value = when (index) {
-            0 -> HomeTab.TENDENCIAS
-            1 -> HomeTab.PELICULAS
+            0 -> HomeTab.BOOKS
+            1 -> HomeTab.FILMS
             2 -> HomeTab.SERIES
-            else -> HomeTab.FAVORITOS
+            3 -> HomeTab.GAMES
+            else -> HomeTab.HEART
         }
     }
 
-    fun clearError() {
-        error.value = null
-    }
+    // clearError removed: UI will reset `error` directly (vm.error.value = null) to avoid unused warnings
 
     // mapping de tab -> par de listas (primary y secondary)
     private fun feedsFor(tab: HomeTab): Pair<Flow<List<Movie>>, Flow<List<Movie>>> =
         when (tab) {
-            HomeTab.TENDENCIAS -> trendingDay to inCinemasToday     // cabecera: hoy / cartelera
-            HomeTab.PELICULAS -> popular to topRated               // cabecera: populares / grid: top
-            HomeTab.SERIES -> trendingWeek to upcoming          // placeholder si aún no hay series
-            HomeTab.FAVORITOS -> hero to discover                  // placeholder hasta tener favoritos
+            HomeTab.BOOKS -> trendingDay to inCinemasToday     // placeholder temporary
+            HomeTab.FILMS -> movies to movies                 // FILMS mostrará secciones separadas en la UI
+            HomeTab.SERIES -> trendingWeek to upcoming        // placeholder si aún no hay series
+            HomeTab.GAMES -> hero to discover                 // placeholder
+            HomeTab.HEART -> discover to discover            // placeholder
         }
 
     // listas visibles según el tab (conmutadas sin recarga)
@@ -160,5 +160,3 @@ class HomeViewModel(
         val activeFilters: Set<Int> = emptySet()
     )
 }
-
-

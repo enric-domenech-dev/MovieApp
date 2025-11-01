@@ -17,7 +17,6 @@ import coil3.request.crossfade
 import coil3.util.DebugLogger
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.lanzadera.proyectos.navigation.Navigation
-import org.lanzadera.proyectos.navigation.NavigationController
 
 // Enum para los diferentes temas disponibles
 enum class AppTheme {
@@ -54,10 +53,9 @@ internal fun App(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            val navController = NavigationController()
+            val navController = rememberNavController()
             Navigation(
-                navHost = rememberNavController(),
-                navigation = navController,
+                navHost = navController,
                 selectedTheme = selectedTheme,
                 darkTheme = darkTheme
             )

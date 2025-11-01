@@ -11,6 +11,8 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.MailOutline
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Settings
 
 object Constants {
 
@@ -22,27 +24,31 @@ object Constants {
         object SplashScreen : Screen("splashScreen")
         object Detail : Screen("detail")
         object Search : Screen("search")
+        // Added settings/chat/profile to centralize routes and avoid literals
+        object Settings : Screen("settings")
+        object Chat : Screen("chat")
+        object Profile : Screen("profile")
     }
 
     // MENU OPTIONS
-object MenuOptions {
-    val topBarTitles = listOf("Tendencias", "Películas", "Series", "Favoritos")
-    val bottomBarTitles = listOf("Menu", "Buscar", "Inicio", "Chat", "Perfil")
-    val bottomBarIcons = listOf(
-        Icons.AutoMirrored.Outlined.List,
-        Icons.Outlined.Search,
-        Icons.Outlined.Home,
-        Icons.Outlined.MailOutline,
-        Icons.Outlined.Person
-    )
-    val bottomBarSelectedIcons = listOf(
-        Icons.AutoMirrored.Filled.List,
-        Icons.Filled.Search,
-        Icons.Filled.Home,
-        Icons.Filled.MailOutline,
-        Icons.Filled.Person
-    )
-}
+    object MenuOptions {
+        val topBarTitles = listOf("BOOKS", "FILMS", "SERIES", "GAMES", "<3")
+        val bottomBarTitles = listOf("Menu", "Buscar", "Inicio", "Chat", "Perfil")
+        val bottomBarIcons = listOf(
+            Icons.AutoMirrored.Outlined.List,
+            Icons.Outlined.Search,
+            Icons.Outlined.Home,
+            Icons.Outlined.MailOutline,
+            Icons.Outlined.Person
+        )
+        val bottomBarSelectedIcons = listOf(
+            Icons.AutoMirrored.Filled.List,
+            Icons.Filled.Search,
+            Icons.Filled.Home,
+            Icons.Filled.MailOutline,
+            Icons.Filled.Person
+        )
+    }
 
     // NAVIGATION
     sealed class NavigationEvent {
@@ -53,6 +59,9 @@ object MenuOptions {
         object NavigateToSplashScreen : NavigationEvent()
         object NavigateToDetail : NavigationEvent()
         object NavigateToSearch : NavigationEvent()
+        object NavigateToSettings : NavigationEvent()
+        object NavigateToChat : NavigationEvent()
+        object NavigateToProfile : NavigationEvent()
     }
 
     //APY KEYS
