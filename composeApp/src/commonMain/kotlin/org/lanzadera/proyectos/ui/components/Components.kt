@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -65,6 +66,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -73,13 +75,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import kotlinx.datetime.LocalDate
 import movieapp.composeapp.generated.resources.Res
@@ -93,17 +95,21 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.lanzadera.proyectos.BuildConfig
 import org.lanzadera.proyectos.domain.models.movie.Movie
-import org.lanzadera.proyectos.navigation.NavigationController
+import androidx.navigation.NavHostController
+import kotlinx.coroutines.launch
+import org.lanzadera.proyectos.navigation.NavigationStore
+import org.lanzadera.proyectos.utils.Constants
 
 
 @Composable
 fun DrawerAppBar(
-    navViewModel: NavigationController,
+    navViewModel: NavHostController,
     drawerState: androidx.compose.material3.DrawerState,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
     var showDialog by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     ModalNavigationDrawer(
         modifier = modifier,
@@ -140,7 +146,7 @@ fun DrawerAppBar(
                 ) {
                     DropdownMenuItem(
                         text = { Text("Profile") },
-                        onClick = { navViewModel.navigateToSearch() },
+                        onClick = { navViewModel.navigate(Constants.Screen.Search.route) },
                         leadingIcon = {
                             Icon(Icons.Outlined.Person, contentDescription = null)
                         }
@@ -148,7 +154,11 @@ fun DrawerAppBar(
 
                     DropdownMenuItem(
                         text = { Text("Settings") },
-                        onClick = { /* Do something... */ },
+                        onClick = {
+                            // Navigate to Settings and close drawer
+                            navViewModel.navigate(Constants.Screen.Settings.route)
+                            scope.launch { drawerState.close() }
+                        },
                         leadingIcon = {
                             Icon(Icons.Outlined.Settings, contentDescription = null)
                         }
@@ -204,7 +214,7 @@ fun DrawerAppBar(
                 LogoutConfirmationDialog(
                     showDialog = showDialog,
                     onDismiss = { showDialog = false },
-                    onConfirm = { navViewModel.navigateToLogin() }
+                    onConfirm = { navViewModel.navigate(Constants.Screen.Login.route) }
                 )
                 CustomBottomAppBar(
                     containerColor = MaterialTheme.colorScheme.primary,
@@ -609,36 +619,18 @@ fun DevelopingDialog(
 }
 
 @Composable
-fun MovieItem(nav: NavigationController, movie: Movie) {
+fun MovieItem(
+    nav: NavHostController,
+    movie: Movie,
+    modifier: Modifier = Modifier.wrapContentHeight(),
+    showMeta: Boolean = true
+) {
     Column(
-        modifier = Modifier
-            .width(180.dp)
-            .clickable { nav.navigateToDetail(movie) }
-    ) {
-        Surface(
-            tonalElevation = 4.dp,
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(2f / 3f)
-                .clip(MaterialTheme.shapes.extraSmall)
-        ) {
-            AsyncImage(
-                model = "https://image.tmdb.org/t/p/original${movie.posterPath}",
-                contentDescription = movie.title,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize(),
-                placeholder = painterResource(Res.drawable.film)
-            )
-        }
-    }
-}
-
-
-@Composable
-fun MovieHeader(nav: NavigationController, movie: Movie) {
-    Column(
-        modifier = Modifier
-            .width(190.dp).clickable { nav.navigateToDetail(movie) }
+        modifier = modifier
+            .clickable {
+                NavigationStore.selectedMovie = movie
+                nav.navigate(Constants.Screen.Detail.route)
+            }
     ) {
         Box(
             modifier = Modifier
@@ -646,7 +638,61 @@ fun MovieHeader(nav: NavigationController, movie: Movie) {
                 .clip(MaterialTheme.shapes.small)
         ) {
             AsyncImage(
-                model = "https://image.tmdb.org/t/p/original${movie.posterPath}",
+                model = "https://image.tmdb.org/t/p/w500${movie.posterPath}",
+                contentDescription = movie.title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+                placeholder = painterResource(Res.drawable.film)
+            )
+        }
+
+        if (showMeta) {
+            Spacer(modifier = Modifier.height(6.dp))
+            movie.title?.let {
+                Text(
+                    text = it,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 15.sp,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            val formattedDate = remember(movie.releaseDate) {
+                movie.releaseDate?.let {
+                    val date = LocalDate.parse(it)
+                    "${date.dayOfMonth} ${date.month.name.lowercase().replaceFirstChar { c -> c.uppercase() }} ${date.year}"
+                }
+            }
+            formattedDate?.let {
+                Text(
+                    text = it,
+                    fontSize = 12.sp,
+                    color = Color.Gray,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun MovieHeader(modifier: Modifier = Modifier, nav: NavHostController, movie: Movie) {
+    Column(
+        modifier = modifier
+            .wrapContentHeight()
+            .clickable {
+                NavigationStore.selectedMovie = movie
+                nav.navigate(Constants.Screen.Detail.route)
+            }
+    ) {
+        Box(
+            modifier = Modifier
+                .aspectRatio(2f / 3f)
+                .clip(MaterialTheme.shapes.small)
+        ) {
+            AsyncImage(
+                model = "https://image.tmdb.org/t/p/w500${movie.posterPath}",
                 contentDescription = movie.title,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
@@ -664,16 +710,72 @@ fun MovieHeader(nav: NavigationController, movie: Movie) {
                 overflow = TextOverflow.Ellipsis
             )
         }
-        movie.releaseDate?.let {
-            val date = LocalDate.parse(it)
-            val formattedDate = "${date.dayOfMonth} ${
-                date.month.name.lowercase().replaceFirstChar { c -> c.uppercase() }
-            } ${date.year}"
+        // Memoize formattedDate to avoid parsing on every recomposition
+        val formattedDate = remember(movie.releaseDate) {
+            movie.releaseDate?.let {
+                val date = LocalDate.parse(it)
+                "${date.dayOfMonth} ${date.month.name.lowercase().replaceFirstChar { c -> c.uppercase() }} ${date.year}"
+            }
+        }
+        formattedDate?.let {
             Text(
-                text = formattedDate,
+                text = it,
                 fontSize = 14.sp,
                 color = Color.Gray,
             )
+        }
+    }
+}
+
+@Composable
+fun MovieSubheader(modifier: Modifier = Modifier, nav: NavHostController, movie: Movie, showMeta: Boolean) {
+    Column(
+        modifier = modifier
+            .wrapContentHeight()
+            .clickable {
+                NavigationStore.selectedMovie = movie
+                nav.navigate(Constants.Screen.Detail.route)
+            }
+    ) {
+        Box(
+            modifier = Modifier
+                .aspectRatio(2f / 3f)
+                .clip(MaterialTheme.shapes.small)
+        ) {
+            AsyncImage(
+                model = "https://image.tmdb.org/t/p/w500${movie.posterPath}",
+                contentDescription = movie.title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+                placeholder = painterResource(Res.drawable.film)
+            )
+        }
+        // Only reserve space when meta is shown; otherwise don't add extra vertical gap
+        if (showMeta) {
+            Spacer(modifier = Modifier.height(6.dp))
+            movie.title?.let {
+                Text(
+                    text = it,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 15.sp,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            val formattedDateSub = remember(movie.releaseDate) {
+                movie.releaseDate?.let {
+                    val date = LocalDate.parse(it)
+                    "${date.dayOfMonth} ${date.month.name.lowercase().replaceFirstChar { c -> c.uppercase() }} ${date.year}"
+                }
+            }
+            formattedDateSub?.let {
+                Text(
+                    text = it,
+                    fontSize = 12.sp,
+                    color = Color.Gray,
+                )
+            }
         }
     }
 }
@@ -783,7 +885,7 @@ fun MovieDetail(movie: Movie?) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 AsyncImage(
-                    model = "https://image.tmdb.org/t/p/original${movie.backdropPath}",
+                    model = "https://image.tmdb.org/t/p/w500${movie.backdropPath}",
                     contentDescription = movie.title,
                     contentScale = ContentScale.FillWidth,
                     modifier = Modifier.fillMaxWidth()

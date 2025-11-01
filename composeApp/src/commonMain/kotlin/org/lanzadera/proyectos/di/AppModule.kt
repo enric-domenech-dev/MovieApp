@@ -115,7 +115,7 @@ val viewModelsModule = module {
     single { LoadInitialDataUseCase(get()) }
 
     // Repositories
-    single<LoadInitialData> { LoadInitialDataImpl(get(), 20, get()) }
+    single<LoadInitialData> { LoadInitialDataImpl(get(), 5, get()) }
 
     // ViewModels
     viewModel { HomeViewModel(get()) }

@@ -30,18 +30,19 @@ import movieapp.composeapp.generated.resources.logo
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.lanzadera.proyectos.AppTheme
-import org.lanzadera.proyectos.navigation.NavigationController
+import androidx.navigation.NavHostController
+import org.lanzadera.proyectos.utils.Constants
 
 @Composable
 @Preview
 fun SplashView(
-    nav: NavigationController,
+    nav: NavHostController,
     darkTheme: Boolean = false,
     selectedTheme: AppTheme = AppTheme.SYSTEM
 ) {
     LaunchedEffect(key1 = true) {
         delay(800)
-        nav.navigateToHome()
+        nav.navigate(Constants.Screen.Home.route)
     }
     Scaffold(
         modifier = Modifier.safeDrawingPadding(),
