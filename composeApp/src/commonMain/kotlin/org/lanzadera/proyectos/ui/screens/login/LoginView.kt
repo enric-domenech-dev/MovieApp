@@ -31,11 +31,11 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.lanzadera.proyectos.AppTheme
 import org.lanzadera.proyectos.utils.Constants
-import org.lanzadera.proyectos.ui.components.DevelopingDialog
 import org.lanzadera.proyectos.ui.components.EmailInput
-import org.lanzadera.proyectos.ui.components.FingerPrintAuthentication
 import org.lanzadera.proyectos.ui.components.PasswordInput
 import org.lanzadera.proyectos.ui.components.PrimaryButton
+import org.lanzadera.proyectos.ui.components.FingerPrintAuthentication
+import org.lanzadera.proyectos.ui.components.DevelopingDialog
 import androidx.navigation.NavHostController
 
 @Composable
@@ -71,10 +71,11 @@ fun LoginView(
             }
         }
     }
-    Scaffold {
+    Scaffold { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(innerPadding)
                 .padding(8.dp)
                 .padding(top = 60.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -89,28 +90,16 @@ fun LoginView(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            EmailInput(
-                email = email,
-                onEmailChange = { email = it },
-                isError = null
-                //isError = vm.emailError.value
-            )
+            EmailInput(email, { email = it }, null)
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            PasswordInput(
-                password = password,
-                passwordVisible = passwordVisible,
-                onPasswordChange = { password = it },
-                onPasswordVisibilityToggle = { passwordVisible = !passwordVisible },
-                isError = null
-                //isError = vm.passwordError.value
-            )
+            PasswordInput(password, passwordVisible, { password = it }, { passwordVisible = !passwordVisible }, null)
 
             Spacer(modifier = Modifier.height(16.dp))
 
             PrimaryButton(
-                onClick = {
+                 onClick = {
                     // Reiniciar estado de error antes de intentar login
                     if (failedAttempts < 3) {
                         errorMessage = ""
@@ -134,18 +123,17 @@ fun LoginView(
             Spacer(modifier = Modifier.height(8.dp))
 
             FingerPrintAuthentication(
-                modifier = Modifier
-                    .clickable {
-                        // TODO()
-                        showDialog = true
-                    }
-            )
-            if (showDialog) {
+                 modifier = Modifier
+                     .clickable {
+                         showDialog = true
+                     }
+             )
+             if (showDialog) {
                 DevelopingDialog(
                     showDialog = showDialog,
                     onDismiss = { showDialog = false }
                 )
-            }
+             }
 
             Spacer(modifier = Modifier.background(MaterialTheme.colorScheme.background).weight(1f))
 
@@ -158,13 +146,13 @@ fun LoginView(
             )
 
             PrimaryButton(
-                onClick = { /*navigateToSignIn()*/ },
-                modifier = Modifier.fillMaxWidth(),
-                icon = null,
-                text = "Sign In",
-                description = "Sign In Button",
-                enabled = true,
-            )
+                 onClick = { /*navigateToSignIn()*/ },
+                 modifier = Modifier.fillMaxWidth(),
+                 icon = null,
+                 text = "Sign In",
+                 description = "Sign In Button",
+                 enabled = true,
+             )
 
             Spacer(modifier = Modifier.height(32.dp))
         }

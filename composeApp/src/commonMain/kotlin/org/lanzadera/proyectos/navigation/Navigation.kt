@@ -37,6 +37,7 @@ import org.lanzadera.proyectos.ui.components.DrawerAppBar
 import androidx.compose.material3.DrawerState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
+import org.lanzadera.proyectos.ui.screens.detail.BookDetailView
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,16 +51,6 @@ fun Navigation(
     val navBackStackEntry by navHost.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    val bottomNavRoutes = setOf(
-        Constants.Screen.Home.route,
-        Constants.Screen.Search.route,
-        Constants.Screen.Settings.route,
-        Constants.Screen.Chat.route,
-        Constants.Screen.Profile.route
-    )
-
-    val showBottomBar = currentRoute in bottomNavRoutes
-
     // drawer state (moved to top-level so bottom bar can control it)
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -67,28 +58,37 @@ fun Navigation(
     // derive whether drawer is open as a Compose state
     val isDrawerOpen by remember { derivedStateOf { drawerState.isOpen } }
 
+    val bottomNavRoutes = setOf(
+        Constants.Screen.Home.route,
+        Constants.Screen.Search.route,
+        Constants.Screen.Chat.route,
+        Constants.Screen.Profile.route
+    )
+
+    val showBottomBar = currentRoute in bottomNavRoutes || isDrawerOpen
+
     // derive selected item from route, but if drawer is open show MENU selected
     val selectedItem = if (isDrawerOpen) BottomNavItem.MENU else BottomNavItem.fromRoute(currentRoute)
 
-    DrawerAppBar(navViewModel = navHost, drawerState = drawerState) {
-        Scaffold(
-            bottomBar = {
-                NavigationBottomBar(
-                    showBottomBar = showBottomBar,
-                    selectedItem = selectedItem,
-                    drawerState = drawerState,
-                    navHost = navHost,
-                    scope = scope
-                )
-            }
-        ) {
+    Scaffold(
+        bottomBar = {
+            NavigationBottomBar(
+                showBottomBar = showBottomBar,
+                selectedItem = selectedItem,
+                drawerState = drawerState,
+                navHost = navHost,
+                scope = scope
+            )
+        }
+    ) {
+        DrawerAppBar(navViewModel = navHost, drawerState = drawerState) {
             NavHost(navController = navHost, startDestination = Constants.Screen.SplashScreen.route) {
                 composable(Constants.Screen.SplashScreen.route) {
                     SplashView(nav = navHost, darkTheme = darkTheme, selectedTheme = selectedTheme)
                 }
                 composable(Constants.Screen.Home.route) {
                     HomeView(
-                        nav = navHost, vm = HomeViewModel(koinInject()),
+                        nav = navHost, vm = HomeViewModel(koinInject(), koinInject()),
                         //selectedTheme = selectedTheme, darkTheme = darkTheme
                     )
                 }
@@ -99,10 +99,17 @@ fun Navigation(
                     )
                 }
                 composable(Constants.Screen.Detail.route) {
-                    DetailView(
-                        nav = navHost, movie = NavigationStore.selectedMovie!!,
-                        selectedTheme = selectedTheme, darkTheme = darkTheme
-                    )
+                    // Show detail depending on what was selected (movie or book). Avoid !! crashes.
+                    val movie = NavigationStore.selectedMovie
+                    val book = NavigationStore.selectedBook
+                    if (movie != null) {
+                        DetailView(nav = navHost, movie = movie, selectedTheme = selectedTheme, darkTheme = darkTheme)
+                    } else if (book != null) {
+                        BookDetailView(nav = navHost, book = book, selectedTheme = selectedTheme, darkTheme = darkTheme)
+                    } else {
+                        // fallback: nothing selected — navigate back safely
+                        LaunchedEffect(Unit) { navHost.popBackStack() }
+                    }
                 }
                 composable(Constants.Screen.Search.route) {
                     SearchView(
@@ -146,7 +153,9 @@ private fun NavigationBottomBar(
             navHost.navigate(item.route) {
                 launchSingleTop = true
                 restoreState = true
-                popUpTo(navHost.graph.startDestinationId) { saveState = true }
+                popUpTo(navHost.graph.startDestinationId) {
+                    saveState = true
+                }
             }
         }
     }

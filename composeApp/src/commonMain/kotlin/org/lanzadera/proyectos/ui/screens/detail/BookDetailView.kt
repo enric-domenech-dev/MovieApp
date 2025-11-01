@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.outlined.Info
@@ -16,18 +15,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavHostController
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.lanzadera.proyectos.AppTheme
-import org.lanzadera.proyectos.domain.models.movie.Movie
+import org.lanzadera.proyectos.domain.models.book.Book
+import org.lanzadera.proyectos.ui.components.BookDetail
 import org.lanzadera.proyectos.ui.components.CustomTopAppBar
-import org.lanzadera.proyectos.ui.components.MovieDetail
+import androidx.navigation.NavHostController
 
 @Composable
 @Preview
-fun DetailView(
-    nav: NavHostController, movie: Movie,
+fun BookDetailView(
+    nav: NavHostController,
+    book: Book,
     selectedTheme: AppTheme = AppTheme.SYSTEM,
     darkTheme: Boolean = false
 ) {
@@ -36,11 +35,11 @@ fun DetailView(
         floatingActionButtonPosition =
             FabPosition.EndOverlay,
         floatingActionButton = {
-//BONOTN
+            // no-op
         },
         topBar = {
             CustomTopAppBar(
-                title = movie.title ?: "",
+                title = book.title ?: "",
                 navigationIcon = {
                     IconButton(onClick = { nav.popBackStack() }) {
                         Icon(
@@ -52,7 +51,7 @@ fun DetailView(
                 },
                 actions = {
                     IconButton(onClick = { nav.popBackStack() }) {
-                        Icon(imageVector = Icons.Outlined.Info, contentDescription = "Info", modifier = Modifier.size(ButtonDefaults.IconSize))
+                        Icon(imageVector = Icons.Outlined.Info, contentDescription = "Info")
                     }
                 },
                 backgroundColor = MaterialTheme.colorScheme.background,
@@ -60,10 +59,8 @@ fun DetailView(
             )
         },
         content = { paddingValue ->
-            Column(
-                modifier = Modifier.fillMaxSize().padding(paddingValue),
-            ) {
-                MovieDetail(movie = movie)
+            Column(modifier = Modifier.fillMaxSize().padding(paddingValue)) {
+                BookDetail(book = book)
             }
         }
     )
