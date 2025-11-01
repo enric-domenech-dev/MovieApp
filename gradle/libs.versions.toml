@@ -10,8 +10,10 @@ androidx-lifecycle = "2.8.4"
 biometric = "1.1.0"
 compose-multiplatform = "1.7.0"
 icons-extended = "1.7.8"
+junitVersion = "4.13.2"
 kotlin = "2.1.0"
 kotlinx-coroutines = "1.10.1"
+kotlinxCoroutinesTest = "1.9.0"
 kotlinxDatetime = "0.6.0"
 kotlinxSerializationJson = "1.7.3"
 navigationCompose = "2.8.0-alpha10"
@@ -26,6 +28,9 @@ androidx-sqliteBundled = "2.5.2"
 buildConfig = "5.3.5"
 koin = "3.6.0-Beta4"
 koin-compose = "1.2.0-Beta4"
+slf4jSimpleVersion = "2.0.13"
+truthVersion = "1.4.4"
+turbineVersion = "1.1.0"
 
 [libraries]
 coil = { module = "io.coil-kt.coil3:coil", version.ref = "coilComposeCore" }
@@ -33,6 +38,8 @@ coil-compose-core = { module = "io.coil-kt.coil3:coil-compose-core", version.ref
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilComposeCore" }
 coil-network-ktor = { module = "io.coil-kt.coil3:coil-network-ktor", version.ref = "coilComposeCore" }
 google-accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissionsVersion" }
+jetbrains-kotlinx-coroutines-test-v190 = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
+junit = { module = "junit:junit", version.ref = "junitVersion" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
@@ -66,7 +73,9 @@ koin-core = { group = "io.insert-koin", name = "koin-core" }
 koin-compose = { group = "io.insert-koin", name = "koin-compose" }
 koin-compose-viewmodel = { group = "io.insert-koin", name = "koin-compose-viewmodel", version.ref = "koin-compose" }
 androidx-compose-material-iconsExtended = { group = "androidx.compose.material", name = "material-icons-extended-android", version.ref = "icons-extended" }
-
+slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4jSimpleVersion" }
+truth = { module = "com.google.truth:truth", version.ref = "truthVersion" }
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbineVersion" }
 
 [bundles]
 ktor-common = ["ktor-client-core", "ktor-client-json", "ktor-client-logging", "ktor-client-serialization", "ktor-client-content-negotiation", "ktor-serialization-kotlinx-json"]

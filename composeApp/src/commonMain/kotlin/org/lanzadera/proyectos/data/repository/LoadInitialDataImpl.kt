@@ -5,8 +5,6 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.TimeZone
@@ -24,33 +22,119 @@ class LoadInitialDataImpl(
     private val json: Json
 ) : LoadInitialData {
 
+    // Core
     private val _movies = MutableStateFlow<List<Movie>>(emptyList())
     override val moviesFlow: StateFlow<List<Movie>> = _movies
 
     private val _trending = MutableStateFlow<List<Movie>>(emptyList())
     override val trendingMoviesFlow: StateFlow<List<Movie>> = _trending
 
-    // Para evitar solapes de recargas
-    private val moviesMutex = Mutex()
-    private val trendingMutex = Mutex()
+    // Additional
+    private val _popular = MutableStateFlow<List<Movie>>(emptyList())
+    override val popularMoviesFlow: StateFlow<List<Movie>> = _popular
 
-    override suspend fun refreshMovies(force: Boolean) {
-        if (!force && _movies.value.isNotEmpty()) return
-        moviesMutex.withLock {
-            if (!force && _movies.value.isNotEmpty()) return
-            _movies.value = fetchNowPlayingMovies()
-        }
+    private val _topRated = MutableStateFlow<List<Movie>>(emptyList())
+    override val topRatedMoviesFlow: StateFlow<List<Movie>> = _topRated
+
+    private val _upcoming = MutableStateFlow<List<Movie>>(emptyList())
+    override val upcomingMoviesFlow: StateFlow<List<Movie>> = _upcoming
+
+    private val _discover = MutableStateFlow<List<Movie>>(emptyList())
+    override val discoverMoviesFlow: StateFlow<List<Movie>> = _discover
+
+    private val _hero = MutableStateFlow<List<Movie>>(emptyList())
+    override val heroMoviesFlow: StateFlow<List<Movie>> = _hero
+
+    private val _trendingDaily = MutableStateFlow<List<Movie>>(emptyList())
+    override val trendingMoviesDailyFlow: StateFlow<List<Movie>> = _trendingDaily
+
+    private val _inCinemasToday = MutableStateFlow<List<Movie>>(emptyList())
+    override val inCinemasTodayFlow: StateFlow<List<Movie>> = _inCinemasToday
+
+    // (Opcional) TTL por feed para evitar sobrecarga
+    private val lastUpdated = mutableMapOf<MutableStateFlow<List<Movie>>, Long>()
+    private val TTL = 2 * 60 * 1000L // 2 min, ajusta a tu gusto
+
+    private fun isValidMovie(m: Movie): Boolean =
+        m.id != null &&
+                m.title != null &&
+                m.posterPath != null &&
+                m.overview != null &&
+                m.releaseDate != null &&
+                m.voteCount != null &&
+                m.popularity != null &&
+                m.originalLanguage != null &&
+                m.originalTitle != null &&
+                m.backdropPath != null &&
+                m.adult != null &&
+                m.video != null
+
+
+// --- Utilidad de refresco con TTL ---
+
+private suspend inline fun refreshFeed(
+    state: MutableStateFlow<List<Movie>>,
+    force: Boolean,
+    ttlMillis: Long = 0L,                      // 0 = sin TTL
+    lastUpdated: MutableMap<MutableStateFlow<List<Movie>>, Long>,
+    crossinline fetch: suspend () -> List<Movie>
+) {
+    val now = Clock.System.now().toEpochMilliseconds()
+    val last = lastUpdated[state] ?: 0L
+    val freshEnough = ttlMillis > 0 && (now - last) < ttlMillis
+
+    println("SYNCRO refreshFeed: force=$force, state.size=${state.value.size}, freshEnough=$freshEnough, ttlMillis=$ttlMillis, last=$last, now=$now")
+    if (!force && (state.value.isNotEmpty() || freshEnough)) {
+        println("SYNCRO refreshFeed: skipping fetch, cache is fresh or not forced")
+        return
+    }
+    println("SYNCRO refreshFeed: fetching new data")
+    val data = fetch()
+    state.value = data                          // emitir ANTES de devolver
+    lastUpdated[state] = now
+    println("SYNCRO refreshFeed: updated state with ${data.size} movies")
+}
+
+
+    // --- Core refresh ---
+    override suspend fun refreshMovies(force: Boolean) =
+        refreshFeed(_movies, force, TTL, lastUpdated) { fetchNowPlayingMovies() }
+
+    override suspend fun refreshTrendingMovies(force: Boolean) =
+        refreshFeed(_trending, force, TTL, lastUpdated) { fetchTrendingMoviesWeek() }
+
+    // --- Additional refresh ---
+    override suspend fun refreshPopularMovies(force: Boolean) =
+        refreshFeed(_popular, force, TTL, lastUpdated) { fetchPopularMovies() }
+
+    override suspend fun refreshTopRatedMovies(force: Boolean) =
+        refreshFeed(_topRated, force, TTL, lastUpdated) { fetchTopRatedMovies() }
+
+    override suspend fun refreshUpcomingMovies(force: Boolean) =
+        refreshFeed(_upcoming, force, TTL, lastUpdated) { fetchUpcomingMovies() }
+
+    override suspend fun refreshDiscoverMovies(force: Boolean) {
+        refreshFeed(_discover, force, TTL, lastUpdated) { fetchTrendingMovies() }
     }
 
-    override suspend fun refreshTrendingMovies(force: Boolean) {
-        if (!force && _trending.value.isNotEmpty()) return
-        trendingMutex.withLock {
-            if (!force && _trending.value.isNotEmpty()) return
-            _trending.value = fetchInCinemasToday()
-        }
+    override suspend fun refreshHeroMovies(force: Boolean) =
+        refreshFeed(_hero, force, TTL, lastUpdated) { fetchHeroMovies() }
+
+    override suspend fun refreshTrendingMoviesDaily(force: Boolean) =
+        refreshFeed(_trendingDaily, force, TTL, lastUpdated) { fetchTrendingMoviesDay() }
+
+    override suspend fun refreshInCinemasToday(force: Boolean) {
+        refreshFeed(_inCinemasToday, force, TTL, lastUpdated) { fetchInCinemasToday() }
     }
 
-    // -------- privados --------
+
+// --- Fetchers concretos (reutiliza los tuyos) ---
+
+    private suspend fun fetchTrendingMoviesWeek(): List<Movie> =
+        fetchPaged("/3/trending/movie/week", mapOf(/* sin language/region si no quieres forzar */))
+
+    private suspend fun fetchTrendingMoviesDay(): List<Movie> =
+        fetchPaged("/3/trending/movie/day", emptyMap())
 
     private suspend fun fetchTrendingMovies(): List<Movie> =
         fetchPaged(
@@ -61,12 +145,11 @@ class LoadInitialDataImpl(
     private suspend fun fetchHeroMovies(): List<Movie> {
         val tz = TimeZone.currentSystemDefault()
         val today = Clock.System.now().toLocalDateTime(tz).date
-        val from = today.minus(DatePeriod(days = 30)).toString() // YYYY-MM-DD
-        val to = today.plus(DatePeriod(days = 30)).toString()
-
+        val from = today.minus(DatePeriod(days = 30)).toString()
+        val to = today.plus(DatePeriod(days = 90)).toString()
         return fetchPaged(
-            path = "/3/discover/movie",
-            baseParams = mapOf(
+            "/3/discover/movie",
+            mapOf(
                 "include_adult" to "false",
                 "include_video" to "false",
                 "sort_by" to "popularity.desc",
@@ -80,48 +163,19 @@ class LoadInitialDataImpl(
 
     private suspend fun fetchInCinemasToday(
         limit: Int = 30,
-        lookbackDays: Int = 90,
-        region: String? = null // opcional: "ES", "US", etc.
+        lookBackDays: Int = 90,
     ): List<Movie> {
         val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
-        val from = today.minus(DatePeriod(days = lookbackDays)).toString()
-
+        val from = today.minus(DatePeriod(days = lookBackDays)).toString()
         val params = buildMap {
             put("include_adult", "false")
-//            put("include_video", "false")
             put("sort_by", "popularity.desc")
-            put("language", "es")              // mínimo 50 votos
-//            put("with_release_type", "3|2")          // cines
-            put("release_date.gte", from)            // estrenadas recientemente
-            put("release_date.lte", today.toString())// …hasta hoy
-            region?.let { put("region", it) }        // si quieres fecha regional
+            put("with_release_type", "3|2")               // cines
+            put("release_date.gte", from)
+            put("release_date.lte", today.toString())
         }
-
-        return fetchPaged(
-            path = "/3/discover/movie",
-            baseParams = params
-        )
-            .distinctBy { it.id }
-            .take(limit)
+        return fetchPaged("/3/discover/movie", params).distinctBy { it.id }.take(limit)
     }
-
-    private suspend fun fetchTrendingMoviesDaily(): List<Movie> =
-        fetchPaged(
-            path = "/3/trending/movie/day",
-            baseParams = mapOf("language" to "en-US")
-        )
-
-    private suspend fun fetchDiscoverMovies(): List<Movie> =
-        fetchPaged(
-            path = "/3/discover/movie",
-            baseParams = mapOf("language" to "es", "sort_by" to "popularity.desc")
-        )
-
-    private suspend fun fetchNowPlayingMovies(): List<Movie> =
-        fetchPaged(
-            path = "/3/movie/now_playing",
-            baseParams = mapOf("language" to "es")
-        )
 
     private suspend fun fetchPopularMovies(): List<Movie> =
         fetchPaged(
@@ -130,10 +184,7 @@ class LoadInitialDataImpl(
         )
 
     private suspend fun fetchTopRatedMovies(): List<Movie> =
-        fetchPaged(
-            path = "/3/movie/top_rated",
-            baseParams = mapOf("language" to "en-US")
-        )
+        fetchPaged("/3/movie/top_rated", emptyMap())
 
     private suspend fun fetchUpcomingMovies(): List<Movie> =
         fetchPaged(
@@ -141,12 +192,11 @@ class LoadInitialDataImpl(
             baseParams = mapOf("language" to "en-US")
         )
 
-    // Lógica común para paginación
+    private suspend fun fetchNowPlayingMovies(): List<Movie> =
+        fetchPaged("/3/movie/now_playing", emptyMap())
 
-    private suspend fun fetchPaged(
-        path: String,
-        baseParams: Map<String, String>
-    ): List<Movie> {
+    // --- Paginación común ---
+    private suspend fun fetchPaged(path: String, baseParams: Map<String, String>): List<Movie> {
         val acc = mutableListOf<Movie>()
         // Si tu MovieResponse tiene total_pages/page, puedes cortar antes.
         for (page in 1..maxPages) {
@@ -162,21 +212,10 @@ class LoadInitialDataImpl(
 
             if (valid.isEmpty()) break
             acc += valid
+            println("SYNCRO fetchPaged: page $page, downloaded ${valid.size} movies, total so far: ${acc.size}")
+
         }
+        println("SYNCRO fetchPaged: finished, total movies downloaded: ${acc.size}")
         return acc
     }
-
-    private fun isValidMovie(m: Movie): Boolean =
-        m.id != null &&
-                m.title != null &&
-                m.posterPath != null &&
-                m.overview != null &&
-                m.releaseDate != null &&
-                m.voteCount != null &&
-                m.popularity != null &&
-                m.originalLanguage != null &&
-                m.originalTitle != null &&
-                m.backdropPath != null &&
-                m.adult != null &&
-                m.video != null
 }
