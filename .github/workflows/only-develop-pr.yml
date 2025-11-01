@@ -1,14 +1,22 @@
-name: only-develop-pr / Verificar que el PR venga de la rama develop
+name: only-develop-pr
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     branches:
       - master
 
 jobs:
   require-develop:
+    # Solo ejecuta este job si la rama base del PR es master
+    if: ${{ github.event.pull_request.base.ref == 'master' }}
     runs-on: ubuntu-latest
     name: Verificar que el PR venga de la rama develop
     steps:
+      - name: Mostrar contexto (debug)
+        run: |
+          echo "PR #${{ github.event.pull_request.number }}"
+          echo "Base (destino): ${{ github.event.pull_request.base.ref }}"
+          echo "Head (origen): ${{ github.event.pull_request.head.ref }}"
       - name: Comprobar rama origen
         run: |
           ORIGIN_BRANCH="${{ github.event.pull_request.head.ref }}"
@@ -18,4 +26,3 @@ jobs:
             exit 1
           fi
           echo "OK: El PR viene de develop."
-          
