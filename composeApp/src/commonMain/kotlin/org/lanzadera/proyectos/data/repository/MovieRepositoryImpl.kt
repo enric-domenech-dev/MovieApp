@@ -96,6 +96,7 @@ class MovieRepositoryImpl(
             val text = client.get("/3/movie/$movieId") {
                 url {
                     parameters.append("append_to_response", "aggregate_credits")
+                    parameters.append("language", "es")
                 }
             }.bodyAsText()
             val movie: Movie = json.decodeFromString(text)
@@ -108,10 +109,10 @@ class MovieRepositoryImpl(
     }
 
     private suspend fun fetchTrendingMoviesWeek(): List<Movie> =
-        fetchPaged("/3/trending/movie/week", emptyMap())
+        fetchPaged("/3/trending/movie/week", mapOf("language" to "es"))
 
     private suspend fun fetchTrendingMoviesDay(): List<Movie> =
-        fetchPaged("/3/trending/movie/day", emptyMap())
+        fetchPaged("/3/trending/movie/day", mapOf("language" to "es"))
 
     private suspend fun fetchPopularMovies(): List<Movie> =
         fetchPaged(
@@ -120,7 +121,7 @@ class MovieRepositoryImpl(
         )
 
     private suspend fun fetchTopRatedMovies(): List<Movie> =
-        fetchPaged("/3/movie/top_rated", emptyMap())
+        fetchPaged("/3/movie/top_rated", mapOf("language" to "es"))
 
     private suspend fun fetchUpcomingMovies(): List<Movie> =
         fetchPaged(

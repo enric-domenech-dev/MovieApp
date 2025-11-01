@@ -1,50 +1,31 @@
 package org.lanzadera.proyectos.ui.screens.home
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
@@ -52,22 +33,20 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import kotlinx.coroutines.delay
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.lanzadera.proyectos.domain.models.book.Book
 import org.lanzadera.proyectos.domain.models.movie.Movie
 import org.lanzadera.proyectos.domain.models.tvshow.TvShow
-import org.lanzadera.proyectos.ui.components.dialogs.SectionDialog
+import org.lanzadera.proyectos.ui.components.PlaceholderScreen
 import org.lanzadera.proyectos.ui.components.sections.BookSection
 import org.lanzadera.proyectos.ui.components.sections.Section
 import org.lanzadera.proyectos.ui.components.sections.TvShowSection
 import org.lanzadera.proyectos.ui.components.tabs.NiaTab
 import org.lanzadera.proyectos.ui.components.tabs.NiaTabRow
 import org.lanzadera.proyectos.utils.Constants.MenuOptions.topBarTitles
+import org.lanzadera.proyectos.utils.Strings
 
 @Composable
 @Preview
@@ -92,7 +71,7 @@ fun HomeView(
 
     // Derived ordering example
     val primarySorted by remember(primary) {
-        derivedStateOf<List<Movie>> {
+        derivedStateOf {
             primary.sortedWith(
                 compareByDescending<Movie> { it.releaseDate }
                     .thenByDescending { it.voteCount }
@@ -166,7 +145,7 @@ fun HomeView(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        Text(text = "Error", color = MaterialTheme.colorScheme.error)
+                        Text(text = Strings.Generic.ERROR, color = MaterialTheme.colorScheme.error)
                         Text(text = state.error ?: "", color = MaterialTheme.colorScheme.error)
                     }
                 }
@@ -186,26 +165,28 @@ fun HomeView(
                                 CircularProgressIndicator()
                             }
                         } else {
-                            org.lanzadera.proyectos.ui.components.PlaceholderScreen(title = "LIBROS")
+                            PlaceholderScreen(title = Strings.Placeholders.BOOKS)
                         }
                     } else {
                         val booksListState = rememberLazyListState()
                         LazyColumn(
                             state = booksListState,
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier.fillMaxSize().navigationBarsPadding(),
                             contentPadding = PaddingValues(
                                 start = 8.dp,
                                 end = 8.dp,
                                 top = paddingValues.calculateTopPadding() + 8.dp,
-                                bottom = paddingValues.calculateBottomPadding() + 16.dp
+                                bottom = paddingValues.calculateBottomPadding() +
+                                        WindowInsets.navigationBars.asPaddingValues()
+                                            .calculateBottomPadding()
                             ),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             val sections: List<Pair<String, List<Book>>> = listOf(
-                                "Featured Books" to books.take(35),
-                                "Popular Books" to books.drop(35).take(35),
-                                "Latest Releases" to books.drop(70).take(35),
-                                "Trending Books" to books.drop(105).take(35),
+                                Strings.BookSections.FEATURED_BOOKS to books.take(35),
+                                Strings.BookSections.POPULAR_BOOKS to books.drop(35).take(35),
+                                Strings.BookSections.LATEST_RELEASES to books.drop(70).take(35),
+                                Strings.BookSections.TRENDING_BOOKS to books.drop(105).take(35),
                             ).filter { it.second.isNotEmpty() }
 
                             sections.forEachIndexed { idx, (sectionTitle, sectionBooks) ->
@@ -265,40 +246,45 @@ fun HomeView(
                                 CircularProgressIndicator()
                             }
                         } else {
-                            org.lanzadera.proyectos.ui.components.PlaceholderScreen(title = "SERIES")
+                            PlaceholderScreen(title = Strings.Menu.SEARCH)
                         }
                     } else {
                         val seriesListState = rememberLazyListState()
                         LazyColumn(
                             state = seriesListState,
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier.fillMaxSize().navigationBarsPadding(),
                             contentPadding = PaddingValues(
                                 start = 8.dp,
                                 end = 8.dp,
                                 top = paddingValues.calculateTopPadding() + 8.dp,
-                                bottom = paddingValues.calculateBottomPadding() + 16.dp
+                                bottom = paddingValues.calculateBottomPadding() +
+                                        WindowInsets.navigationBars.asPaddingValues()
+                                            .calculateBottomPadding()
                             ),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             val sections: List<Pair<String, List<TvShow>>> = listOf(
-                                "Now Airing" to onAirTvShows,
-                                "Popular Series" to popularTvShows,
-                                "Top Rated" to topRatedTvShows,
-                                "Trending Today" to trendingTvShows,
-                                "Airing Today" to airingTodayTvShows,
-                                "Trending This Week" to trendingTvShowsWeek,
-                                "Airing Today & Trending" to airingTodayAndTrendingTvShows,
-                                "Recommended For You" to recommendedTvShows,
-                                "Coming Soon" to upcomingTvShows,
-                                "New & Trending" to trendingTvShows.shuffled().take(20),
-                                "Fan Favorites" to topRatedTvShows.shuffled().take(15),
-                                "Hidden Gems" to popularTvShows.filter { (it.voteCount ?: 0) < 1000 }.shuffled()
+                                Strings.TVShowSections.NOW_AIRING to onAirTvShows,
+                                Strings.TVShowSections.POPULAR_SERIES to popularTvShows,
+                                Strings.TVShowSections.TOP_RATED to topRatedTvShows,
+                                Strings.TVShowSections.TRENDING_TODAY to trendingTvShows,
+                                Strings.TVShowSections.AIRING_TODAY to airingTodayTvShows,
+                                Strings.TVShowSections.TRENDING_THIS_WEEK to trendingTvShowsWeek,
+                                Strings.TVShowSections.AIRING_TODAY_AND_TRENDING to airingTodayAndTrendingTvShows,
+                                Strings.TVShowSections.RECOMMENDED_FOR_YOU to recommendedTvShows,
+                                Strings.TVShowSections.COMING_SOON to upcomingTvShows,
+                                Strings.TVShowSections.NEW_AND_TRENDING to trendingTvShows.shuffled().take(20),
+                                Strings.TVShowSections.FAN_FAVORITES to topRatedTvShows.shuffled().take(15),
+                                Strings.TVShowSections.HIDDEN_GEMS to popularTvShows.filter {
+                                    (it.voteCount ?: 0) < 1000
+                                }.shuffled()
                                     .take(15),
-                                "Binge-Worthy Picks" to popularTvShows.shuffled().take(20),
-                                "Critics' Choice" to topRatedTvShows.take(20),
-                                "Next Up" to tvShows.filter { it !in onAirTvShows }.shuffled().take(20),
-                                "Popular Classics" to popularTvShows.take(20),
-                                "All Series" to tvShows,
+                                Strings.TVShowSections.BINGE_WORTHY_PICKS to popularTvShows.shuffled().take(20),
+                                Strings.TVShowSections.CRITICS_CHOICE to topRatedTvShows.take(20),
+                                Strings.TVShowSections.NEXT_UP to tvShows.filter { it !in onAirTvShows }.shuffled()
+                                    .take(20),
+                                Strings.TVShowSections.POPULAR_CLASSICS to popularTvShows.take(20),
+                                Strings.TVShowSections.ALL_SERIES to tvShows,
                             ).filter { it.second.isNotEmpty() }
 
                             sections.forEachIndexed { idx, (sectionTitle, sectionTvShows) ->
@@ -341,10 +327,10 @@ fun HomeView(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        org.lanzadera.proyectos.ui.components.PlaceholderScreen(
+                        PlaceholderScreen(
                             title = when (selectedTab) {
-                                HomeViewModel.HomeTab.GAMES -> "JUEGOS"
-                                HomeViewModel.HomeTab.HEART -> "FAVORITOS"
+                                HomeViewModel.HomeTab.GAMES -> Strings.Placeholders.GAMES
+                                HomeViewModel.HomeTab.HEART -> Strings.Placeholders.FAVORITES
                                 else -> ""
                             }
                         )
@@ -355,7 +341,7 @@ fun HomeView(
                     // FILMS tab
                     LazyColumn(
                         state = listState,
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier.fillMaxSize().navigationBarsPadding(),
                         contentPadding = PaddingValues(
                             start = 8.dp,
                             end = 8.dp,
@@ -365,14 +351,14 @@ fun HomeView(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         val sections: List<Pair<String, List<Movie>>> = listOf(
-                            "Upcoming" to upcoming,
-                            "Popular Movies" to popular,
-                            "Discover" to discover,
-                            "In Cinemas Today" to inCinemasToday,
-                            "Top Rated" to topRated,
-                            "Trending Today" to trendingDay,
-                            "Trending This Week" to trendingWeek,
-                            "Hero Picks" to hero,
+                            Strings.MovieSections.UPCOMING to upcoming,
+                            Strings.MovieSections.POPULAR_MOVIES to popular,
+                            Strings.MovieSections.DISCOVER to discover,
+                            Strings.MovieSections.IN_CINEMAS_TODAY to inCinemasToday,
+                            Strings.MovieSections.TOP_RATED to topRated,
+                            Strings.MovieSections.TRENDING_TODAY to trendingDay,
+                            Strings.MovieSections.TRENDING_THIS_WEEK to trendingWeek,
+                            Strings.MovieSections.HERO_PICKS to hero,
                         )
 
                         sections.forEachIndexed { idx, (sectionTitle, items) ->
@@ -412,168 +398,3 @@ fun HomeView(
         }
     }
 }
-
-@Composable
-private fun Section(
-    title: String,
-    items: List<Movie>,
-    nav: NavHostController,
-    sectionIndex: Int = 0,
-    mode: SectionMode = SectionMode.HEADER
-) {
-    val visibleItems = remember(items) { items.take(12) }
-
-    var showDialog by remember { mutableStateOf(false) }
-    var dialogContentVisible by remember { mutableStateOf(false) }
-    val animDuration = 320 // ms
-
-    Column(modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(text = title, style = MaterialTheme.typography.headlineSmall)
-            Text(
-                text = "VER MÁS... (${items.size})",
-                style = TextStyle(
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Normal,
-                    fontFamily = FontFamily.SansSerif,
-                    color = MaterialTheme.colorScheme.primary
-                ),
-                modifier = Modifier.clickable {
-                    showDialog = true
-                    dialogContentVisible = true
-                }
-            )
-        }
-
-        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            val spacing = 16.dp
-            val horizontalPadding = 16.dp
-            val available = maxWidth - horizontalPadding
-            val baseWidth = (available - spacing) / 2f
-            val headerWidth = baseWidth
-            val subWidth = baseWidth * 0.65f
-            val rowContentPadding = PaddingValues(horizontal = 8.dp)
-
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(spacing),
-                verticalAlignment = Alignment.Top,
-                contentPadding = rowContentPadding,
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-            ) {
-                itemsIndexed(visibleItems, key = { index, movie ->
-                    // unique key combining sectionIndex, movie id/hash and index
-                    val idPart = movie.id?.toString() ?: movie.hashCode().toString()
-                    "s${sectionIndex}_${idPart}_$index"
-                }) { _, movie ->
-                    val itemModifier =
-                        if (mode == SectionMode.HEADER) Modifier.width(headerWidth) else Modifier.width(subWidth)
-                    when (mode) {
-                        SectionMode.HEADER -> org.lanzadera.proyectos.ui.components.MovieHeader(
-                            modifier = itemModifier,
-                            nav = nav,
-                            movie = movie
-                        )
-
-                        SectionMode.SUBHEADER_SHOW_META -> org.lanzadera.proyectos.ui.components.MovieSubheader(
-                            modifier = itemModifier,
-                            nav = nav,
-                            movie = movie,
-                            showMeta = true
-                        )
-
-                        SectionMode.SUBHEADER_HIDE_META -> org.lanzadera.proyectos.ui.components.MovieSubheader(
-                            modifier = itemModifier,
-                            nav = nav,
-                            movie = movie,
-                            showMeta = false
-                        )
-                    }
-                }
-            }
-
-            if (showDialog) {
-                SectionDialog(
-                    title = title,
-                    items = items,
-                    nav = nav,
-                    sectionIndex = sectionIndex,
-                    dialogVisible = dialogContentVisible,
-                    onRequestHideContent = { dialogContentVisible = false },
-                    onDismissed = { showDialog = false },
-                    animDuration = animDuration
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun SectionDialog(
-    title: String,
-    items: List<Movie>,
-    nav: NavHostController,
-    sectionIndex: Int,
-    dialogVisible: Boolean,
-    onRequestHideContent: () -> Unit,
-    onDismissed: () -> Unit,
-    animDuration: Int
-) {
-    Dialog(
-        onDismissRequest = { onRequestHideContent() },
-        properties = DialogProperties(usePlatformDefaultWidth = false)
-    ) {
-        AnimatedVisibility(
-            visible = dialogVisible,
-            enter = fadeIn(animationSpec = tween(animDuration)) + slideInVertically(animationSpec = tween(animDuration)) { it / 4 },
-            exit = fadeOut(animationSpec = tween(animDuration)) + slideOutVertically(animationSpec = tween(animDuration)) { it / 4 }
-        ) {
-            Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(text = title, style = MaterialTheme.typography.headlineSmall)
-                        IconButton(onClick = { onRequestHideContent() }) {
-                            Icon(imageVector = Icons.Filled.Close, contentDescription = "Cerrar")
-                        }
-                    }
-
-                    val gridState = rememberLazyGridState()
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(3),
-                        state = gridState,
-                        contentPadding = PaddingValues(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        itemsIndexed(items, key = { index, movie ->
-                            val idPart = movie.id?.toString() ?: movie.hashCode().toString()
-                            // include sectionIndex to avoid collisions across sections
-                            "s${sectionIndex}_${idPart}_$index"
-                        }) { _, movie ->
-                            org.lanzadera.proyectos.ui.components.MovieItem(nav, movie)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    if (!dialogVisible) {
-        LaunchedEffect(dialogVisible) {
-            delay(animDuration.toLong())
-            onDismissed()
-        }
-    }
-}
-
-
-
-

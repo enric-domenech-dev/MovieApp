@@ -20,10 +20,25 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
 import org.lanzadera.proyectos.BuildConfig
+import org.lanzadera.proyectos.data.repository.BooksRepositoryImpl
 import org.lanzadera.proyectos.data.repository.LoadInitialDataImpl
+import org.lanzadera.proyectos.data.repository.MovieRepositoryImpl
+import org.lanzadera.proyectos.data.repository.SearchRepositoryImpl
+import org.lanzadera.proyectos.data.repository.TvShowRepositoryImpl
+import org.lanzadera.proyectos.domain.repository.BooksRepository
 import org.lanzadera.proyectos.domain.repository.LoadInitialData
+import org.lanzadera.proyectos.domain.repository.MovieRepository
+import org.lanzadera.proyectos.domain.repository.SearchRepository
+import org.lanzadera.proyectos.domain.repository.TvShowRepository
+import org.lanzadera.proyectos.domain.usecase.books.RefreshBooksUseCase
 import org.lanzadera.proyectos.domain.usecase.load_initial_data.LoadInitialDataUseCase
+import org.lanzadera.proyectos.domain.usecase.search.SearchMoviesUseCase
+import org.lanzadera.proyectos.domain.usecase.tvshows.GetTvShowDetailsUseCase
+import org.lanzadera.proyectos.domain.usecase.tvshows.RefreshTvShowsUseCase
+import org.lanzadera.proyectos.ui.screens.detail.MovieDetailViewModel
+import org.lanzadera.proyectos.ui.screens.detail.SeriesDetailViewModel
 import org.lanzadera.proyectos.ui.screens.home.HomeViewModel
+import org.lanzadera.proyectos.ui.screens.search.SearchViewModel
 
 val appModule = module {
     single(named("apiBearerToken")) { BuildConfig.API_BEARER_TOKEN }
@@ -133,32 +148,29 @@ val viewModelsModule = module {
 
     // UseCases
     single { LoadInitialDataUseCase(get()) }
-    single { org.lanzadera.proyectos.domain.usecase.books.RefreshBooksUseCase(get()) }
-    single { org.lanzadera.proyectos.domain.usecase.tvshows.RefreshTvShowsUseCase(get()) }
-    single { org.lanzadera.proyectos.domain.usecase.tvshows.GetTvShowDetailsUseCase(get()) }
+    single { RefreshBooksUseCase(get()) }
+    single { RefreshTvShowsUseCase(get()) }
+    single { GetTvShowDetailsUseCase(get()) }
+    single { SearchMoviesUseCase(get()) }
 
     // Repositories
     single<LoadInitialData> { LoadInitialDataImpl(get(), 5, get()) }
-    single<org.lanzadera.proyectos.domain.repository.BooksRepository> { org.lanzadera.proyectos.data.repository.BooksRepositoryImpl(get(named("googleBooksClient")), get(), get(named("googleBooksApiKey"))) }
-    single<org.lanzadera.proyectos.domain.repository.TvShowRepository> {
-        org.lanzadera.proyectos.data.repository.TvShowRepositoryImpl(
+    single<BooksRepository> {
+        BooksRepositoryImpl(
+            get(named("googleBooksClient")),
             get(),
-            5,
-            get()
+            get(named("googleBooksApiKey"))
         )
     }
-    single<org.lanzadera.proyectos.domain.repository.MovieRepository> {
-        org.lanzadera.proyectos.data.repository.MovieRepositoryImpl(
-            get(),
-            5,
-            get()
-        )
-    }
+    single<TvShowRepository> { TvShowRepositoryImpl(get(), 5, get()) }
+    single<MovieRepository> { MovieRepositoryImpl(get(), 5, get()) }
+    single<SearchRepository> { SearchRepositoryImpl(get(), get()) }
 
     // ViewModels
     viewModel { HomeViewModel(get(), get(), get()) }
-    viewModel { org.lanzadera.proyectos.ui.screens.detail.SeriesDetailViewModel(get()) }
-    viewModel { org.lanzadera.proyectos.ui.screens.detail.MovieDetailViewModel(get()) }
+    viewModel { SeriesDetailViewModel(get()) }
+    viewModel { MovieDetailViewModel(get()) }
+    viewModel { SearchViewModel(get()) }
 }
 
 val nativeModule: Module = module {}

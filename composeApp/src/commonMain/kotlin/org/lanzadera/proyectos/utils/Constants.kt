@@ -27,7 +27,13 @@ object Constants {
         object SignIn : Screen("signIn")
         object SplashScreen : Screen("splashScreen")
         object Detail : Screen("detail")
-        object SeriesDetail : Screen("seriesDetail")
+        object MovieDetail : Screen("movieDetail/{movieId}") {
+            fun createRoute(movieId: Int) = "movieDetail/$movieId"
+        }
+
+        object SeriesDetail : Screen("seriesDetail/{tvShowId}") {
+            fun createRoute(tvShowId: Int) = "seriesDetail/$tvShowId"
+        }
         object Search : Screen("search")
         // Added settings/chat/profile to centralize routes and avoid literals
         object Settings : Screen("settings")

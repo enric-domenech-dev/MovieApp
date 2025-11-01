@@ -26,43 +26,60 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
-import org.lanzadera.proyectos.domain.models.tvshow.TvShow
-import org.lanzadera.proyectos.navigation.NavigationStore
 import org.lanzadera.proyectos.ui.components.CustomTopAppBar
-import org.lanzadera.proyectos.ui.components.TvShowDetail
+import org.lanzadera.proyectos.ui.components.MovieDetail
 import org.lanzadera.proyectos.utils.Strings
 
 @Composable
 @Preview
-fun SeriesDetailView(
+fun MovieDetailView(
     nav: NavHostController,
-    tvShow: TvShow? = null,
-    tvShowId: Int? = null,
-    vm: SeriesDetailViewModel = koinInject()
+    movieId: Int,
+    viewModel: MovieDetailViewModel = koinInject()
 ) {
-    val tvShowDetail by vm.tvShowDetail.collectAsStateWithLifecycle()
-    val isLoading by vm.isLoading.collectAsStateWithLifecycle()
-    val error by vm.error.collectAsStateWithLifecycle()
+    val movieDetail by viewModel.movieDetail.collectAsStateWithLifecycle()
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val error by viewModel.error.collectAsStateWithLifecycle()
 
-    // Si recibimos un tvShowId, cargar por ID
-    LaunchedEffect(tvShowId) {
-        if (tvShowId != null && tvShowId > 0) {
-            vm.loadTvShowDetails(tvShowId)
-        }
+    // Cargar los detalles de la película cuando el composable se monta
+    LaunchedEffect(movieId) {
+        viewModel.loadMovieDetails(movieId)
     }
 
-    // Si recibimos un tvShow del NavigationStore, úsalo
-    // Si no, intenta cargar por ID (para casos donde se recarga la página)
-    LaunchedEffect(tvShow) {
-        when {
-            tvShow != null -> vm.setTvShowDetail(tvShow)
-            NavigationStore.selectedTvShow != null -> vm.setTvShowDetail(NavigationStore.selectedTvShow!!)
+    if (movieDetail == null && isLoading) {
+        Scaffold(
+            modifier = Modifier.safeDrawingPadding(),
+            topBar = {
+                CustomTopAppBar(
+                    title = "Cargando...",
+                    navigationIcon = {
+                        IconButton(onClick = { nav.popBackStack() }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                                contentDescription = "Volver",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    },
+                    backgroundColor = MaterialTheme.colorScheme.background,
+                    contentColor = MaterialTheme.colorScheme.onBackground,
+                )
+            }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(it),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                CircularProgressIndicator()
+            }
         }
+        return
     }
 
-    val displayedTvShow = tvShowDetail ?: tvShow ?: NavigationStore.selectedTvShow
-
-    if (displayedTvShow == null) {
+    if (movieDetail == null || error != null) {
         Scaffold(
             modifier = Modifier.safeDrawingPadding(),
             topBar = {
@@ -89,7 +106,7 @@ fun SeriesDetailView(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(Strings.Detail.NO_DATA, color = MaterialTheme.colorScheme.error)
+                Text(error ?: Strings.Detail.NO_DATA, color = MaterialTheme.colorScheme.error)
             }
         }
         return
@@ -99,11 +116,11 @@ fun SeriesDetailView(
         modifier = Modifier.safeDrawingPadding(),
         floatingActionButtonPosition = FabPosition.EndOverlay,
         floatingActionButton = {
-            // BUTTON
+            // Placeholder for future action button
         },
         topBar = {
             CustomTopAppBar(
-                title = displayedTvShow.name ?: "",
+                title = movieDetail?.title ?: "",
                 navigationIcon = {
                     IconButton(onClick = { nav.popBackStack() }) {
                         Icon(
@@ -127,40 +144,12 @@ fun SeriesDetailView(
             )
         },
         content = { paddingValue ->
-            when {
-                isLoading && tvShowDetail == null -> {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValue),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                }
-
-                error != null && tvShowDetail == null -> {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValue),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(error ?: "Error desconocido", color = MaterialTheme.colorScheme.error)
-                    }
-                }
-
-                else -> {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValue),
-                    ) {
-                        TvShowDetail(tvShow = displayedTvShow)
-                    }
-                }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValue),
+            ) {
+                MovieDetail(movie = movieDetail)
             }
         }
     )

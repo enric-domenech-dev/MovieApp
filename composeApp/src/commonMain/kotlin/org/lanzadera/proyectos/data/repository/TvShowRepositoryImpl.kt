@@ -109,6 +109,7 @@ class TvShowRepositoryImpl(
             val text = client.get("/3/tv/$tvShowId") {
                 url {
                     parameters.append("append_to_response", "seasons,aggregate_credits")
+                    parameters.append("language", "es")
                 }
             }.bodyAsText()
             var tvShow: TvShow = json.decodeFromString(text)
@@ -119,7 +120,7 @@ class TvShowRepositoryImpl(
                     try {
                         val seasonText = client.get("/3/tv/$tvShowId/season/${season.seasonNumber}") {
                             url {
-                                // No necesitamos parámetros adicionales
+                                parameters.append("language", "es")
                             }
                         }.bodyAsText()
                         val seasonWithEpisodes: Season = json.decodeFromString(seasonText)
@@ -140,10 +141,10 @@ class TvShowRepositoryImpl(
     }
 
     private suspend fun fetchTrendingTvShowsWeek(): List<TvShow> =
-        fetchPaged("/3/trending/tv/week", emptyMap())
+        fetchPaged("/3/trending/tv/week", mapOf("language" to "es"))
 
     private suspend fun fetchTrendingTvShowsDay(): List<TvShow> =
-        fetchPaged("/3/trending/tv/day", emptyMap())
+        fetchPaged("/3/trending/tv/day", mapOf("language" to "es"))
 
     private suspend fun fetchPopularTvShows(): List<TvShow> =
         fetchPaged(
@@ -152,7 +153,7 @@ class TvShowRepositoryImpl(
         )
 
     private suspend fun fetchTopRatedTvShows(): List<TvShow> =
-        fetchPaged("/3/tv/top_rated", emptyMap())
+        fetchPaged("/3/tv/top_rated", mapOf("language" to "es"))
 
     private suspend fun fetchOnAirTvShows(): List<TvShow> =
         fetchPaged(

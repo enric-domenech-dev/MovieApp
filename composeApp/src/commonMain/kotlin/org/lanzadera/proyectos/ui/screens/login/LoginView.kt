@@ -25,18 +25,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import movieapp.composeapp.generated.resources.Res
 import movieapp.composeapp.generated.resources.unicorn
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.lanzadera.proyectos.AppTheme
-import org.lanzadera.proyectos.utils.Constants
+import org.lanzadera.proyectos.ui.components.DevelopingDialog
 import org.lanzadera.proyectos.ui.components.EmailInput
+import org.lanzadera.proyectos.ui.components.FingerPrintAuthentication
 import org.lanzadera.proyectos.ui.components.PasswordInput
 import org.lanzadera.proyectos.ui.components.PrimaryButton
-import org.lanzadera.proyectos.ui.components.FingerPrintAuthentication
-import org.lanzadera.proyectos.ui.components.DevelopingDialog
-import androidx.navigation.NavHostController
+import org.lanzadera.proyectos.utils.Constants
+import org.lanzadera.proyectos.utils.Strings
 
 @Composable
 @Preview
@@ -47,7 +48,7 @@ fun LoginView(
 ) {
     val user by vm.userState.collectAsState()
     val scope = rememberCoroutineScope()
-    var text by remember { mutableStateOf("Loading") }
+    var text by remember { mutableStateOf(Strings.Generic.LOADING) }
     var showDialog by remember { mutableStateOf(false) }
     var email by remember { mutableStateOf("test@gmail.com") }
     var password by remember { mutableStateOf("1234") }
@@ -65,9 +66,9 @@ fun LoginView(
             // Si el login falla, incrementar el contador de intentos fallidos
             if (failedAttempts < 3) {
                 failedAttempts++
-                errorMessage = "Login fallido: Usuario no encontrado o credenciales inválidas."
+                errorMessage = Strings.Auth.LOGIN_FAILED
             } else {
-                errorMessage = "Se ha alcanzado el límite de intentos fallidos."
+                errorMessage = Strings.Auth.LOGIN_LIMIT_REACHED
             }
         }
     }
@@ -107,8 +108,8 @@ fun LoginView(
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                text = "Log In",
-                description = "Log In Button",
+                text = Strings.Auth.LOG_IN,
+                description = Strings.Auth.LOG_IN_BUTTON,
                 enabled = !isLoading && failedAttempts < 3,
                 icon = null
             )
@@ -138,7 +139,7 @@ fun LoginView(
             Spacer(modifier = Modifier.background(MaterialTheme.colorScheme.background).weight(1f))
 
             Text(
-                "Don't have an account yet?",
+                Strings.Auth.DONT_HAVE_ACCOUNT,
                 modifier = Modifier
                     .align(Alignment.Start)
                     .padding(horizontal = 10.dp),
@@ -149,8 +150,8 @@ fun LoginView(
                  onClick = { /*navigateToSignIn()*/ },
                  modifier = Modifier.fillMaxWidth(),
                  icon = null,
-                 text = "Sign In",
-                 description = "Sign In Button",
+                text = Strings.Auth.SIGN_IN,
+                description = Strings.Auth.SIGN_IN_BUTTON,
                  enabled = true,
              )
 
