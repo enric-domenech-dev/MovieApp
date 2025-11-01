@@ -80,7 +80,7 @@ fun HomeView(
             primary.sortedWith(
                 compareByDescending<Movie> { it.releaseDate }
                     .thenByDescending { it.voteCount }
-            ).take(36)
+            ).take(35)
         }
     }
 
