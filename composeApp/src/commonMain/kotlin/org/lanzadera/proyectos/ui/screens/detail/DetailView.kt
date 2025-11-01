@@ -40,36 +40,22 @@ fun DetailView(
     selectedTheme: AppTheme = AppTheme.SYSTEM,
     darkTheme: Boolean = false
 ) {
-
-    var isFavorite by rememberSaveable { mutableStateOf(false) }
-    var isWatched by rememberSaveable { mutableStateOf(false) }
-
     Scaffold(
-        containerColor = Color.Black,
         modifier = Modifier.safeDrawingPadding(),
         floatingActionButtonPosition =
             FabPosition.EndOverlay,
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    isFavorite = !isFavorite
-                },
-                content = {
-                    Icon(
-                       imageVector = if (isFavorite) Icons.Outlined.Favorite else Icons.Outlined.FavoriteBorder,
-                        contentDescription = "Favorite Button"
-                    )
-                }
-            )
+
         },
         topBar = {
             CustomTopAppBar(
-                title = "",
+                title = movie.title ?: "",
                 navigationIcon = {
                     IconButton(onClick = { nav.navigateBack() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = "Go Back"
+                            contentDescription = "Go Back",
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 },
@@ -85,7 +71,7 @@ fun DetailView(
                     }
                 },
                 backgroundColor = MaterialTheme.colorScheme.background,
-                contentColor = MaterialTheme.colorScheme.onBackground
+                contentColor = MaterialTheme.colorScheme.onBackground,
             )
         },
         content = { paddingValue ->

@@ -35,6 +35,8 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
@@ -42,12 +44,12 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -63,6 +65,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -127,7 +130,7 @@ fun DrawerAppBar(
                         style = MaterialTheme.typography.headlineSmall
                     )
                 }
-                Divider()
+                HorizontalDivider()
 
                 Column(
                     modifier = Modifier
@@ -152,7 +155,7 @@ fun DrawerAppBar(
                     )
                 }
 
-                Divider()
+                HorizontalDivider()
 
                 DropdownMenuItem(
                     text = { Text("Send Feedback") },
@@ -165,7 +168,7 @@ fun DrawerAppBar(
                     }
                 )
 
-                Divider()
+                HorizontalDivider()
 
                 DropdownMenuItem(
                     text = { Text("Help") },
@@ -310,38 +313,41 @@ fun SingleChoiceSegmentedButtonAlternativeExample(
             when (index) {
                 0 -> Icon(
                     imageVector = Icons.Outlined.Search,
-                    contentDescription = "Fingerprint Icon",
-                    tint = MaterialTheme.colorScheme.primary.copy(alpha = if (index == selectedIndex) 1f else 0.6f)
+                    contentDescription = Icons.Outlined.Search.name,
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = fl(index, selectedIndex))
                 )
 
                 1 -> Icon(
                     painter = painterResource(Res.drawable.film),
                     contentDescription = "Fingerprint Icon",
                     modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.primary.copy(alpha = if (index == selectedIndex) 1f else 0.6f)
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = fl(index, selectedIndex))
                 )
 
                 2 -> Icon(
                     imageVector = Icons.Default.Home,
                     contentDescription = "Home",
-                    tint = MaterialTheme.colorScheme.primary.copy(alpha = if (index == selectedIndex) 1f else 0.6f)
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = fl(index, selectedIndex))
                 )
 
                 3 -> Icon(
                     imageVector = Icons.AutoMirrored.Outlined.List,
                     contentDescription = "List",
-                    tint = MaterialTheme.colorScheme.primary.copy(alpha = if (index == selectedIndex) 1f else 0.6f)
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = fl(index, selectedIndex))
                 )
 
                 4 -> Icon(
                     imageVector = Icons.Outlined.Person,
                     contentDescription = "Person",
-                    tint = MaterialTheme.colorScheme.primary.copy(alpha = if (index == selectedIndex) 1f else 0.6f)
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = fl(index, selectedIndex))
                 )
             }
         }
     )
 }
+
+private fun fl(index: Int, selectedIndex: Int) =
+    if (index == selectedIndex) 1f else 0.6f
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -586,7 +592,6 @@ fun LogoutConfirmationDialog(
 fun DevelopingDialog(
     showDialog: Boolean,
     onDismiss: () -> Unit,
-    onConfirm: () -> Unit
 ) {
     if (showDialog) {
         AlertDialog(
@@ -605,17 +610,27 @@ fun DevelopingDialog(
 
 @Composable
 fun MovieItem(nav: NavigationController, movie: Movie) {
-    AsyncImage(
-        model = "https://image.tmdb.org/t/p/original${movie.posterPath}",
-        contentDescription = "Movie Poster",
-        contentScale = ContentScale.Crop,
+    Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(2 / 3f)
-            .clip(MaterialTheme.shapes.small)
-            .clickable { nav.navigateToDetail(movie) },
-        placeholder = painterResource(Res.drawable.film)
-    )
+            .width(180.dp)
+            .clickable { nav.navigateToDetail(movie) }
+    ) {
+        Surface(
+            tonalElevation = 4.dp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(2f / 3f)
+                .clip(MaterialTheme.shapes.extraSmall)
+        ) {
+            AsyncImage(
+                model = "https://image.tmdb.org/t/p/original${movie.posterPath}",
+                contentDescription = movie.title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+                placeholder = painterResource(Res.drawable.film)
+            )
+        }
+    }
 }
 
 
@@ -623,24 +638,20 @@ fun MovieItem(nav: NavigationController, movie: Movie) {
 fun MovieHeader(nav: NavigationController, movie: Movie) {
     Column(
         modifier = Modifier
-            .width(180.dp)
-            .padding(vertical = 8.dp)
-            .clickable { nav.navigateToDetail(movie) }
+            .width(190.dp).clickable { nav.navigateToDetail(movie) }
     ) {
         Box(
             modifier = Modifier
                 .aspectRatio(2f / 3f)
-                .clip(RoundedCornerShape(18.dp))
+                .clip(MaterialTheme.shapes.small)
         ) {
             AsyncImage(
                 model = "https://image.tmdb.org/t/p/original${movie.posterPath}",
-                contentDescription = "Movie Poster",
+                contentDescription = movie.title,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
                 placeholder = painterResource(Res.drawable.film)
             )
-
-
         }
         Spacer(modifier = Modifier.height(8.dp))
         movie.title?.let {
@@ -653,15 +664,17 @@ fun MovieHeader(nav: NavigationController, movie: Movie) {
                 overflow = TextOverflow.Ellipsis
             )
         }
-movie.releaseDate?.let {
-    val date = LocalDate.parse(it)
-    val formattedDate = "${date.dayOfMonth} ${date.month.name.lowercase().replaceFirstChar { c -> c.uppercase() }} ${date.year}"
-    Text(
-        text = formattedDate,
-        fontSize = 14.sp,
-        color = Color.Gray,
-    )
-}
+        movie.releaseDate?.let {
+            val date = LocalDate.parse(it)
+            val formattedDate = "${date.dayOfMonth} ${
+                date.month.name.lowercase().replaceFirstChar { c -> c.uppercase() }
+            } ${date.year}"
+            Text(
+                text = formattedDate,
+                fontSize = 14.sp,
+                color = Color.Gray,
+            )
+        }
     }
 }
 
@@ -699,7 +712,7 @@ fun ButtonRow(
         }
         Spacer(modifier = Modifier.width(16.dp))
         FloatingActionButton(
-            onClick = { /* TODO: Show average votes */ },
+            onClick = { /* onclick */ },
             modifier = Modifier
                 .size(40.dp)
                 .offset(y = (-20).dp),
@@ -737,6 +750,7 @@ fun ButtonRow(
 @Composable
 fun CircularAvgVotes(movie: Movie) {
     val votePercentage = (movie.voteAverage.toDouble() * 10).toInt()
+    if (votePercentage == 0) return
     val borderColor = when {
         votePercentage < 40 -> Color.Red
         votePercentage < 70 -> Color.Yellow
@@ -761,70 +775,79 @@ fun CircularAvgVotes(movie: Movie) {
 
 @Composable
 fun MovieDetail(movie: Movie?) {
-
+    val isFavorite = rememberSaveable { mutableStateOf(false) }
     if (movie != null) {
-        var isFilled by remember { mutableStateOf(false) }
-
         Column {
-
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 AsyncImage(
                     model = "https://image.tmdb.org/t/p/original${movie.backdropPath}",
-                    contentDescription = "Movie Poster",
+                    contentDescription = movie.title,
                     contentScale = ContentScale.FillWidth,
                     modifier = Modifier.fillMaxWidth()
                         .aspectRatio(16 / 9f)
                 )
             }
 
-//            Row(
-//                modifier = Modifier.fillMaxWidth(),
-//                horizontalArrangement = Arrangement.SpaceBetween,
-//                verticalAlignment = Alignment.CenterVertically
-//            ) {
-            CircularAvgVotes(movie)
-//            }
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                movie.releaseDate?.let {
+                    val date = LocalDate.parse(it)
+                    val formattedDate = "${date.dayOfMonth} ${
+                        date.month.name.lowercase().replaceFirstChar { c -> c.uppercase() }
+                    } ${date.year}"
+                    Text(
+                        text = formattedDate,
+                        fontSize = 20.sp,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                CircularAvgVotes(movie)
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                FloatingActionButton(
+                    onClick = {
+                        isFavorite.value = !isFavorite.value
+                    },
+                    content = {
+                        Icon(
+                            imageVector = if (isFavorite.value) Icons.Outlined.Favorite else Icons.Outlined.FavoriteBorder,
+                            contentDescription = "Favorite Button"
+                        )
+                    },
+                    shape = CircleShape,
+                )
+            }
 
             LazyColumn(
-                modifier = Modifier.fillMaxWidth().padding(16.dp)
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
             ) {
                 item {
-                    movie.title?.let {
-                        Text(
-                            text = it,
-                            style = MaterialTheme.typography.headlineSmall,
-                        )
-                    }
-
-                    movie.releaseDate?.let {
-
-                        val date: LocalDate = LocalDate.parse(it)
-                        val formattedDate = "${
-                            date.dayOfMonth.toString().padStart(2, '0')
-                        }-${date.monthNumber.toString().padStart(2, '0')}-${date.year}"
-
-                        Text(
-                            text = formattedDate,
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
                     movie.overview?.let {
                         Text(
                             text = it,
-                            style = MaterialTheme.typography.bodySmall
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.secondary,
                         )
                     }
 
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    Text(movie.toString(), style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        movie.toString(),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
                 }
             }
         }

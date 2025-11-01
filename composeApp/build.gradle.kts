@@ -52,7 +52,7 @@ kotlin {
 //    }
 
     sourceSets {
-        val desktopMain by getting
+//        val desktopMain by getting
 
         androidMain.dependencies {
 
@@ -99,14 +99,14 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.kotlinx.datetime)
         }
-        desktopMain.dependencies {
-            implementation(libs.ktor.client.okhttp)
-            implementation(compose.desktop.currentOs)
-            implementation(libs.kotlinx.coroutines.swing)
-        }
-        wasmJsMain.dependencies {
-            implementation(libs.ktor.client.js)
-        }
+//        desktopMain.dependencies {
+//            implementation(libs.ktor.client.okhttp)
+//            implementation(compose.desktop.currentOs)
+//            implementation(libs.kotlinx.coroutines.swing)
+//        }
+//        wasmJsMain.dependencies {
+//            implementation(libs.ktor.client.js)
+//        }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
         }
@@ -123,8 +123,34 @@ kotlin {
 
                 implementation(kotlin("test"))
 
+                // ya tienes varios, añado Turbine (para testear Flow)
+                implementation(libs.turbine)
+                // (opcional) aserciones más cómodas
+                implementation(libs.truth)
+
             }
         }
+
+        // tests JVM puros (para el ViewModel con viewModelScope)
+//        val desktopTest by getting {
+//            dependencies {
+//                implementation(kotlin("test-junit"))
+//                implementation(libs.kotlinx.coroutines.test)
+//                implementation(libs.turbine)
+//            }
+//        }
+
+        // alternativa si prefieres tests en Android (unit, no instrumentación)
+        val androidUnitTest by getting {
+            dependencies {
+                implementation(libs.junit)
+                implementation(libs.jetbrains.kotlinx.coroutines.test.v190)
+                implementation(libs.turbine)
+                // SLF4J para el runtime de tests JVM
+                //runtimeOnly(libs.slf4j.simple)
+            }
+        }
+
     }
 
     sourceSets.commonMain {

@@ -38,7 +38,7 @@ val LoggingPlugin = createClientPlugin("LoggingPlugin") {
         val method = request.method.value
         val url = request.url
         println(
-            "--> REQUEST $method $url \n " +
+            "--> SYNCRO REQUEST $method $url \n " +
                     "---> HEADERS: ${
                         json.encodeToString(
                             MapSerializer(String.serializer(), ListSerializer(String.serializer())),
@@ -53,23 +53,22 @@ val LoggingPlugin = createClientPlugin("LoggingPlugin") {
         val call = response.call
         val request = call.request
         val method = request.method
+        val ct = response.headers["Content-Type"] ?: ""
         val url = request.url.toString()
         val startTime = response.requestTime.timestamp
         val endTime = response.responseTime.timestamp
         val elapsed = endTime - startTime
         val body = response.bodyAsText()
         println("<-- END REQUEST ${method.value} $url (${elapsed}ms)")
-        println("<-- RESPONSE CODE ${response.status}")
-        println(
-            "<-- RESPONSE HEADER ${
-                json.encodeToString(
-                    MapSerializer(String.serializer(), ListSerializer(String.serializer())),
-                    request.headers.entries().associate { it.key to it.value }
-                )
-            } \n ---> RESPONSE BODY: ${
-                json.encodeToString(JsonElement.serializer(), Json.parseToJsonElement(body))
-            } "
-        )
+        println("<-- SYNCRO RESPONSE CODE ${response.status}")
+        runCatching {
+            if (ct.contains("application/json", ignoreCase = true))
+                println("<-- RESPONSE BODY (json): ${json.encodeToString(JsonElement.serializer(), Json.parseToJsonElement(body))}")
+            else
+                println("<-- RESPONSE BODY (text): $body")
+        }.getOrElse {
+            println("<-- RESPONSE BODY (raw): $body") // no bloquees la llamada por el logger
+        }
     }
 }
 
@@ -93,11 +92,11 @@ val dataModule = module {
     // HTTPS Client
     single {
         HttpClient {
+            expectSuccess = true
             install(HttpTimeout)
+            install(ContentNegotiation) { json(get()) }
+//            install(Logging) { level = LogLevel.ALL }
             install(LoggingPlugin)
-            install(ContentNegotiation) {
-                json(get())
-            }
             defaultRequest {
                 url {
                     protocol = URLProtocol.HTTPS
@@ -122,7 +121,7 @@ val viewModelsModule = module {
     viewModel { HomeViewModel(get()) }
 }
 
-expect val nativeModule: Module
+val nativeModule: Module = module {}
 
 fun initKoin(config: KoinAppDeclaration? = null) {
     startKoin {
