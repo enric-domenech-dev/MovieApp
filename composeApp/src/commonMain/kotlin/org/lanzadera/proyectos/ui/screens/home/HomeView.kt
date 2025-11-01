@@ -1,5 +1,6 @@
 package org.lanzadera.proyectos.ui.screens.home
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -44,7 +45,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,6 +64,7 @@ import org.lanzadera.proyectos.ui.components.DrawerAppBar
 import org.lanzadera.proyectos.ui.components.MovieHeader
 import org.lanzadera.proyectos.ui.components.MovieItem
 import org.lanzadera.proyectos.ui.components.MovieSubheader
+import org.lanzadera.proyectos.ui.components.BookItem
 import org.lanzadera.proyectos.ui.components.tabs.NiaTab
 import org.lanzadera.proyectos.ui.components.tabs.NiaTabRow
 import org.lanzadera.proyectos.utils.Constants.MenuOptions.topBarTitles
@@ -71,7 +72,6 @@ import org.lanzadera.proyectos.utils.Constants.MenuOptions.topBarTitles
 @Composable
 @Preview
 fun HomeView(
-    navIndexBottomBar: Int = 2,
     nav: NavHostController,
     vm: HomeViewModel,
 ) {
@@ -88,7 +88,6 @@ fun HomeView(
     val discover by vm.discover.collectAsStateWithLifecycle()
     val hero by vm.hero.collectAsStateWithLifecycle()
     val inCinemasToday by vm.inCinemasToday.collectAsStateWithLifecycle()
-    val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
 
     // Derived ordering example
@@ -101,7 +100,7 @@ fun HomeView(
         }
     }
 
-    DrawerAppBar(
+    org.lanzadera.proyectos.ui.components.DrawerAppBar(
         modifier = Modifier.safeDrawingPadding(),
         navViewModel = nav,
         drawerState = drawerState
@@ -164,15 +163,44 @@ fun HomeView(
                     }
                     else -> {
                         // Home screen content (tabs + sections)
-                        if (selectedTab != HomeViewModel.HomeTab.FILMS) {
-                            PlaceholderScreen(
-                                title = when (selectedTab) {
-                                    HomeViewModel.HomeTab.BOOKS -> "BOOKS"
-                                    HomeViewModel.HomeTab.SERIES -> "SERIES"
-                                    HomeViewModel.HomeTab.GAMES -> "GAMES"
-                                    HomeViewModel.HomeTab.HEART -> "FAVORITOS"
-                                    else -> ""
+                        if (selectedTab == HomeViewModel.HomeTab.BOOKS) {
+                            // Mostrar lista de libros usando los nuevos composables
+                            val books by vm.books.collectAsStateWithLifecycle()
+                            val isRefreshingBooks by vm.refreshing.collectAsStateWithLifecycle()
+
+                            if (books.isEmpty()) {
+                                // Si no hay libros, mostrar placeholder o loading según el flag específico de books
+                                if (isRefreshingBooks) {
+                                    CircularProgressIndicator()
+                                } else {
+                                    org.lanzadera.proyectos.ui.components.PlaceholderScreen(title = "BOOKS")
                                 }
+                            } else {
+                                 // Grid de libros similar a la dialog de sección
+                                 val gridState = rememberLazyGridState()
+                                 LazyVerticalGrid(
+                                     columns = GridCells.Fixed(3),
+                                     state = gridState,
+                                     contentPadding = PaddingValues(8.dp),
+                                     verticalArrangement = Arrangement.spacedBy(8.dp),
+                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                     modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp)
+                                 ) {
+                                     itemsIndexed(books, key = { _, book -> book.id ?: book.hashCode().toString() }) { _, book ->
+                                         org.lanzadera.proyectos.ui.components.BookItem(nav, book)
+                                     }
+                                 }
+                             }
+
+                        } else if (selectedTab != HomeViewModel.HomeTab.FILMS) {
+                            org.lanzadera.proyectos.ui.components.PlaceholderScreen(
+                                 title = when (selectedTab) {
+                                     HomeViewModel.HomeTab.BOOKS -> "BOOKS"
+                                     HomeViewModel.HomeTab.SERIES -> "SERIES"
+                                     HomeViewModel.HomeTab.GAMES -> "GAMES"
+                                     HomeViewModel.HomeTab.HEART -> "FAVORITOS"
+                                     else -> ""
+                                 }
                             )
                         } else {
                             LazyColumn(
@@ -266,9 +294,9 @@ private fun Section(title: String, items: List<Movie>, nav: NavHostController, s
                 }) { _, movie ->
                      val itemModifier = if (mode == SectionMode.HEADER) Modifier.width(headerWidth) else Modifier.width(subWidth)
                      when (mode) {
-                         SectionMode.HEADER -> MovieHeader(modifier = itemModifier, nav = nav, movie = movie)
-                         SectionMode.SUBHEADER_SHOW_META -> MovieSubheader(modifier = itemModifier, nav = nav, movie = movie, showMeta = true)
-                         SectionMode.SUBHEADER_HIDE_META -> MovieSubheader(modifier = itemModifier, nav = nav, movie = movie, showMeta = false)
+                         SectionMode.HEADER -> org.lanzadera.proyectos.ui.components.MovieHeader(modifier = itemModifier, nav = nav, movie = movie)
+                         SectionMode.SUBHEADER_SHOW_META -> org.lanzadera.proyectos.ui.components.MovieSubheader(modifier = itemModifier, nav = nav, movie = movie, showMeta = true)
+                         SectionMode.SUBHEADER_HIDE_META -> org.lanzadera.proyectos.ui.components.MovieSubheader(modifier = itemModifier, nav = nav, movie = movie, showMeta = false)
                      }
                  }
              }
@@ -301,7 +329,7 @@ private fun SectionDialog(
     animDuration: Int
 ) {
     Dialog(onDismissRequest = { onRequestHideContent() }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        androidx.compose.animation.AnimatedVisibility(
+        AnimatedVisibility(
             visible = dialogVisible,
             enter = fadeIn(animationSpec = tween(animDuration)) + slideInVertically(animationSpec = tween(animDuration)) { it / 4 },
             exit = fadeOut(animationSpec = tween(animDuration)) + slideOutVertically(animationSpec = tween(animDuration)) { it / 4 }
@@ -333,9 +361,9 @@ private fun SectionDialog(
                             // include sectionIndex to avoid collisions across sections
                             "s${sectionIndex}_${idPart}_$index"
                         }) { _, movie ->
-                            MovieItem(nav, movie)
+                            org.lanzadera.proyectos.ui.components.MovieItem(nav, movie)
                         }
-                      }
+                       }
                  }
              }
          }
@@ -349,43 +377,3 @@ private fun SectionDialog(
     }
 }
 
-@Composable
-private fun PlaceholderScreen(title: String) {
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(48.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Icon(imageVector = Icons.Filled.Info, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(bottom = 8.dp))
-        Text(text = title, style = MaterialTheme.typography.headlineSmall)
-        Text(text = "Funcionalidad en desarrollo", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp))
-    }
-}
-
-@Composable
-private fun BottomBarScreenPlaceholder(title: String) {
-    // A placeholder screen for bottom bar selections, with a title and scaffold-like hints
-    Column(
-        modifier = Modifier.fillMaxSize().padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-        // Hints or descriptions for future implementation can go here
-        Text(
-            text = "Esta sección está en desarrollo.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        Text(
-            text = "Pronto podrás disfrutar de más contenido aquí.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}

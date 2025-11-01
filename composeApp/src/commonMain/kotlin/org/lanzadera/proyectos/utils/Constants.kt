@@ -13,8 +13,14 @@ import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.ui.unit.dp
 
 object Constants {
+
+    // UI DIMENSIONS
+    object Dimensions {
+        val BOTTOM_NAV_BAR_HEIGHT = 80.dp  // Material 3 NavigationBar standard height
+    }
 
     // SCREENS
     sealed class Screen(val route: String) {
