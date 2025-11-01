@@ -1,0 +1,20 @@
+name: only-develop-pr
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  require-develop:
+    runs-on: ubuntu-latest
+    name: Verificar que el PR venga de la rama develop
+    steps:
+      - name: Comprobar rama origen
+        run: |
+          ORIGIN_BRANCH="${{ github.event.pull_request.head.ref }}"
+          echo "Origen del PR: $ORIGIN_BRANCH"
+          if [ "$ORIGIN_BRANCH" != "develop" ]; then
+            echo "::error::Los PR hacia master solo están permitidos desde la rama 'develop'. Origen: $ORIGIN_BRANCH"
+            exit 1
+          fi
+          echo "OK: El PR viene de develop."
