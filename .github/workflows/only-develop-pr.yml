@@ -1,4 +1,4 @@
-name: only-develop-pr
+name: only-develop-pr / Verificar que el PR venga de la rama develop
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
