@@ -1,8 +1,13 @@
 name: only-develop-pr
 on:
   pull_request:
+    types: [opened, synchronize, reopened]
     branches:
       - master
+
+permissions:
+  pull-requests: read
+  statuses: write
 
 jobs:
   require-develop:
