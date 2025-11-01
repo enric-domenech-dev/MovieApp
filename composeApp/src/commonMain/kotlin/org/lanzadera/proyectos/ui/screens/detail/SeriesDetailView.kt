@@ -26,43 +26,40 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
-import org.lanzadera.proyectos.AppTheme
-import org.lanzadera.proyectos.domain.models.movie.Movie
+import org.lanzadera.proyectos.domain.models.tvshow.TvShow
 import org.lanzadera.proyectos.navigation.NavigationStore
 import org.lanzadera.proyectos.ui.components.CustomTopAppBar
-import org.lanzadera.proyectos.ui.components.MovieDetail
+import org.lanzadera.proyectos.ui.components.TvShowDetail
 
 @Composable
 @Preview
-fun DetailView(
+fun SeriesDetailView(
     nav: NavHostController,
-    movie: Movie?,
-    vm: MovieDetailViewModel = koinInject(),
-    selectedTheme: AppTheme = AppTheme.SYSTEM,
-    darkTheme: Boolean = false
+    tvShow: TvShow?,
+    vm: SeriesDetailViewModel = koinInject()
 ) {
-    val movieDetail by vm.movieDetail.collectAsStateWithLifecycle()
+    val tvShowDetail by vm.tvShowDetail.collectAsStateWithLifecycle()
     val isLoading by vm.isLoading.collectAsStateWithLifecycle()
     val error by vm.error.collectAsStateWithLifecycle()
 
-    // Si recibimos una película del NavigationStore, úsala
+    // Si recibimos un tvShow del NavigationStore, úsalo
     // Si no, intenta cargar por ID (para casos donde se recarga la página)
-    LaunchedEffect(movie) {
+    LaunchedEffect(tvShow) {
         when {
-            movie != null -> vm.setMovieDetail(movie)
-            NavigationStore.selectedMovie != null -> vm.setMovieDetail(NavigationStore.selectedMovie!!)
+            tvShow != null -> vm.setTvShowDetail(tvShow)
+            NavigationStore.selectedTvShow != null -> vm.setTvShowDetail(NavigationStore.selectedTvShow!!)
             else -> nav.popBackStack() // Fallback: navega atrás si no hay datos
         }
     }
 
-    val displayedMovie = movieDetail ?: movie ?: NavigationStore.selectedMovie
+    val displayedTvShow = tvShowDetail ?: tvShow ?: NavigationStore.selectedTvShow
 
-    if (displayedMovie == null) {
+    if (displayedTvShow == null) {
         Scaffold(
             modifier = Modifier.safeDrawingPadding(),
             topBar = {
                 CustomTopAppBar(
-                    title = "Película",
+                    title = "Serie",
                     navigationIcon = {
                         IconButton(onClick = { nav.popBackStack() }) {
                             Icon(
@@ -84,7 +81,7 @@ fun DetailView(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("No se encontraron datos de la película", color = MaterialTheme.colorScheme.error)
+                Text("No se encontraron datos de la serie", color = MaterialTheme.colorScheme.error)
             }
         }
         return
@@ -98,7 +95,7 @@ fun DetailView(
         },
         topBar = {
             CustomTopAppBar(
-                title = displayedMovie.title ?: "",
+                title = displayedTvShow.name ?: "",
                 navigationIcon = {
                     IconButton(onClick = { nav.popBackStack() }) {
                         Icon(
@@ -123,7 +120,7 @@ fun DetailView(
         },
         content = { paddingValue ->
             when {
-                isLoading && movieDetail == null -> {
+                isLoading && tvShowDetail == null -> {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -135,7 +132,7 @@ fun DetailView(
                     }
                 }
 
-                error != null && movieDetail == null -> {
+                error != null && tvShowDetail == null -> {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -153,10 +150,11 @@ fun DetailView(
                             .fillMaxSize()
                             .padding(paddingValue),
                     ) {
-                        MovieDetail(movie = displayedMovie)
+                        TvShowDetail(tvShow = displayedTvShow)
                     }
                 }
             }
         }
     )
 }
+

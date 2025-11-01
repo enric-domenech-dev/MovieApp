@@ -1,43 +1,45 @@
 package org.lanzadera.proyectos.navigation
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.runtime.*
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import org.koin.compose.koinInject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import org.koin.compose.viewmodel.koinViewModel
 import org.lanzadera.proyectos.AppTheme
+import org.lanzadera.proyectos.ui.components.DrawerAppBar
+import org.lanzadera.proyectos.ui.components.navComponents.AppBottomBar
+import org.lanzadera.proyectos.ui.screens.chat.ChatView
+import org.lanzadera.proyectos.ui.screens.chat.ChatViewModel
+import org.lanzadera.proyectos.ui.screens.detail.BookDetailView
 import org.lanzadera.proyectos.ui.screens.detail.DetailView
+import org.lanzadera.proyectos.ui.screens.detail.SeriesDetailView
 import org.lanzadera.proyectos.ui.screens.home.HomeView
 import org.lanzadera.proyectos.ui.screens.home.HomeViewModel
 import org.lanzadera.proyectos.ui.screens.login.LoginView
 import org.lanzadera.proyectos.ui.screens.login.LoginViewModel
-import org.lanzadera.proyectos.ui.screens.search.SearchView
-import org.lanzadera.proyectos.ui.screens.settings.SettingView
-import org.lanzadera.proyectos.ui.screens.chat.ChatView
 import org.lanzadera.proyectos.ui.screens.profile.ProfileView
-import org.lanzadera.proyectos.ui.screens.settings.SettingsViewModel
-import org.lanzadera.proyectos.ui.screens.chat.ChatViewModel
 import org.lanzadera.proyectos.ui.screens.profile.ProfileViewModel
+import org.lanzadera.proyectos.ui.screens.search.SearchView
 import org.lanzadera.proyectos.ui.screens.search.SearchViewModel
+import org.lanzadera.proyectos.ui.screens.settings.SettingView
+import org.lanzadera.proyectos.ui.screens.settings.SettingsViewModel
 import org.lanzadera.proyectos.ui.screens.splash.SplashView
-import org.lanzadera.proyectos.utils.Constants
-import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.getValue
-import androidx.compose.material3.ExperimentalMaterial3Api
-import org.lanzadera.proyectos.ui.components.navComponents.AppBottomBar
 import org.lanzadera.proyectos.utils.BottomNavItem
-import androidx.compose.material3.rememberDrawerState
-import androidx.compose.material3.DrawerValue
-import kotlinx.coroutines.launch
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.rememberCoroutineScope
-import org.lanzadera.proyectos.ui.components.DrawerAppBar
-import androidx.compose.material3.DrawerState
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.CoroutineStart
-import org.lanzadera.proyectos.ui.screens.detail.BookDetailView
+import org.lanzadera.proyectos.utils.Constants
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,8 +89,9 @@ fun Navigation(
                     SplashView(nav = navHost, darkTheme = darkTheme, selectedTheme = selectedTheme)
                 }
                 composable(Constants.Screen.Home.route) {
+                    val homeViewModel: HomeViewModel = koinViewModel()
                     HomeView(
-                        nav = navHost, vm = HomeViewModel(koinInject(), koinInject()),
+                        nav = navHost, vm = homeViewModel,
                         //selectedTheme = selectedTheme, darkTheme = darkTheme
                     )
                 }
@@ -110,6 +113,11 @@ fun Navigation(
                         // fallback: nothing selected — navigate back safely
                         LaunchedEffect(Unit) { navHost.popBackStack() }
                     }
+                }
+                composable(Constants.Screen.SeriesDetail.route) {
+                    // Show series detail - pass tvShow if available, let ViewModel handle fallback
+                    val tvShow = remember { NavigationStore.selectedTvShow }
+                    SeriesDetailView(nav = navHost, tvShow = tvShow)
                 }
                 composable(Constants.Screen.Search.route) {
                     SearchView(

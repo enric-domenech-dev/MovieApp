@@ -15,15 +15,18 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
-import org.lanzadera.proyectos.domain.models.movie.Movie
 import org.lanzadera.proyectos.domain.models.book.Book
-import org.lanzadera.proyectos.domain.usecase.load_initial_data.LoadInitialDataUseCase
+import org.lanzadera.proyectos.domain.models.movie.Movie
+import org.lanzadera.proyectos.domain.models.tvshow.TvShow
 import org.lanzadera.proyectos.domain.usecase.books.RefreshBooksUseCase
+import org.lanzadera.proyectos.domain.usecase.load_initial_data.LoadInitialDataUseCase
+import org.lanzadera.proyectos.domain.usecase.tvshows.RefreshTvShowsUseCase
 import kotlin.coroutines.cancellation.CancellationException
 
 class HomeViewModel(
     private val loadInitialData: LoadInitialDataUseCase,
-    private val refreshBooksUseCase: RefreshBooksUseCase?
+    private val refreshBooksUseCase: RefreshBooksUseCase?,
+    private val refreshTvShowsUseCase: RefreshTvShowsUseCase? = null
 ) : ViewModel() {
 
     // HomeTab: ahora con 5 pestañas: BOOKS, FILMS, SERIES, GAMES, <3
@@ -53,6 +56,45 @@ class HomeViewModel(
     val books: StateFlow<List<Book>> = refreshBooksUseCase?.booksFlow
         ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
         ?: MutableStateFlow(emptyList())
+
+    // TvShows flows (if use case provided)
+    val tvShows: StateFlow<List<TvShow>> = refreshTvShowsUseCase?.tvShowsFlow
+        ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+        ?: MutableStateFlow(emptyList())
+    val popularTvShows: StateFlow<List<TvShow>> = refreshTvShowsUseCase?.popularTvShowsFlow
+        ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+        ?: MutableStateFlow(emptyList())
+    val topRatedTvShows: StateFlow<List<TvShow>> = refreshTvShowsUseCase?.topRatedTvShowsFlow
+        ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+        ?: MutableStateFlow(emptyList())
+    val onAirTvShows: StateFlow<List<TvShow>> = refreshTvShowsUseCase?.onAirTvShowsFlow
+        ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+        ?: MutableStateFlow(emptyList())
+    val trendingTvShows: StateFlow<List<TvShow>> = refreshTvShowsUseCase?.trendingTvShowsFlow
+        ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+        ?: MutableStateFlow(emptyList())
+
+    val airingTodayTvShows: StateFlow<List<TvShow>> = refreshTvShowsUseCase?.airingTodayTvShowsFlow
+        ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+        ?: MutableStateFlow(emptyList())
+
+    val trendingTvShowsWeek: StateFlow<List<TvShow>> = refreshTvShowsUseCase?.trendingTvShowsWeekFlow
+        ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+        ?: MutableStateFlow(emptyList())
+
+    // Derived TV show flows for additional sections
+    val airingTodayAndTrendingTvShows: StateFlow<List<TvShow>> =
+        combine(onAirTvShows, airingTodayTvShows) { onAir, airingToday ->
+            (onAir + airingToday).distinctBy { it.id }.take(20)
+        }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val recommendedTvShows: StateFlow<List<TvShow>> = combine(topRatedTvShows, popularTvShows) { topRated, popular ->
+        (topRated + popular).distinctBy { it.id }.shuffled().take(20)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val upcomingTvShows: StateFlow<List<TvShow>> = tvShows.combine(onAirTvShows) { all, onAir ->
+        all.filter { it !in onAir }.take(20)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     // Flags de UI
     val refreshing = MutableStateFlow(false)
@@ -90,6 +132,38 @@ class HomeViewModel(
                 } catch (t: Throwable) {
                     error.value = t.message ?: "Error fetching books"
                     println("SYNCRO HomeViewModel: error refreshing books: ${t.message}")
+                } finally {
+                    refreshing.value = false
+                }
+            }
+        }
+
+        // Si selecciona SERIES y aún no hay datos, lanzar refresco
+        if (_selectedTab.value == HomeTab.SERIES) {
+            println("SYNCRO HomeViewModel: SERIES tab selected, tvShows.size=${tvShows.value.size}")
+            viewModelScope.launch {
+                try {
+                    if (refreshTvShowsUseCase != null && tvShows.value.isEmpty()) {
+                        println("SYNCRO HomeViewModel: launching refreshTvShowsUseCase for all TV endpoints")
+                        refreshing.value = true
+                        supervisorScope {
+                            awaitAll(
+                                async { refreshTvShowsUseCase.refreshTvShows(force = false) },
+                                async { refreshTvShowsUseCase.refreshPopularTvShows(force = false) },
+                                async { refreshTvShowsUseCase.refreshTopRatedTvShows(force = false) },
+                                async { refreshTvShowsUseCase.refreshOnAirTvShows(force = false) },
+                                async { refreshTvShowsUseCase.refreshTrendingTvShows(force = false) },
+                                async { refreshTvShowsUseCase.refreshAiringTodayTvShows(force = false) },
+                                async { refreshTvShowsUseCase.refreshTrendingTvShowsWeek(force = false) }
+                            )
+                        }
+                        println("SYNCRO HomeViewModel: refreshTvShowsUseCase finished, tvShows.size=${tvShows.value.size}")
+                    } else {
+                        println("SYNCRO HomeViewModel: no refresh needed or no use case")
+                    }
+                } catch (t: Throwable) {
+                    error.value = t.message ?: "Error fetching tv shows"
+                    println("SYNCRO HomeViewModel: error refreshing tv shows: ${t.message}")
                 } finally {
                     refreshing.value = false
                 }

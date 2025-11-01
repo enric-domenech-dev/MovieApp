@@ -6,7 +6,6 @@ import io.ktor.client.plugins.api.createClientPlugin
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.statement.bodyAsText
-import io.ktor.client.statement.request
 import io.ktor.http.URLProtocol
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.builtins.ListSerializer
@@ -135,13 +134,31 @@ val viewModelsModule = module {
     // UseCases
     single { LoadInitialDataUseCase(get()) }
     single { org.lanzadera.proyectos.domain.usecase.books.RefreshBooksUseCase(get()) }
+    single { org.lanzadera.proyectos.domain.usecase.tvshows.RefreshTvShowsUseCase(get()) }
+    single { org.lanzadera.proyectos.domain.usecase.tvshows.GetTvShowDetailsUseCase(get()) }
 
     // Repositories
     single<LoadInitialData> { LoadInitialDataImpl(get(), 5, get()) }
     single<org.lanzadera.proyectos.domain.repository.BooksRepository> { org.lanzadera.proyectos.data.repository.BooksRepositoryImpl(get(named("googleBooksClient")), get(), get(named("googleBooksApiKey"))) }
+    single<org.lanzadera.proyectos.domain.repository.TvShowRepository> {
+        org.lanzadera.proyectos.data.repository.TvShowRepositoryImpl(
+            get(),
+            5,
+            get()
+        )
+    }
+    single<org.lanzadera.proyectos.domain.repository.MovieRepository> {
+        org.lanzadera.proyectos.data.repository.MovieRepositoryImpl(
+            get(),
+            5,
+            get()
+        )
+    }
 
     // ViewModels
-    viewModel { HomeViewModel(get(), get()) }
+    viewModel { HomeViewModel(get(), get(), get()) }
+    viewModel { org.lanzadera.proyectos.ui.screens.detail.SeriesDetailViewModel(get()) }
+    viewModel { org.lanzadera.proyectos.ui.screens.detail.MovieDetailViewModel(get()) }
 }
 
 val nativeModule: Module = module {}
