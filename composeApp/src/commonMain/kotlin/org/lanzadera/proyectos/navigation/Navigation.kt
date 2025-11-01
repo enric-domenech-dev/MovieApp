@@ -26,7 +26,10 @@ import org.lanzadera.proyectos.ui.screens.chat.ChatView
 import org.lanzadera.proyectos.ui.screens.chat.ChatViewModel
 import org.lanzadera.proyectos.ui.screens.detail.BookDetailView
 import org.lanzadera.proyectos.ui.screens.detail.DetailView
+import org.lanzadera.proyectos.ui.screens.detail.MovieDetailView
+import org.lanzadera.proyectos.ui.screens.detail.MovieDetailViewModel
 import org.lanzadera.proyectos.ui.screens.detail.SeriesDetailView
+import org.lanzadera.proyectos.ui.screens.detail.SeriesDetailViewModel
 import org.lanzadera.proyectos.ui.screens.home.HomeView
 import org.lanzadera.proyectos.ui.screens.home.HomeViewModel
 import org.lanzadera.proyectos.ui.screens.login.LoginView
@@ -114,16 +117,29 @@ fun Navigation(
                         LaunchedEffect(Unit) { navHost.popBackStack() }
                     }
                 }
-                composable(Constants.Screen.SeriesDetail.route) {
-                    // Show series detail - pass tvShow if available, let ViewModel handle fallback
-                    val tvShow = remember { NavigationStore.selectedTvShow }
-                    SeriesDetailView(nav = navHost, tvShow = tvShow)
-                }
                 composable(Constants.Screen.Search.route) {
                     SearchView(
-                        nav = navHost, vm = SearchViewModel(),
-                        selectedTheme = selectedTheme, darkTheme = darkTheme
+                        vm = koinViewModel<SearchViewModel>(),
+                        navController = navHost
                     )
+                }
+                composable(Constants.Screen.MovieDetail.route) { backStackEntry ->
+                    val movieId = backStackEntry.arguments?.getString("movieId")?.toIntOrNull()
+                    if (movieId != null) {
+                        val viewModel: MovieDetailViewModel = koinViewModel()
+                        MovieDetailView(nav = navHost, viewModel = viewModel, movieId = movieId)
+                    } else {
+                        LaunchedEffect(Unit) { navHost.popBackStack() }
+                    }
+                }
+                composable(Constants.Screen.SeriesDetail.route) { backStackEntry ->
+                    val tvShowId = backStackEntry.arguments?.getString("tvShowId")?.toIntOrNull()
+                    if (tvShowId != null) {
+                        val viewModel: SeriesDetailViewModel = koinViewModel()
+                        SeriesDetailView(nav = navHost, vm = viewModel, tvShowId = tvShowId)
+                    } else {
+                        LaunchedEffect(Unit) { navHost.popBackStack() }
+                    }
                 }
                 composable(Constants.Screen.Settings.route) {
                     SettingView(navHost, SettingsViewModel())

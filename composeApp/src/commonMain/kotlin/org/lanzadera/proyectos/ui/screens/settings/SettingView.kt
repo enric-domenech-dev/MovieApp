@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import org.lanzadera.proyectos.utils.Strings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,12 +28,12 @@ fun SettingView(nav: NavHostController, vm: SettingsViewModel, modifier: Modifie
         modifier = modifier.safeDrawingPadding(),
         topBar = {
             TopAppBar(
-                title = { Text("Settings") },
+                title = { Text(Strings.Settings.THEME) },
                 navigationIcon = {
                     IconButton(onClick = { nav.popBackStack() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = "Go Back"
+                            contentDescription = "Volver"
                         )
                     }
                 }

@@ -131,10 +131,10 @@ private suspend inline fun refreshFeed(
 // --- Fetchers concretos (reutiliza los tuyos) ---
 
     private suspend fun fetchTrendingMoviesWeek(): List<Movie> =
-        fetchPaged("/3/trending/movie/week", mapOf(/* sin language/region si no quieres forzar */))
+        fetchPaged("/3/trending/movie/week", mapOf("language" to "es"))
 
     private suspend fun fetchTrendingMoviesDay(): List<Movie> =
-        fetchPaged("/3/trending/movie/day", emptyMap())
+        fetchPaged("/3/trending/movie/day", mapOf("language" to "es"))
 
     private suspend fun fetchTrendingMovies(): List<Movie> =
         fetchPaged(
@@ -156,7 +156,8 @@ private suspend inline fun refreshFeed(
                 "with_release_type" to "3|2",            // theatrical primero
                 "release_date.gte" to from,              // ventana reciente/próxima
                 "release_date.lte" to to,
-                "vote_count.gte" to "200"
+                "vote_count.gte" to "200",
+                "language" to "es"
             )
         )
     }
@@ -172,6 +173,7 @@ private suspend inline fun refreshFeed(
             put("sort_by", "popularity.desc")
             put("with_release_type", "3|2")               // cines
             put("release_date.gte", from)
+            put("language", "es")
             put("release_date.lte", today.toString())
         }
         return fetchPaged("/3/discover/movie", params).distinctBy { it.id }.take(limit)
@@ -184,7 +186,7 @@ private suspend inline fun refreshFeed(
         )
 
     private suspend fun fetchTopRatedMovies(): List<Movie> =
-        fetchPaged("/3/movie/top_rated", emptyMap())
+        fetchPaged("/3/movie/top_rated", mapOf("language" to "es"))
 
     private suspend fun fetchUpcomingMovies(): List<Movie> =
         fetchPaged(
@@ -193,7 +195,7 @@ private suspend inline fun refreshFeed(
         )
 
     private suspend fun fetchNowPlayingMovies(): List<Movie> =
-        fetchPaged("/3/movie/now_playing", emptyMap())
+        fetchPaged("/3/movie/now_playing", mapOf("language" to "es"))
 
     // --- Paginación común ---
     private suspend fun fetchPaged(path: String, baseParams: Map<String, String>): List<Movie> {

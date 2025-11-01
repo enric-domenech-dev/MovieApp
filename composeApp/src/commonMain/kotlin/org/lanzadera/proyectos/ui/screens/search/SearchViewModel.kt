@@ -1,50 +1,79 @@
 package org.lanzadera.proyectos.ui.screens.search
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.lanzadera.proyectos.domain.repository.SearchRepository
 
 class SearchViewModel(
-    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default)
-) {
+    private val searchRepository: SearchRepository
+) : ViewModel() {
 
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query.asStateFlow()
 
-    private val _results = MutableStateFlow<List<String>>(emptyList())
-    val results: StateFlow<List<String>> = _results.asStateFlow()
+    private val _results = MutableStateFlow<List<Any>>(emptyList())
+    val results: StateFlow<List<Any>> = _results.asStateFlow()
 
-    // Actualizar el texto de búsqueda
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error.asStateFlow()
+
     fun onQueryChanged(newQuery: String) {
         _query.value = newQuery
     }
 
-    // Función placeholder para realizar la búsqueda (futura integración con repositorio)
     fun performSearch() {
-        val q = _query.value.trim()
-        if (q.isEmpty()) {
+        val currentQuery = _query.value.trim()
+        if (currentQuery.isEmpty()) {
             _results.value = emptyList()
+            _error.value = null
             return
         }
 
-        // Simular búsqueda rápida: devuelve una lista de strings con el término
-        coroutineScope.launch {
-            // En una implementación real aquí se llamaría a un repositorio/servicio
-            _results.value = listOf(
-                "Resultado para: \"$q\" - Ejemplo 1",
-                "Resultado para: \"$q\" - Ejemplo 2",
-                "Resultado para: \"$q\" - Ejemplo 3"
-            )
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+            try {
+                // Buscar películas y series en paralelo
+                val movies = searchRepository.searchMovies(currentQuery)
+                val tvShows = searchRepository.searchTvShows(currentQuery)
+
+                // Combinar resultados alternando películas y series
+                val combinedResults = mutableListOf<Any>()
+                val maxSize = maxOf(movies.size, tvShows.size)
+
+                for (i in 0 until maxSize) {
+                    if (i < movies.size) {
+                        combinedResults.add(movies[i])
+                    }
+                    if (i < tvShows.size) {
+                        combinedResults.add(tvShows[i])
+                    }
+                }
+
+                _results.value = combinedResults
+
+                if (combinedResults.isEmpty()) {
+                    _error.value = "No se encontraron resultados para '$currentQuery'"
+                }
+            } catch (e: Exception) {
+                _error.value = "Error al buscar: ${e.message}"
+            } finally {
+                _isLoading.value = false
+            }
         }
     }
 
-    // Limpiar resultados y query
     fun clear() {
         _query.value = ""
         _results.value = emptyList()
+        _error.value = null
     }
-
 }
+
