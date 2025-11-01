@@ -45,7 +45,7 @@ fun DetailView(
         floatingActionButtonPosition =
             FabPosition.EndOverlay,
         floatingActionButton = {
-//BONOTN
+
         },
         topBar = {
             CustomTopAppBar(
