@@ -1,6 +1,7 @@
 name: only-develop-pr
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     branches:
       - master
 
