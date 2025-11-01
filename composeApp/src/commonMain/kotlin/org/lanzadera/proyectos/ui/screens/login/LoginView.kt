@@ -30,17 +30,18 @@ import movieapp.composeapp.generated.resources.unicorn
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.lanzadera.proyectos.AppTheme
-import org.lanzadera.proyectos.navigation.NavigationController
+import org.lanzadera.proyectos.utils.Constants
 import org.lanzadera.proyectos.ui.components.DevelopingDialog
 import org.lanzadera.proyectos.ui.components.EmailInput
 import org.lanzadera.proyectos.ui.components.FingerPrintAuthentication
 import org.lanzadera.proyectos.ui.components.PasswordInput
 import org.lanzadera.proyectos.ui.components.PrimaryButton
+import androidx.navigation.NavHostController
 
 @Composable
 @Preview
 fun LoginView(
-    nav: NavigationController, vm: LoginViewModel,
+    nav: NavHostController, vm: LoginViewModel,
     selectedTheme: AppTheme = AppTheme.SYSTEM,
     darkTheme: Boolean = false
 ) {
@@ -59,7 +60,7 @@ fun LoginView(
     // Observa el estado de login y navega cuando se haya realizado correctamente
     LaunchedEffect(isLoginSuccessful) {
         if (isLoginSuccessful == true) {
-            nav.navigateToHome()
+            nav.navigate(Constants.Screen.Home.route)
         } else {
             // Si el login falla, incrementar el contador de intentos fallidos
             if (failedAttempts < 3) {
@@ -169,4 +170,3 @@ fun LoginView(
         }
     }
 }
-
