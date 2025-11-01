@@ -22,8 +22,8 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -52,6 +52,7 @@ import androidx.navigation.NavHostController
 import kotlinx.coroutines.launch
 import org.lanzadera.proyectos.BuildConfig
 import org.lanzadera.proyectos.utils.Constants
+import org.lanzadera.proyectos.utils.Strings
 
 @Composable
 fun DrawerAppBar(
@@ -80,11 +81,11 @@ fun DrawerAppBar(
                 ) {
                     Icon(
                         imageVector = Icons.Default.AccountCircle,
-                        contentDescription = "User Image",
+                        contentDescription = "Imagen de Usuario",
                         modifier = Modifier.size(100.dp)
                     )
                     Text(
-                        "User Name".uppercase(),
+                        "Nombre de Usuario".uppercase(),
                         modifier = Modifier.padding(16.dp),
                         style = MaterialTheme.typography.headlineSmall
                     )
@@ -98,7 +99,7 @@ fun DrawerAppBar(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     DropdownMenuItem(
-                        text = { Text("Profile") },
+                        text = { Text(Strings.Menu.PROFILE) },
                         onClick = { navViewModel.navigate(Constants.Screen.Search.route) },
                         leadingIcon = {
                             Icon(Icons.Outlined.Person, contentDescription = null)
@@ -106,7 +107,7 @@ fun DrawerAppBar(
                     )
 
                     DropdownMenuItem(
-                        text = { Text("Settings") },
+                        text = { Text(Strings.Settings.THEME) },
                         onClick = {
                             navViewModel.navigate(Constants.Screen.Settings.route)
                             scope.launch { drawerState.close() }
@@ -120,7 +121,7 @@ fun DrawerAppBar(
                 HorizontalDivider()
 
                 DropdownMenuItem(
-                    text = { Text("Send Feedback") },
+                    text = { Text("Enviar Comentarios") },
                     onClick = { /* Do something... */ },
                     leadingIcon = {
                         Icon(Icons.Outlined.Email, contentDescription = null)
@@ -133,7 +134,7 @@ fun DrawerAppBar(
                 HorizontalDivider()
 
                 DropdownMenuItem(
-                    text = { Text("Help") },
+                    text = { Text("Ayuda") },
                     onClick = { /* Do something... */ },
                     leadingIcon = {
                         Icon(Icons.Outlined.Info, contentDescription = null)
@@ -146,7 +147,7 @@ fun DrawerAppBar(
                 Spacer(modifier = Modifier.weight(1f))
 
                 DropdownMenuItem(
-                    text = { Text("About") },
+                    text = { Text(Strings.Settings.ABOUT) },
                     onClick = { /* Do something... */ },
                     leadingIcon = {
                         Icon(Icons.Outlined.Info, contentDescription = null)
@@ -154,12 +155,12 @@ fun DrawerAppBar(
                 )
 
                 DropdownMenuItem(
-                    text = { Text("Log Out") },
+                    text = { Text(Strings.Settings.LOGOUT) },
                     onClick = { showDialog = true },
                     leadingIcon = {
                         Icon(
                             Icons.AutoMirrored.Outlined.ExitToApp,
-                            contentDescription = "log out icon button"
+                            contentDescription = "Botón de cerrar sesión"
                         )
                     }
                 )

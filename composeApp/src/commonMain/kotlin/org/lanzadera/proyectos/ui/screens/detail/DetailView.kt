@@ -31,6 +31,7 @@ import org.lanzadera.proyectos.domain.models.movie.Movie
 import org.lanzadera.proyectos.navigation.NavigationStore
 import org.lanzadera.proyectos.ui.components.CustomTopAppBar
 import org.lanzadera.proyectos.ui.components.MovieDetail
+import org.lanzadera.proyectos.utils.Strings
 
 @Composable
 @Preview
@@ -62,12 +63,12 @@ fun DetailView(
             modifier = Modifier.safeDrawingPadding(),
             topBar = {
                 CustomTopAppBar(
-                    title = "Película",
+                    title = Strings.Detail.NO_DATA,
                     navigationIcon = {
                         IconButton(onClick = { nav.popBackStack() }) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                                contentDescription = "Go Back",
+                                contentDescription = "Volver",
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
@@ -84,7 +85,7 @@ fun DetailView(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("No se encontraron datos de la película", color = MaterialTheme.colorScheme.error)
+                Text(Strings.Detail.NO_DATA, color = MaterialTheme.colorScheme.error)
             }
         }
         return
@@ -103,7 +104,7 @@ fun DetailView(
                     IconButton(onClick = { nav.popBackStack() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = "Go Back",
+                            contentDescription = "Volver",
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
@@ -112,7 +113,7 @@ fun DetailView(
                     IconButton(onClick = { nav.popBackStack() }) {
                         Icon(
                             imageVector = Icons.Outlined.Info,
-                            contentDescription = "Info",
+                            contentDescription = "Información",
                             modifier = Modifier.size(ButtonDefaults.IconSize)
                         )
                     }

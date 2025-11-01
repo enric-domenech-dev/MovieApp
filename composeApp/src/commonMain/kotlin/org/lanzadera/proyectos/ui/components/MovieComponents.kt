@@ -256,7 +256,7 @@ fun MovieDetail(movie: Movie?) {
         }
 
         LazyColumn(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).navigationBarsPadding()
         ) {
             item {
                 // Título

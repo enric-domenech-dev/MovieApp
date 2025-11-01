@@ -15,6 +15,7 @@ fun NiaNavigationBar(
     content: @Composable RowScope.() -> Unit,
 ) {
     NavigationBar(
+        containerColor = MaterialTheme.colorScheme.background,
         contentColor = NiaNavigationDefaults.navigationContentColor(),
         tonalElevation = 0.dp,
         content = content,

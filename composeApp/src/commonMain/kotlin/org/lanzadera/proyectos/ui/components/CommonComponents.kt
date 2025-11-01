@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.lanzadera.proyectos.utils.Strings
 
 @Composable
 fun PlaceholderScreen(title: String) {
@@ -29,7 +30,7 @@ fun PlaceholderScreen(title: String) {
         )
         Text(text = title, style = MaterialTheme.typography.headlineSmall)
         Text(
-            text = "Funcionalidad en desarrollo",
+            text = Strings.Generic.DEVELOPING,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 8.dp)
