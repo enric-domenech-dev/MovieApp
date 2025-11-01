@@ -180,7 +180,7 @@ private suspend inline fun refreshFeed(
     private suspend fun fetchPopularMovies(): List<Movie> =
         fetchPaged(
             path = "/3/movie/popular",
-            baseParams = mapOf("language" to "en-US")
+            baseParams = mapOf("language" to "es")
         )
 
     private suspend fun fetchTopRatedMovies(): List<Movie> =
@@ -189,7 +189,7 @@ private suspend inline fun refreshFeed(
     private suspend fun fetchUpcomingMovies(): List<Movie> =
         fetchPaged(
             path = "/3/movie/upcoming",
-            baseParams = mapOf("language" to "en-US")
+            baseParams = mapOf("language" to "es")
         )
 
     private suspend fun fetchNowPlayingMovies(): List<Movie> =

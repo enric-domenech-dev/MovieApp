@@ -1,5 +1,6 @@
 package org.lanzadera.proyectos.ui.screens.home
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -27,7 +28,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
@@ -44,7 +44,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,11 +58,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.lanzadera.proyectos.domain.models.book.Book
 import org.lanzadera.proyectos.domain.models.movie.Movie
-import org.lanzadera.proyectos.ui.components.DrawerAppBar
-import org.lanzadera.proyectos.ui.components.MovieHeader
-import org.lanzadera.proyectos.ui.components.MovieItem
-import org.lanzadera.proyectos.ui.components.MovieSubheader
+import org.lanzadera.proyectos.domain.models.tvshow.TvShow
+import org.lanzadera.proyectos.ui.components.dialogs.SectionDialog
+import org.lanzadera.proyectos.ui.components.sections.BookSection
+import org.lanzadera.proyectos.ui.components.sections.Section
+import org.lanzadera.proyectos.ui.components.sections.TvShowSection
 import org.lanzadera.proyectos.ui.components.tabs.NiaTab
 import org.lanzadera.proyectos.ui.components.tabs.NiaTabRow
 import org.lanzadera.proyectos.utils.Constants.MenuOptions.topBarTitles
@@ -71,7 +72,6 @@ import org.lanzadera.proyectos.utils.Constants.MenuOptions.topBarTitles
 @Composable
 @Preview
 fun HomeView(
-    navIndexBottomBar: Int = 2,
     nav: NavHostController,
     vm: HomeViewModel,
 ) {
@@ -88,7 +88,6 @@ fun HomeView(
     val discover by vm.discover.collectAsStateWithLifecycle()
     val hero by vm.hero.collectAsStateWithLifecycle()
     val inCinemasToday by vm.inCinemasToday.collectAsStateWithLifecycle()
-    val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
 
     // Derived ordering example
@@ -101,7 +100,7 @@ fun HomeView(
         }
     }
 
-    DrawerAppBar(
+    org.lanzadera.proyectos.ui.components.DrawerAppBar(
         modifier = Modifier.safeDrawingPadding(),
         navViewModel = nav,
         drawerState = drawerState
@@ -146,61 +145,263 @@ fun HomeView(
             },
             // bottomBar moved to top-level Navigation scaffold
         ) { paddingValues ->
-            Column(
-                modifier = Modifier.fillMaxSize().padding(paddingValues),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
+            val hasContent = primarySorted.isNotEmpty() || secondary.isNotEmpty()
+            val showLoading = state.isLoading && !hasContent
+            val showError = (state.error != null) && !hasContent
 
-                val hasContent = primarySorted.isNotEmpty() || secondary.isNotEmpty()
-                val showLoading = state.isLoading && !hasContent
-                val showError = (state.error != null) && !hasContent
+            when {
+                showLoading -> {
+                    Column(
+                        modifier = Modifier.fillMaxSize().padding(paddingValues),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
 
-                when {
-                    showLoading -> CircularProgressIndicator()
-                    showError -> {
+                showError -> {
+                    Column(
+                        modifier = Modifier.fillMaxSize().padding(paddingValues),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
                         Text(text = "Error", color = MaterialTheme.colorScheme.error)
                         Text(text = state.error ?: "", color = MaterialTheme.colorScheme.error)
                     }
-                    else -> {
-                        // Home screen content (tabs + sections)
-                        if (selectedTab != HomeViewModel.HomeTab.FILMS) {
-                            PlaceholderScreen(
-                                title = when (selectedTab) {
-                                    HomeViewModel.HomeTab.BOOKS -> "BOOKS"
-                                    HomeViewModel.HomeTab.SERIES -> "SERIES"
-                                    HomeViewModel.HomeTab.GAMES -> "GAMES"
-                                    HomeViewModel.HomeTab.HEART -> "FAVORITOS"
-                                    else -> ""
-                                }
-                            )
-                        } else {
-                            LazyColumn(
-                                state = listState,
-                                modifier = Modifier.fillMaxSize(),
-                                contentPadding = PaddingValues(horizontal = 8.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                val sections: List<Pair<String, List<Movie>>> = listOf(
-                                    "Upcoming" to upcoming,
-                                    "Popular Movies" to popular,
-                                    "Discover" to discover,
-                                    "In Cinemas Today" to inCinemasToday,
-                                    "Top Rated" to topRated,
-                                    "Trending Today" to trendingDay,
-                                    "Trending This Week" to trendingWeek,
-                                    "Hero Picks" to hero,
-                                )
+                }
 
-                                sections.forEachIndexed { idx, (sectionTitle, items) ->
-                                    if (items.isNotEmpty()) {
-                                        item {
-                                            when (idx) {
-                                                0 -> Section(sectionTitle, items, nav, sectionIndex = idx, mode = SectionMode.HEADER)
-                                                1 -> Section(sectionTitle, items, nav, sectionIndex = idx, mode = SectionMode.SUBHEADER_SHOW_META)
-                                                else -> Section(sectionTitle, items, nav, sectionIndex = idx, mode = SectionMode.SUBHEADER_HIDE_META)
-                                            }
-                                        }
+                selectedTab == HomeViewModel.HomeTab.BOOKS -> {
+                    // Mostrar lista de libros con secciones
+                    val books by vm.books.collectAsStateWithLifecycle()
+                    val isRefreshingBooks by vm.refreshing.collectAsStateWithLifecycle()
+
+                    if (books.isEmpty()) {
+                        if (isRefreshingBooks) {
+                            Column(
+                                modifier = Modifier.fillMaxSize().padding(paddingValues),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        } else {
+                            org.lanzadera.proyectos.ui.components.PlaceholderScreen(title = "LIBROS")
+                        }
+                    } else {
+                        val booksListState = rememberLazyListState()
+                        LazyColumn(
+                            state = booksListState,
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(
+                                start = 8.dp,
+                                end = 8.dp,
+                                top = paddingValues.calculateTopPadding() + 8.dp,
+                                bottom = paddingValues.calculateBottomPadding() + 16.dp
+                            ),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            val sections: List<Pair<String, List<Book>>> = listOf(
+                                "Featured Books" to books.take(35),
+                                "Popular Books" to books.drop(35).take(35),
+                                "Latest Releases" to books.drop(70).take(35),
+                                "Trending Books" to books.drop(105).take(35),
+                            ).filter { it.second.isNotEmpty() }
+
+                            sections.forEachIndexed { idx, (sectionTitle, sectionBooks) ->
+                                item {
+                                    when (idx) {
+                                        0 -> BookSection(
+                                            sectionTitle,
+                                            sectionBooks,
+                                            nav,
+                                            sectionIndex = idx,
+                                            mode = SectionMode.HEADER
+                                        )
+
+                                        1 -> BookSection(
+                                            sectionTitle,
+                                            sectionBooks,
+                                            nav,
+                                            sectionIndex = idx,
+                                            mode = SectionMode.SUBHEADER_SHOW_META
+                                        )
+
+                                        else -> BookSection(
+                                            sectionTitle,
+                                            sectionBooks,
+                                            nav,
+                                            sectionIndex = idx,
+                                            mode = SectionMode.SUBHEADER_HIDE_META
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                selectedTab == HomeViewModel.HomeTab.SERIES -> {
+                    // Mostrar lista de series con secciones
+                    val tvShows by vm.tvShows.collectAsStateWithLifecycle()
+                    val popularTvShows by vm.popularTvShows.collectAsStateWithLifecycle()
+                    val topRatedTvShows by vm.topRatedTvShows.collectAsStateWithLifecycle()
+                    val onAirTvShows by vm.onAirTvShows.collectAsStateWithLifecycle()
+                    val trendingTvShows by vm.trendingTvShows.collectAsStateWithLifecycle()
+                    val airingTodayTvShows by vm.airingTodayTvShows.collectAsStateWithLifecycle()
+                    val trendingTvShowsWeek by vm.trendingTvShowsWeek.collectAsStateWithLifecycle()
+                    val airingTodayAndTrendingTvShows by vm.airingTodayAndTrendingTvShows.collectAsStateWithLifecycle()
+                    val recommendedTvShows by vm.recommendedTvShows.collectAsStateWithLifecycle()
+                    val upcomingTvShows by vm.upcomingTvShows.collectAsStateWithLifecycle()
+                    val isRefreshingSeries by vm.refreshing.collectAsStateWithLifecycle()
+
+                    if (tvShows.isEmpty()) {
+                        if (isRefreshingSeries) {
+                            Column(
+                                modifier = Modifier.fillMaxSize().padding(paddingValues),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        } else {
+                            org.lanzadera.proyectos.ui.components.PlaceholderScreen(title = "SERIES")
+                        }
+                    } else {
+                        val seriesListState = rememberLazyListState()
+                        LazyColumn(
+                            state = seriesListState,
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(
+                                start = 8.dp,
+                                end = 8.dp,
+                                top = paddingValues.calculateTopPadding() + 8.dp,
+                                bottom = paddingValues.calculateBottomPadding() + 16.dp
+                            ),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            val sections: List<Pair<String, List<TvShow>>> = listOf(
+                                "Now Airing" to onAirTvShows,
+                                "Popular Series" to popularTvShows,
+                                "Top Rated" to topRatedTvShows,
+                                "Trending Today" to trendingTvShows,
+                                "Airing Today" to airingTodayTvShows,
+                                "Trending This Week" to trendingTvShowsWeek,
+                                "Airing Today & Trending" to airingTodayAndTrendingTvShows,
+                                "Recommended For You" to recommendedTvShows,
+                                "Coming Soon" to upcomingTvShows,
+                                "New & Trending" to trendingTvShows.shuffled().take(20),
+                                "Fan Favorites" to topRatedTvShows.shuffled().take(15),
+                                "Hidden Gems" to popularTvShows.filter { (it.voteCount ?: 0) < 1000 }.shuffled()
+                                    .take(15),
+                                "Binge-Worthy Picks" to popularTvShows.shuffled().take(20),
+                                "Critics' Choice" to topRatedTvShows.take(20),
+                                "Next Up" to tvShows.filter { it !in onAirTvShows }.shuffled().take(20),
+                                "Popular Classics" to popularTvShows.take(20),
+                                "All Series" to tvShows,
+                            ).filter { it.second.isNotEmpty() }
+
+                            sections.forEachIndexed { idx, (sectionTitle, sectionTvShows) ->
+                                item {
+                                    when (idx) {
+                                        0 -> TvShowSection(
+                                            sectionTitle,
+                                            sectionTvShows,
+                                            nav,
+                                            sectionIndex = idx,
+                                            mode = SectionMode.HEADER
+                                        )
+
+                                        1 -> TvShowSection(
+                                            sectionTitle,
+                                            sectionTvShows,
+                                            nav,
+                                            sectionIndex = idx,
+                                            mode = SectionMode.SUBHEADER_SHOW_META
+                                        )
+
+
+                                        else -> TvShowSection(
+                                            sectionTitle,
+                                            sectionTvShows,
+                                            nav,
+                                            sectionIndex = idx,
+                                            mode = SectionMode.SUBHEADER_HIDE_META
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                selectedTab == HomeViewModel.HomeTab.GAMES || selectedTab == HomeViewModel.HomeTab.HEART -> {
+                    Column(
+                        modifier = Modifier.fillMaxSize().padding(paddingValues),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        org.lanzadera.proyectos.ui.components.PlaceholderScreen(
+                            title = when (selectedTab) {
+                                HomeViewModel.HomeTab.GAMES -> "JUEGOS"
+                                HomeViewModel.HomeTab.HEART -> "FAVORITOS"
+                                else -> ""
+                            }
+                        )
+                    }
+                }
+
+                else -> {
+                    // FILMS tab
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(
+                            start = 8.dp,
+                            end = 8.dp,
+                            top = paddingValues.calculateTopPadding() + 8.dp,
+                            bottom = paddingValues.calculateBottomPadding() + 16.dp
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        val sections: List<Pair<String, List<Movie>>> = listOf(
+                            "Upcoming" to upcoming,
+                            "Popular Movies" to popular,
+                            "Discover" to discover,
+                            "In Cinemas Today" to inCinemasToday,
+                            "Top Rated" to topRated,
+                            "Trending Today" to trendingDay,
+                            "Trending This Week" to trendingWeek,
+                            "Hero Picks" to hero,
+                        )
+
+                        sections.forEachIndexed { idx, (sectionTitle, items) ->
+                            if (items.isNotEmpty()) {
+                                item {
+                                    when (idx) {
+                                        0 -> Section(
+                                            sectionTitle,
+                                            items,
+                                            nav,
+                                            sectionIndex = idx,
+                                            mode = SectionMode.HEADER
+                                        )
+
+                                        1 -> Section(
+                                            sectionTitle,
+                                            items,
+                                            nav,
+                                            sectionIndex = idx,
+                                            mode = SectionMode.SUBHEADER_SHOW_META
+                                        )
+
+                                        else -> Section(
+                                            sectionTitle,
+                                            items,
+                                            nav,
+                                            sectionIndex = idx,
+                                            mode = SectionMode.SUBHEADER_HIDE_META
+                                        )
                                     }
                                 }
                             }
@@ -212,17 +413,21 @@ fun HomeView(
     }
 }
 
-private enum class SectionMode { HEADER, SUBHEADER_SHOW_META, SUBHEADER_HIDE_META }
-
 @Composable
-private fun Section(title: String, items: List<Movie>, nav: NavHostController, sectionIndex: Int = 0, mode: SectionMode = SectionMode.HEADER) {
+private fun Section(
+    title: String,
+    items: List<Movie>,
+    nav: NavHostController,
+    sectionIndex: Int = 0,
+    mode: SectionMode = SectionMode.HEADER
+) {
     val visibleItems = remember(items) { items.take(12) }
 
     var showDialog by remember { mutableStateOf(false) }
     var dialogContentVisible by remember { mutableStateOf(false) }
     val animDuration = 320 // ms
 
-    Column(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+    Column(modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -264,14 +469,31 @@ private fun Section(title: String, items: List<Movie>, nav: NavHostController, s
                     val idPart = movie.id?.toString() ?: movie.hashCode().toString()
                     "s${sectionIndex}_${idPart}_$index"
                 }) { _, movie ->
-                     val itemModifier = if (mode == SectionMode.HEADER) Modifier.width(headerWidth) else Modifier.width(subWidth)
-                     when (mode) {
-                         SectionMode.HEADER -> MovieHeader(modifier = itemModifier, nav = nav, movie = movie)
-                         SectionMode.SUBHEADER_SHOW_META -> MovieSubheader(modifier = itemModifier, nav = nav, movie = movie, showMeta = true)
-                         SectionMode.SUBHEADER_HIDE_META -> MovieSubheader(modifier = itemModifier, nav = nav, movie = movie, showMeta = false)
-                     }
-                 }
-             }
+                    val itemModifier =
+                        if (mode == SectionMode.HEADER) Modifier.width(headerWidth) else Modifier.width(subWidth)
+                    when (mode) {
+                        SectionMode.HEADER -> org.lanzadera.proyectos.ui.components.MovieHeader(
+                            modifier = itemModifier,
+                            nav = nav,
+                            movie = movie
+                        )
+
+                        SectionMode.SUBHEADER_SHOW_META -> org.lanzadera.proyectos.ui.components.MovieSubheader(
+                            modifier = itemModifier,
+                            nav = nav,
+                            movie = movie,
+                            showMeta = true
+                        )
+
+                        SectionMode.SUBHEADER_HIDE_META -> org.lanzadera.proyectos.ui.components.MovieSubheader(
+                            modifier = itemModifier,
+                            nav = nav,
+                            movie = movie,
+                            showMeta = false
+                        )
+                    }
+                }
+            }
 
             if (showDialog) {
                 SectionDialog(
@@ -285,8 +507,8 @@ private fun Section(title: String, items: List<Movie>, nav: NavHostController, s
                     animDuration = animDuration
                 )
             }
-         }
-     }
+        }
+    }
 }
 
 @Composable
@@ -300,8 +522,11 @@ private fun SectionDialog(
     onDismissed: () -> Unit,
     animDuration: Int
 ) {
-    Dialog(onDismissRequest = { onRequestHideContent() }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        androidx.compose.animation.AnimatedVisibility(
+    Dialog(
+        onDismissRequest = { onRequestHideContent() },
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        AnimatedVisibility(
             visible = dialogVisible,
             enter = fadeIn(animationSpec = tween(animDuration)) + slideInVertically(animationSpec = tween(animDuration)) { it / 4 },
             exit = fadeOut(animationSpec = tween(animDuration)) + slideOutVertically(animationSpec = tween(animDuration)) { it / 4 }
@@ -321,25 +546,25 @@ private fun SectionDialog(
 
                     val gridState = rememberLazyGridState()
                     LazyVerticalGrid(
-                         columns = GridCells.Fixed(3),
-                         state = gridState,
-                         contentPadding = PaddingValues(8.dp),
-                         verticalArrangement = Arrangement.spacedBy(8.dp),
-                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                         modifier = Modifier.fillMaxSize()
-                     ) {
+                        columns = GridCells.Fixed(3),
+                        state = gridState,
+                        contentPadding = PaddingValues(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
                         itemsIndexed(items, key = { index, movie ->
                             val idPart = movie.id?.toString() ?: movie.hashCode().toString()
                             // include sectionIndex to avoid collisions across sections
                             "s${sectionIndex}_${idPart}_$index"
                         }) { _, movie ->
-                            MovieItem(nav, movie)
+                            org.lanzadera.proyectos.ui.components.MovieItem(nav, movie)
                         }
-                      }
-                 }
-             }
-         }
-     }
+                    }
+                }
+            }
+        }
+    }
 
     if (!dialogVisible) {
         LaunchedEffect(dialogVisible) {
@@ -349,43 +574,6 @@ private fun SectionDialog(
     }
 }
 
-@Composable
-private fun PlaceholderScreen(title: String) {
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(48.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Icon(imageVector = Icons.Filled.Info, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(bottom = 8.dp))
-        Text(text = title, style = MaterialTheme.typography.headlineSmall)
-        Text(text = "Funcionalidad en desarrollo", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp))
-    }
-}
 
-@Composable
-private fun BottomBarScreenPlaceholder(title: String) {
-    // A placeholder screen for bottom bar selections, with a title and scaffold-like hints
-    Column(
-        modifier = Modifier.fillMaxSize().padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-        // Hints or descriptions for future implementation can go here
-        Text(
-            text = "Esta sección está en desarrollo.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        Text(
-            text = "Pronto podrás disfrutar de más contenido aquí.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
+
+

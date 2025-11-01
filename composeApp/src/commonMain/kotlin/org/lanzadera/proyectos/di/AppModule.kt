@@ -89,7 +89,7 @@ val dataModule = module {
         }
     }
 
-    // HTTPS Client
+    // HTTPS Client for TMDB (existing)
     single {
         HttpClient {
             expectSuccess = true
@@ -107,18 +107,58 @@ val dataModule = module {
             }
         }
     }
+
+    // HTTPS Client for Google Books API - named binding
+    single(named("googleBooksClient")) {
+        HttpClient {
+            expectSuccess = true
+            install(HttpTimeout)
+            install(ContentNegotiation) { json(get()) }
+            install(LoggingPlugin)
+            defaultRequest {
+                url {
+                    protocol = URLProtocol.HTTPS
+                    host = "www.googleapis.com"
+                    headers.append("accept", "application/json")
+                }
+            }
+        }
+    }
+
+    // API key for Google Books (optional). Replace value via DI or update this binding to use BuildConfig when you add the key.
+    single(named("googleBooksApiKey")) { "" }
 }
 
 val viewModelsModule = module {
 
     // UseCases
     single { LoadInitialDataUseCase(get()) }
+    single { org.lanzadera.proyectos.domain.usecase.books.RefreshBooksUseCase(get()) }
+    single { org.lanzadera.proyectos.domain.usecase.tvshows.RefreshTvShowsUseCase(get()) }
+    single { org.lanzadera.proyectos.domain.usecase.tvshows.GetTvShowDetailsUseCase(get()) }
 
     // Repositories
     single<LoadInitialData> { LoadInitialDataImpl(get(), 5, get()) }
+    single<org.lanzadera.proyectos.domain.repository.BooksRepository> { org.lanzadera.proyectos.data.repository.BooksRepositoryImpl(get(named("googleBooksClient")), get(), get(named("googleBooksApiKey"))) }
+    single<org.lanzadera.proyectos.domain.repository.TvShowRepository> {
+        org.lanzadera.proyectos.data.repository.TvShowRepositoryImpl(
+            get(),
+            5,
+            get()
+        )
+    }
+    single<org.lanzadera.proyectos.domain.repository.MovieRepository> {
+        org.lanzadera.proyectos.data.repository.MovieRepositoryImpl(
+            get(),
+            5,
+            get()
+        )
+    }
 
     // ViewModels
-    viewModel { HomeViewModel(get()) }
+    viewModel { HomeViewModel(get(), get(), get()) }
+    viewModel { org.lanzadera.proyectos.ui.screens.detail.SeriesDetailViewModel(get()) }
+    viewModel { org.lanzadera.proyectos.ui.screens.detail.MovieDetailViewModel(get()) }
 }
 
 val nativeModule: Module = module {}

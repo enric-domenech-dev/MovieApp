@@ -11,10 +11,14 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.MailOutline
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.ui.unit.dp
 
 object Constants {
+
+    // UI DIMENSIONS
+    object Dimensions {
+        val BOTTOM_NAV_BAR_HEIGHT = 80.dp  // Material 3 NavigationBar standard height
+    }
 
     // SCREENS
     sealed class Screen(val route: String) {
@@ -23,6 +27,7 @@ object Constants {
         object SignIn : Screen("signIn")
         object SplashScreen : Screen("splashScreen")
         object Detail : Screen("detail")
+        object SeriesDetail : Screen("seriesDetail")
         object Search : Screen("search")
         // Added settings/chat/profile to centralize routes and avoid literals
         object Settings : Screen("settings")
@@ -32,7 +37,7 @@ object Constants {
 
     // MENU OPTIONS
     object MenuOptions {
-        val topBarTitles = listOf("BOOKS", "FILMS", "SERIES", "GAMES", "<3")
+        val topBarTitles = listOf("LIBROS", "PELÍCULAS", "SERIES", "JUEGOS", "<3")
         val bottomBarTitles = listOf("Menu", "Buscar", "Inicio", "Chat", "Perfil")
         val bottomBarIcons = listOf(
             Icons.AutoMirrored.Outlined.List,

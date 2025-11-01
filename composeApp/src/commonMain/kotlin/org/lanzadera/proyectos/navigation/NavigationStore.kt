@@ -1,6 +1,8 @@
 package org.lanzadera.proyectos.navigation
 
+import org.lanzadera.proyectos.domain.models.book.Book
 import org.lanzadera.proyectos.domain.models.movie.Movie
+import org.lanzadera.proyectos.domain.models.tvshow.TvShow
 
 /**
  * Temporary in-memory store to pass complex objects between destinations when
@@ -9,5 +11,6 @@ import org.lanzadera.proyectos.domain.models.movie.Movie
  */
 object NavigationStore {
     var selectedMovie: Movie? = null
+    var selectedBook: Book? = null
+    var selectedTvShow: TvShow? = null
 }
-
