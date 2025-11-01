@@ -142,8 +142,7 @@ fun LoginView(
             if (showDialog) {
                 DevelopingDialog(
                     showDialog = showDialog,
-                    onDismiss = { showDialog = false },
-                    onConfirm = { }
+                    onDismiss = { showDialog = false }
                 )
             }
 

@@ -1,7 +1,4 @@
 package org.lanzadera.proyectos.di
 
-import org.koin.dsl.module
-
-actual val nativeModule = module {
-
-}
+// Android-specific dependencies for Koin can be added here if needed.
+// This file intentionally left minimal because `nativeModule` is provided in commonMain.

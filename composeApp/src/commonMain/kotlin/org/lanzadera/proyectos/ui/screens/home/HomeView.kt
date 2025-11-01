@@ -3,6 +3,8 @@ package org.lanzadera.proyectos.ui.screens.home
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,11 +16,15 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -31,7 +37,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -57,19 +67,20 @@ fun HomeView(
     vm: HomeViewModel,
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val uiState by vm.uiState.collectAsStateWithLifecycle()
-    val movies by vm.movies.collectAsStateWithLifecycle()
-    val trendingMovies by vm.trending.collectAsStateWithLifecycle()
+    val selectedTab by vm.selectedTab.collectAsStateWithLifecycle()
+    val state by vm.uiState.collectAsStateWithLifecycle()
+    val primary by vm.primary.collectAsStateWithLifecycle()
+    val secondary by vm.secondary.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     val listState = rememberLazyGridState()
 
-    // Orden derivado y memoizado
-    val sortedTrending by remember(trendingMovies) {
+    // orden derivado para la cabecera (si te conviene)
+    val primarySorted by remember(primary) {
         derivedStateOf {
-            trendingMovies
-                .sortedWith(compareByDescending<Movie> { it.releaseDate }
-                    .thenByDescending { it.voteCount })
-                .take(30)
+            primary.sortedWith(
+                compareByDescending<Movie> { it.releaseDate }
+                    .thenByDescending { it.voteCount }
+            ).take(30)
         }
     }
 
@@ -80,13 +91,28 @@ fun HomeView(
     ) {
         Scaffold(
             topBar = {
-                var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
-                NiaTabRow(selectedTabIndex = selectedTabIndex) {
+                val selectedIndex = when (selectedTab) {
+                    HomeViewModel.HomeTab.TENDENCIAS -> 0
+                    HomeViewModel.HomeTab.PELICULAS -> 1
+                    HomeViewModel.HomeTab.SERIES -> 2
+                    HomeViewModel.HomeTab.FAVORITOS -> 3
+                }
+                NiaTabRow(selectedTabIndex = selectedIndex) {
                     topBarTitles.forEachIndexed { index, title ->
                         NiaTab(
-                            selected = selectedTabIndex == index,
-                            onClick = { selectedTabIndex = index },
-                            text = { Text(text = title) },
+                            selected = selectedIndex == index,
+                            onClick = { vm.selectTab(index) },   // <- el VM manda
+                            text = {
+                                Text(
+                                    text = title.uppercase(),
+                                    style = TextStyle(
+                                        fontSize = 11.sp,
+                                        fontWeight = if (selectedIndex == index) FontWeight.Bold else FontWeight.Normal,
+                                        fontFamily = FontFamily.SansSerif,
+                                        color = if (selectedIndex == index) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                )
+                            },
                         )
                     }
                 }
@@ -96,6 +122,7 @@ fun HomeView(
                 NiaNavigationBar {
                     bottomBarTitles.forEachIndexed { index, item ->
                         NiaNavigationBarItem(
+                            modifier = Modifier.weight(1f),
                             icon = {
                                 Icon(
                                     imageVector = bottomBarIcons[index],
@@ -128,70 +155,140 @@ fun HomeView(
                 }
             }
         ) { paddingValues ->
-            Text(if (uiState.isLoading) "Cargando..." else "Listo!")
+
+//            Text(
+//                "\nisLoading: ${state.isLoading}, \nerror: ${state.error}, " +
+//                        "\nprimary: ${primary.size}, \nsecondary: ${secondary.size} ",
+//                modifier = Modifier.padding(paddingValues)
+//            )
+
             Column(
                 modifier = Modifier.fillMaxSize().padding(paddingValues),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
 
+                val hasContent = primarySorted.isNotEmpty() || secondary.isNotEmpty()
+                val showLoading = state.isLoading && !hasContent
+                val showError = (state.error != null) && !hasContent
+
                 when {
-                    uiState.isLoading -> {
+                    showLoading -> {
                         CircularProgressIndicator()
                     }
 
-                    uiState.error != null -> {
-                        Text(text = uiState.error ?: "", color = MaterialTheme.colorScheme.error)
+                    showError -> {
+                        Text(text = "Error", color = MaterialTheme.colorScheme.error)
+                        Text(text = state.error ?: "", color = MaterialTheme.colorScheme.error)
+                        // Opcional: botón de reintento
+                        Button(onClick = { vm.refresh(force = true) }) { Text("Reintentar") }
                     }
 
                     else -> {
-                        LazyVerticalGrid(
-                            columns = GridCells.Adaptive(minSize = 120.dp),
-                            state = listState,
-                            contentPadding = PaddingValues(horizontal = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
 
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            // Tendencias (si hay)
-                            if (sortedTrending.isNotEmpty()) {
-                                item(span = { GridItemSpan(maxLineSpan) }) {
-                                    Text(
-                                        text = "Tendencias",
-                                        style = MaterialTheme.typography.headlineSmall,
-                                        modifier = Modifier.padding(bottom = 8.dp, top = 8.dp)
+                        if (!hasContent) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(24.dp)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = androidx.compose.material.icons.Icons.Filled.Info,
+                                        contentDescription = "Información",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.padding(end = 12.dp)
                                     )
-                                }
-                                item(span = { GridItemSpan(maxLineSpan) }) {
-                                    LazyRow(
-                                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                        modifier = Modifier.fillMaxWidth()
+                                    Column {
+                                        Text(
+                                            text = "No hay contenido",
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            modifier = Modifier.padding(bottom = 4.dp)
+                                        )
+                                        Text(
+                                            text = "Intenta actualizar o cambia de pestaña.",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.weight(1f))
+                                    Surface(
+                                        shape = androidx.compose.foundation.shape.CircleShape,
+                                        color = MaterialTheme.colorScheme.primaryContainer,
+                                        modifier = Modifier.padding(top = 12.dp)
                                     ) {
-                                        itemsIndexed(
-                                            items = sortedTrending,
-                                            key = { index, m -> "${m.id}_$index" }
-                                        ) { _, movie ->
-                                            MovieHeader(nav, movie)
+                                        androidx.compose.material3.IconButton(onClick = {
+                                            vm.refresh(
+                                                force = true
+                                            )
+                                        }) {
+                                            Icon(
+                                                imageVector = androidx.compose.material.icons.Icons.Filled.Refresh,
+                                                contentDescription = "Reintentar",
+                                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                                modifier = Modifier.padding(12.dp)
+                                            )
                                         }
                                     }
                                 }
                             }
-
-                            // Películas (si hay)
-                            if (movies.isNotEmpty()) {
-                                item(span = { GridItemSpan(maxLineSpan) }) {
-                                    Text(
-                                        text = "Más buscadas",
-                                        style = MaterialTheme.typography.headlineSmall,
-                                        modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
-                                    )
+                        } else {
+                            LazyVerticalGrid(
+                                state = listState,
+                                modifier = Modifier.fillMaxSize(),
+                                columns = GridCells.Adaptive(minSize = 120.dp),
+                                contentPadding = PaddingValues(horizontal = 8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                // Titles depending on the selected tab
+                                val (primaryTitle, secondaryTitle) = when (selectedTab) {
+                                    HomeViewModel.HomeTab.TENDENCIAS -> "Tendencias" to "En cartelera"
+                                    HomeViewModel.HomeTab.PELICULAS -> "Populares" to "Mejor valoradas"
+                                    HomeViewModel.HomeTab.SERIES -> "Tendencias (semana)" to "Próximamente"
+                                    HomeViewModel.HomeTab.FAVORITOS -> "Favoritos" to "Descubrir"
                                 }
-                                itemsIndexed(
-                                    items = movies,
-                                    key = { index, movie -> "${movie.id}_$index" }
-                                ) { _, movie ->
-                                    MovieItem(nav, movie)
+
+                                // Tendencias / primary (si hay)
+                                if (primarySorted.isNotEmpty()) {
+                                    item(span = { GridItemSpan(maxLineSpan) }) {
+                                        Text(
+                                            text = primaryTitle,
+                                            style = MaterialTheme.typography.headlineSmall,
+                                            modifier = Modifier.padding(top = 8.dp)
+                                        )
+                                    }
+                                    item(span = { GridItemSpan(maxLineSpan) }) {
+                                        LazyRow(
+                                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            itemsIndexed(
+                                                items = primarySorted,
+                                                key = { index, m -> "${m.id}_$index" }
+                                            ) { _, movie ->
+                                                MovieHeader(nav, movie)
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // Películas / secondary (si hay)
+                                if (secondary.isNotEmpty()) {
+                                    item(span = { GridItemSpan(maxLineSpan) }) {
+                                        Text(
+                                            text = secondaryTitle,
+                                            style = MaterialTheme.typography.headlineSmall,
+                                            modifier = Modifier.padding(bottom = 8.dp)
+                                        )
+                                    }
+                                    itemsIndexed(
+                                        items = secondary,
+                                        key = { index, movie -> "${movie.id}_$index" }
+                                    ) { _, movie ->
+                                        MovieItem(nav, movie)
+                                    }
                                 }
                             }
                         }
