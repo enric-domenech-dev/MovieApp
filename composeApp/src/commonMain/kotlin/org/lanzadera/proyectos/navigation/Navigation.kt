@@ -70,6 +70,13 @@ fun Navigation(
         Constants.Screen.Profile.route
     )
 
+    val detailRoutes = setOf(
+        Constants.Screen.MovieDetail.route,
+        Constants.Screen.SeriesDetail.route
+    )
+
+    val drawerEnabled = currentRoute !in detailRoutes
+
     val showBottomBar = currentRoute in bottomNavRoutes || isDrawerOpen
 
     // derive selected item from route, but if drawer is open show MENU selected
@@ -86,7 +93,7 @@ fun Navigation(
             )
         }
     ) {
-        DrawerAppBar(navViewModel = navHost, drawerState = drawerState) {
+        DrawerAppBar(navViewModel = navHost, drawerState = drawerState, drawerEnabled = drawerEnabled) {
             NavHost(navController = navHost, startDestination = Constants.Screen.SplashScreen.route) {
                 composable(Constants.Screen.SplashScreen.route) {
                     SplashView(nav = navHost, darkTheme = darkTheme, selectedTheme = selectedTheme)

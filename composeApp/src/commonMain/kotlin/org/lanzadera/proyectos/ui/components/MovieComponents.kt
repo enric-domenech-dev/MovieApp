@@ -3,8 +3,24 @@ package org.lanzadera.proyectos.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -26,6 +42,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -188,77 +205,81 @@ fun MovieSubheader(modifier: Modifier = Modifier, nav: NavHostController, movie:
 }
 
 @Composable
-fun MovieDetail(movie: Movie?) {
+fun MovieDetail(movie: Movie?, modifier: Modifier = Modifier) {
     val isFavorite = rememberSaveable { mutableStateOf(false) }
     if (movie == null) return
 
-    Column {
-        // Backdrop
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            AsyncImage(
-                model = "https://image.tmdb.org/t/p/w500${movie.backdropPath}",
-                contentDescription = movie.title,
-                contentScale = ContentScale.FillWidth,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(16 / 9f)
-            )
-        }
-
-        // Header con fecha, rating y favorito
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            movie.releaseDate?.let {
-                val date = try {
-                    LocalDate.parse(it)
-                } catch (e: Exception) {
-                    null
-                }
-                date?.let {
-                    val formattedDate = "${it.dayOfMonth} ${
-                        it.month.name.lowercase().replaceFirstChar { c -> c.uppercase() }
-                    } ${it.year}"
-                    Text(
-                        text = formattedDate,
-                        fontSize = 20.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                }
+    LazyColumn(
+        modifier = modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()
+    ) {
+        item {
+            // Backdrop
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                AsyncImage(
+                    model = "https://image.tmdb.org/t/p/w500${movie.backdropPath}",
+                    contentDescription = movie.title,
+                    contentScale = ContentScale.FillWidth,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(16 / 9f)
+                )
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            // Header con fecha, rating y favorito
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                movie.releaseDate?.let {
+                    val date = try {
+                        LocalDate.parse(it)
+                    } catch (e: Exception) {
+                        null
+                    }
+                    date?.let {
+                        val formattedDate = "${it.dayOfMonth} ${
+                            it.month.name.lowercase().replaceFirstChar { c -> c.uppercase() }
+                        } ${it.year}"
+                        Text(
+                            text = formattedDate,
+                            fontSize = 20.sp,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
+                }
 
-            CircularAvgVotes(movie)
+                Spacer(modifier = Modifier.weight(1f))
 
-            Spacer(modifier = Modifier.width(16.dp))
+                CircularAvgVotes(movie)
 
-            FloatingActionButton(
-                onClick = {
-                    isFavorite.value = !isFavorite.value
-                },
-                content = {
-                    Icon(
-                        imageVector = if (isFavorite.value) Icons.Outlined.Favorite else Icons.Outlined.FavoriteBorder,
-                        contentDescription = "Favorite Button"
-                    )
-                },
-                shape = CircleShape,
-            )
+                Spacer(modifier = Modifier.width(16.dp))
+
+                FloatingActionButton(
+                    onClick = {
+                        isFavorite.value = !isFavorite.value
+                    },
+                    content = {
+                        Icon(
+                            imageVector = if (isFavorite.value) Icons.Outlined.Favorite else Icons.Outlined.FavoriteBorder,
+                            contentDescription = "Favorite Button"
+                        )
+                    },
+                    shape = CircleShape,
+                )
+            }
         }
 
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).navigationBarsPadding()
-        ) {
-            item {
+        item {
+            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 // Título
                 movie.title?.let {
                     Text(
@@ -357,16 +378,16 @@ fun MovieDetail(movie: Movie?) {
                             .padding(12.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        if (movie.budget != null && movie.budget!! > 0) {
+                        if (movie.budget != null && movie.budget > 0) {
                             Text(
-                                text = "Budget: \$${String.format("%,d", movie.budget)}",
+                                text = "Budget: \$${formatNumber(movie.budget)}",
                                 fontSize = 12.sp,
                                 color = MaterialTheme.colorScheme.secondary
                             )
                         }
-                        if (movie.revenue != null && movie.revenue!! > 0) {
+                        if (movie.revenue != null && movie.revenue > 0) {
                             Text(
-                                text = "Revenue: \$${String.format("%,d", movie.revenue)}",
+                                text = "Revenue: \$${formatNumber(movie.revenue)}",
                                 fontSize = 12.sp,
                                 color = MaterialTheme.colorScheme.secondary
                             )
@@ -478,7 +499,7 @@ fun MovieDetail(movie: Movie?) {
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             items(movie.aggregateCredits?.cast?.take(10) ?: emptyList()) { actor ->
-                                CastMemberCard(actor)
+                                MovieCastMemberCard(actor)
                             }
                         }
 
@@ -499,7 +520,7 @@ fun MovieDetail(movie: Movie?) {
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             items(movie.aggregateCredits?.crew?.take(10) ?: emptyList()) { crewMember ->
-                                CrewMemberCard(crewMember)
+                                MovieCrewMemberCard(crewMember)
                             }
                         }
 
@@ -537,4 +558,421 @@ fun CircularAvgVotes(movie: Movie) {
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
         )
     }
+}
+
+@Composable
+fun MovieCastMemberCard(actor: org.lanzadera.proyectos.domain.models.tvshow.AggregateCast) {
+    Column(
+        modifier = Modifier
+            .width(120.dp)
+            .wrapContentHeight(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        // Foto del actor
+        if (!actor.profilePath.isNullOrEmpty()) {
+            AsyncImage(
+                model = "https://image.tmdb.org/t/p/w300${actor.profilePath}",
+                contentDescription = actor.name,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(RoundedCornerShape(8.dp))
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(Res.drawable.film),
+                    contentDescription = null,
+                    modifier = Modifier.size(40.dp),
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                )
+            }
+        }
+
+        // Nombre del actor
+        Text(
+            text = actor.name ?: "Unknown",
+            fontSize = 12.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center
+        )
+
+        // Personaje/Rol
+        if (!actor.roles.isNullOrEmpty()) {
+            val character = actor.roles.firstOrNull()?.character
+            character?.let {
+                Text(
+                    text = it,
+                    fontSize = 10.sp,
+                    color = MaterialTheme.colorScheme.secondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun MovieCrewMemberCard(crewMember: org.lanzadera.proyectos.domain.models.tvshow.AggregateCrew) {
+    Column(
+        modifier = Modifier
+            .width(120.dp)
+            .wrapContentHeight(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        // Foto del personal
+        if (!crewMember.profilePath.isNullOrEmpty()) {
+            AsyncImage(
+                model = "https://image.tmdb.org/t/p/w300${crewMember.profilePath}",
+                contentDescription = crewMember.name,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(RoundedCornerShape(8.dp))
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(Res.drawable.film),
+                    contentDescription = null,
+                    modifier = Modifier.size(40.dp),
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                )
+            }
+        }
+
+        // Nombre
+        Text(
+            text = crewMember.name ?: "Unknown",
+            fontSize = 12.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center
+        )
+
+        // Departamento/Trabajo
+        if (!crewMember.jobs.isNullOrEmpty()) {
+            val job = crewMember.jobs.firstOrNull()?.job
+            job?.let {
+                Text(
+                    text = it,
+                    fontSize = 10.sp,
+                    color = MaterialTheme.colorScheme.secondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun MovieInfoTabContent(movie: Movie?, modifier: Modifier = Modifier) {
+    if (movie == null) return
+
+    LazyColumn(
+        modifier = modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()
+    ) {
+        item {
+            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Title
+                movie.title?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Info: status, runtime
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    movie.status?.let {
+                        Text(
+                            text = it,
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                    movie.runtime?.let {
+                        Text(
+                            text = "${it}min",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Genres
+                if (!movie.genres.isNullOrEmpty()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        movie.genres.forEach { genre ->
+                            Card(
+                                modifier = Modifier.wrapContentSize(),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                                ),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text(
+                                    text = genre.name ?: "",
+                                    modifier = Modifier.padding(8.dp),
+                                    fontSize = 11.sp,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Overview
+                movie.overview?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.secondary,
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Tagline
+                movie.tagline?.let {
+                    if (it.isNotEmpty()) {
+                        Text(
+                            text = "\"$it\"",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+                }
+
+                // Financial Info
+                if (movie.budget != null || movie.revenue != null) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        if (movie.budget != null && movie.budget > 0) {
+                            Text(
+                                text = "Budget: \$${formatNumber(movie.budget)}",
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.secondary
+                            )
+                        }
+                        if (movie.revenue != null && movie.revenue > 0) {
+                            Text(
+                                text = "Revenue: \$${formatNumber(movie.revenue)}",
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.secondary
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                // Countries
+                if (!movie.productionCountries.isNullOrEmpty()) {
+                    Text(
+                        text = "Countries: ${movie.productionCountries.map { it.name }.joinToString(", ")}",
+                        fontSize = 12.sp,
+                        color = Color.Gray,
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                // Languages
+                if (!movie.spokenLanguages.isNullOrEmpty()) {
+                    Text(
+                        text = "Languages: ${
+                            movie.spokenLanguages.map { it.englishName ?: it.name }.joinToString(", ")
+                        }",
+                        fontSize = 12.sp,
+                        color = Color.Gray,
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                // Production Companies
+                if (!movie.productionCompanies.isNullOrEmpty()) {
+                    Text(
+                        text = "Production: ${movie.productionCompanies.map { it.name }.joinToString(", ")}",
+                        fontSize = 12.sp,
+                        color = Color.Gray,
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Collection
+                movie.belongsToCollection?.let { collection ->
+                    Text(
+                        text = "Part of Collection",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                        ),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (!collection.posterPath.isNullOrEmpty()) {
+                                AsyncImage(
+                                    model = "https://image.tmdb.org/t/p/w200${collection.posterPath}",
+                                    contentDescription = collection.name,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .size(50.dp, 75.dp)
+                                        .clip(RoundedCornerShape(4.dp))
+                                )
+                            }
+                            Text(
+                                text = collection.name ?: "Unknown Collection",
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun MovieCreditsTab(movie: Movie?, modifier: Modifier = Modifier) {
+    if (movie == null) return
+
+    LazyColumn(
+        modifier = modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()
+    ) {
+        // Cast
+        if (!movie.aggregateCredits?.cast.isNullOrEmpty()) {
+            item {
+                Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Cast",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+
+            item {
+                LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(movie.aggregateCredits?.cast?.take(10) ?: emptyList()) { actor ->
+                        MovieCastMemberCard(actor)
+                    }
+                }
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+        }
+
+        // Crew
+        if (!movie.aggregateCredits?.crew.isNullOrEmpty()) {
+            item {
+                Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                    Text(
+                        text = "Crew",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+
+            item {
+                LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(movie.aggregateCredits?.crew?.take(10) ?: emptyList()) { crewMember ->
+                        MovieCrewMemberCard(crewMember)
+                    }
+                }
+                Spacer(modifier = Modifier.height(32.dp))
+            }
+        }
+    }
+}
+
+// Helper function to format numbers with thousand separators
+fun formatNumber(number: Int): String {
+    return number.toString().reversed().chunked(3).joinToString(",").reversed()
 }
