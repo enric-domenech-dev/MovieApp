@@ -61,7 +61,7 @@ fun BookItem(
             AsyncImage(
                 model = book.thumbnail,
                 contentDescription = book.title,
-                contentScale = ContentScale.Crop,
+                contentScale = ContentScale.FillBounds,
                 modifier = Modifier.fillMaxSize(),
                 placeholder = painterResource(Res.drawable.unicorn)
             )
@@ -154,7 +154,7 @@ fun BookHeader(modifier: Modifier = Modifier, nav: NavHostController, book: Book
             AsyncImage(
                 model = book.thumbnail,
                 contentDescription = book.title,
-                contentScale = ContentScale.Crop,
+                contentScale = ContentScale.FillBounds,
                 modifier = Modifier.fillMaxSize(),
                 placeholder = painterResource(Res.drawable.unicorn)
             )
@@ -199,7 +199,7 @@ fun BookSubheader(modifier: Modifier = Modifier, nav: NavHostController, book: B
             AsyncImage(
                 model = book.thumbnail,
                 contentDescription = book.title,
-                contentScale = ContentScale.Crop,
+                contentScale = ContentScale.FillBounds,
                 modifier = Modifier.fillMaxSize(),
                 placeholder = painterResource(Res.drawable.unicorn)
             )

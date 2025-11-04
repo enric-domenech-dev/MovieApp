@@ -22,6 +22,7 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DrawerDefaults
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -59,140 +60,147 @@ fun DrawerAppBar(
     navViewModel: NavHostController,
     drawerState: DrawerState,
     modifier: Modifier = Modifier,
+    drawerEnabled: Boolean = true,
     content: @Composable () -> Unit
 ) {
     var showDialog by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
-    ModalNavigationDrawer(
-        modifier = modifier,
-        drawerContent = {
-            Column(
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.background)
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(bottom = Constants.Dimensions.BOTTOM_NAV_BAR_HEIGHT)
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.AccountCircle,
-                        contentDescription = "Imagen de Usuario",
-                        modifier = Modifier.size(100.dp)
-                    )
-                    Text(
-                        "Nombre de Usuario".uppercase(),
-                        modifier = Modifier.padding(16.dp),
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-                }
-                HorizontalDivider()
-
+    if (drawerEnabled) {
+        ModalNavigationDrawer(
+            modifier = modifier,
+            drawerState = drawerState,
+            scrimColor = DrawerDefaults.scrimColor,
+            drawerContent = {
                 Column(
                     modifier = Modifier
-                        .fillMaxSize(),
-                    verticalArrangement = Arrangement.SpaceAround,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .background(MaterialTheme.colorScheme.background)
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(bottom = Constants.Dimensions.BOTTOM_NAV_BAR_HEIGHT)
                 ) {
-                    DropdownMenuItem(
-                        text = { Text(Strings.Menu.PROFILE) },
-                        onClick = { navViewModel.navigate(Constants.Screen.Search.route) },
-                        leadingIcon = {
-                            Icon(Icons.Outlined.Person, contentDescription = null)
-                        }
-                    )
-
-                    DropdownMenuItem(
-                        text = { Text(Strings.Settings.THEME) },
-                        onClick = {
-                            navViewModel.navigate(Constants.Screen.Settings.route)
-                            scope.launch { drawerState.close() }
-                        },
-                        leadingIcon = {
-                            Icon(Icons.Outlined.Settings, contentDescription = null)
-                        }
-                    )
-                }
-
-                HorizontalDivider()
-
-                DropdownMenuItem(
-                    text = { Text("Enviar Comentarios") },
-                    onClick = { /* Do something... */ },
-                    leadingIcon = {
-                        Icon(Icons.Outlined.Email, contentDescription = null)
-                    },
-                    trailingIcon = {
-                        Icon(Icons.AutoMirrored.Outlined.Send, contentDescription = null)
-                    }
-                )
-
-                HorizontalDivider()
-
-                DropdownMenuItem(
-                    text = { Text("Ayuda") },
-                    onClick = { /* Do something... */ },
-                    leadingIcon = {
-                        Icon(Icons.Outlined.Info, contentDescription = null)
-                    },
-                    trailingIcon = {
-                        Icon(Icons.AutoMirrored.Outlined.ExitToApp, contentDescription = null)
-                    }
-                )
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                DropdownMenuItem(
-                    text = { Text(Strings.Settings.ABOUT) },
-                    onClick = { /* Do something... */ },
-                    leadingIcon = {
-                        Icon(Icons.Outlined.Info, contentDescription = null)
-                    },
-                )
-
-                DropdownMenuItem(
-                    text = { Text(Strings.Settings.LOGOUT) },
-                    onClick = { showDialog = true },
-                    leadingIcon = {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
                         Icon(
-                            Icons.AutoMirrored.Outlined.ExitToApp,
-                            contentDescription = "Botón de cerrar sesión"
+                            imageVector = Icons.Default.AccountCircle,
+                            contentDescription = "Imagen de Usuario",
+                            modifier = Modifier.size(100.dp)
+                        )
+                        Text(
+                            "Nombre de Usuario".uppercase(),
+                            modifier = Modifier.padding(16.dp),
+                            style = MaterialTheme.typography.headlineSmall
                         )
                     }
-                )
-                LogoutConfirmationDialog(
-                    showDialog = showDialog,
-                    onDismiss = { showDialog = false },
-                    onConfirm = { navViewModel.navigate(Constants.Screen.Login.route) }
-                )
-                CustomBottomAppBar(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 16.dp)
-                ) {
-                    Text(
-                        text = "v${BuildConfig.APP_VERSION}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.align(Alignment.CenterHorizontally),
-                        fontSize = 16.sp,
-                        fontFamily = FontFamily.SansSerif,
-                    )
-                }
+                    HorizontalDivider()
 
-            }
-        },
-        gesturesEnabled = true,
-        drawerState = drawerState,
-        content = content
-    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        verticalArrangement = Arrangement.SpaceAround,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text(Strings.Menu.PROFILE) },
+                            onClick = { navViewModel.navigate(Constants.Screen.Search.route) },
+                            leadingIcon = {
+                                Icon(Icons.Outlined.Person, contentDescription = null)
+                            }
+                        )
+
+                        DropdownMenuItem(
+                            text = { Text(Strings.Settings.THEME) },
+                            onClick = {
+                                navViewModel.navigate(Constants.Screen.Settings.route)
+                                scope.launch { drawerState.close() }
+                            },
+                            leadingIcon = {
+                                Icon(Icons.Outlined.Settings, contentDescription = null)
+                            }
+                        )
+                    }
+
+                    HorizontalDivider()
+
+                    DropdownMenuItem(
+                        text = { Text("Enviar Comentarios") },
+                        onClick = { /* Do something... */ },
+                        leadingIcon = {
+                            Icon(Icons.Outlined.Email, contentDescription = null)
+                        },
+                        trailingIcon = {
+                            Icon(Icons.AutoMirrored.Outlined.Send, contentDescription = null)
+                        }
+                    )
+
+                    HorizontalDivider()
+
+                    DropdownMenuItem(
+                        text = { Text("Ayuda") },
+                        onClick = { /* Do something... */ },
+                        leadingIcon = {
+                            Icon(Icons.Outlined.Info, contentDescription = null)
+                        },
+                        trailingIcon = {
+                            Icon(Icons.AutoMirrored.Outlined.ExitToApp, contentDescription = null)
+                        }
+                    )
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    DropdownMenuItem(
+                        text = { Text(Strings.Settings.ABOUT) },
+                        onClick = { /* Do something... */ },
+                        leadingIcon = {
+                            Icon(Icons.Outlined.Info, contentDescription = null)
+                        },
+                    )
+
+                    DropdownMenuItem(
+                        text = { Text(Strings.Settings.LOGOUT) },
+                        onClick = { showDialog = true },
+                        leadingIcon = {
+                            Icon(
+                                Icons.AutoMirrored.Outlined.ExitToApp,
+                                contentDescription = "Botón de cerrar sesión"
+                            )
+                        }
+                    )
+                    LogoutConfirmationDialog(
+                        showDialog = showDialog,
+                        onDismiss = { showDialog = false },
+                        onConfirm = { navViewModel.navigate(Constants.Screen.Login.route) }
+                    )
+                    CustomBottomAppBar(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 16.dp)
+                    ) {
+                        Text(
+                            text = "v${BuildConfig.APP_VERSION}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.align(Alignment.CenterHorizontally),
+                            fontSize = 16.sp,
+                            fontFamily = FontFamily.SansSerif,
+                        )
+                    }
+
+                }
+            },
+            gesturesEnabled = true,
+            content = content
+        )
+    } else {
+        // When drawer is disabled, just show content without the drawer wrapper
+        content()
+    }
 }
 
 @Composable

@@ -30,6 +30,8 @@ import org.lanzadera.proyectos.ui.screens.detail.MovieDetailView
 import org.lanzadera.proyectos.ui.screens.detail.MovieDetailViewModel
 import org.lanzadera.proyectos.ui.screens.detail.SeriesDetailView
 import org.lanzadera.proyectos.ui.screens.detail.SeriesDetailViewModel
+import org.lanzadera.proyectos.ui.screens.games.GameDetailView
+import org.lanzadera.proyectos.ui.screens.games.GameDetailViewModel
 import org.lanzadera.proyectos.ui.screens.home.HomeView
 import org.lanzadera.proyectos.ui.screens.home.HomeViewModel
 import org.lanzadera.proyectos.ui.screens.login.LoginView
@@ -70,6 +72,13 @@ fun Navigation(
         Constants.Screen.Profile.route
     )
 
+    val detailRoutes = setOf(
+        Constants.Screen.MovieDetail.route,
+        Constants.Screen.SeriesDetail.route
+    )
+
+    val drawerEnabled = currentRoute !in detailRoutes
+
     val showBottomBar = currentRoute in bottomNavRoutes || isDrawerOpen
 
     // derive selected item from route, but if drawer is open show MENU selected
@@ -86,7 +95,7 @@ fun Navigation(
             )
         }
     ) {
-        DrawerAppBar(navViewModel = navHost, drawerState = drawerState) {
+        DrawerAppBar(navViewModel = navHost, drawerState = drawerState, drawerEnabled = drawerEnabled) {
             NavHost(navController = navHost, startDestination = Constants.Screen.SplashScreen.route) {
                 composable(Constants.Screen.SplashScreen.route) {
                     SplashView(nav = navHost, darkTheme = darkTheme, selectedTheme = selectedTheme)
@@ -137,6 +146,19 @@ fun Navigation(
                     if (tvShowId != null) {
                         val viewModel: SeriesDetailViewModel = koinViewModel()
                         SeriesDetailView(nav = navHost, vm = viewModel, tvShowId = tvShowId)
+                    } else {
+                        LaunchedEffect(Unit) { navHost.popBackStack() }
+                    }
+                }
+                composable(Constants.Screen.GameDetail.route) { backStackEntry ->
+                    val gameId = backStackEntry.arguments?.getString("gameId")?.toIntOrNull()
+                    if (gameId != null) {
+                        val viewModel: GameDetailViewModel = koinViewModel()
+                        GameDetailView(
+                            gameId = gameId,
+                            viewModel = viewModel,
+                            onNavigateBack = { navHost.popBackStack() }
+                        )
                     } else {
                         LaunchedEffect(Unit) { navHost.popBackStack() }
                     }

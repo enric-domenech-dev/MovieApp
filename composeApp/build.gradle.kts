@@ -242,7 +242,11 @@ buildConfig {
 
     val apiBearerToken = properties.getProperty("API_BEARER_TOKEN", "")
     val appVersion = properties.getProperty("APP_VERSION", "")
+    val igdbClientId = properties.getProperty("IGDB_CLIENT_ID", "")
+    val igdbClientSecret = properties.getProperty("IGDB_CLIENT_SECRET", "")
 
     buildConfigField("String", "API_BEARER_TOKEN", "\"$apiBearerToken\"")
     buildConfigField("String", "APP_VERSION", "\"$appVersion\"")
+    buildConfigField("String", "IGDB_CLIENT_ID", "\"$igdbClientId\"")
+    buildConfigField("String", "IGDB_CLIENT_SECRET", "\"$igdbClientSecret\"")
 }

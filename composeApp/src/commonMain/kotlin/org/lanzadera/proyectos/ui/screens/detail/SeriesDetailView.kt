@@ -1,13 +1,19 @@
 package org.lanzadera.proyectos.ui.screens.detail
 
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -16,20 +22,31 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import coil3.compose.AsyncImage
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
 import org.lanzadera.proyectos.domain.models.tvshow.TvShow
 import org.lanzadera.proyectos.navigation.NavigationStore
 import org.lanzadera.proyectos.ui.components.CustomTopAppBar
-import org.lanzadera.proyectos.ui.components.TvShowDetail
+import org.lanzadera.proyectos.ui.components.SeriesCreditsTab
+import org.lanzadera.proyectos.ui.components.SeriesInfoTab
+import org.lanzadera.proyectos.ui.components.SeriesSeasonsTab
 import org.lanzadera.proyectos.utils.Strings
 
 @Composable
@@ -43,6 +60,7 @@ fun SeriesDetailView(
     val tvShowDetail by vm.tvShowDetail.collectAsStateWithLifecycle()
     val isLoading by vm.isLoading.collectAsStateWithLifecycle()
     val error by vm.error.collectAsStateWithLifecycle()
+    val selectedTab = remember { mutableStateOf(0) }
 
     // Si recibimos un tvShowId, cargar por ID
     LaunchedEffect(tvShowId) {
@@ -98,9 +116,6 @@ fun SeriesDetailView(
     Scaffold(
         modifier = Modifier.safeDrawingPadding(),
         floatingActionButtonPosition = FabPosition.EndOverlay,
-        floatingActionButton = {
-            // BUTTON
-        },
         topBar = {
             CustomTopAppBar(
                 title = displayedTvShow.name ?: "",
@@ -114,12 +129,23 @@ fun SeriesDetailView(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { nav.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.Outlined.Info,
-                            contentDescription = "Información",
-                            modifier = Modifier.size(ButtonDefaults.IconSize)
-                        )
+                    Row(
+                        modifier = Modifier.padding(end = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Like Button - Green
+                        IconButton(
+                            onClick = { /* TODO: Implement favorite functionality */ },
+                            modifier = Modifier.size(40.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.FavoriteBorder,
+                                contentDescription = "Agregar a favoritos",
+                                modifier = Modifier.size(ButtonDefaults.IconSize),
+                                tint = Color(0xFF2AE98E)
+                            )
+                        }
                     }
                 },
                 backgroundColor = MaterialTheme.colorScheme.background,
@@ -156,9 +182,75 @@ fun SeriesDetailView(
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(paddingValue),
+                            .padding(paddingValue)
                     ) {
-                        TvShowDetail(tvShow = displayedTvShow)
+                        // Backdrop - Always visible, with swipe detection only on image
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .pointerInput(Unit) {
+                                    detectHorizontalDragGestures { change, dragAmount ->
+                                        change.consume()
+                                        when {
+                                            dragAmount > 100 && selectedTab.value > 0 -> selectedTab.value--
+                                            dragAmount < -100 && selectedTab.value < 2 -> selectedTab.value++
+                                        }
+                                    }
+                                },
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            AsyncImage(
+                                model = "https://image.tmdb.org/t/p/original${displayedTvShow.backdropPath}",
+                                contentDescription = displayedTvShow.name,
+                                contentScale = ContentScale.FillWidth,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .aspectRatio(16 / 9f)
+                            )
+                        }
+
+                        // Tab Row with better spacing
+                        TabRow(
+                            selectedTabIndex = selectedTab.value,
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            divider = {}
+                        ) {
+                            Tab(
+                                selected = selectedTab.value == 0,
+                                onClick = { selectedTab.value = 0 },
+                                icon = { Icon(Icons.Outlined.Info, contentDescription = "Info") }
+                            )
+                            Tab(
+                                selected = selectedTab.value == 1,
+                                onClick = { selectedTab.value = 1 },
+                                text = {
+                                    Text(
+                                        "Temporadas",
+                                        maxLines = 1
+                                    )
+                                }
+                            )
+                            Tab(
+                                selected = selectedTab.value == 2,
+                                onClick = { selectedTab.value = 2 },
+                                text = {
+                                    Text(
+                                        "Créditos",
+                                        maxLines = 1
+                                    )
+                                }
+                            )
+                        }
+
+                        // Tab Content - scrollable with proper padding
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            when (selectedTab.value) {
+                                0 -> SeriesInfoTab(tvShow = displayedTvShow)
+                                1 -> SeriesSeasonsTab(tvShow = displayedTvShow)
+                                2 -> SeriesCreditsTab(tvShow = displayedTvShow)
+                            }
+                        }
                     }
                 }
             }
