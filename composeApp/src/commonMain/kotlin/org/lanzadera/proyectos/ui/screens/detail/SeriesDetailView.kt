@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FabPosition
@@ -218,12 +219,7 @@ fun SeriesDetailView(
                             Tab(
                                 selected = selectedTab.value == 0,
                                 onClick = { selectedTab.value = 0 },
-                                text = {
-                                    Text(
-                                        "Info",
-                                        maxLines = 1
-                                    )
-                                }
+                                icon = { Icon(Icons.Outlined.Info, contentDescription = "Info") }
                             )
                             Tab(
                                 selected = selectedTab.value == 1,

@@ -67,7 +67,9 @@ fun MovieItem(
         modifier = modifier
             .clickable {
                 NavigationStore.selectedMovie = movie
-                nav.navigate(Constants.Screen.Detail.route)
+                movie.id?.let { movieId ->
+                    nav.navigate(Constants.Screen.MovieDetail.createRoute(movieId))
+                }
             }
     ) {
         Box(
@@ -121,7 +123,9 @@ fun MovieHeader(modifier: Modifier = Modifier, nav: NavHostController, movie: Mo
             .wrapContentHeight()
             .clickable {
                 NavigationStore.selectedMovie = movie
-                nav.navigate(Constants.Screen.Detail.route)
+                movie.id?.let { movieId ->
+                    nav.navigate(Constants.Screen.MovieDetail.createRoute(movieId))
+                }
             }
     ) {
         Box(
@@ -165,7 +169,9 @@ fun MovieSubheader(modifier: Modifier = Modifier, nav: NavHostController, movie:
             .wrapContentHeight()
             .clickable {
                 NavigationStore.selectedMovie = movie
-                nav.navigate(Constants.Screen.Detail.route)
+                movie.id?.let { movieId ->
+                    nav.navigate(Constants.Screen.MovieDetail.createRoute(movieId))
+                }
             }
     ) {
         Box(
