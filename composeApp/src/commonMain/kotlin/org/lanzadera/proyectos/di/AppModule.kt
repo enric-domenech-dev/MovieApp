@@ -20,23 +20,29 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
 import org.lanzadera.proyectos.BuildConfig
+import org.lanzadera.proyectos.data.authentication.IGDBAuthManager
 import org.lanzadera.proyectos.data.repository.BooksRepositoryImpl
+import org.lanzadera.proyectos.data.repository.GameRepositoryImpl
 import org.lanzadera.proyectos.data.repository.LoadInitialDataImpl
 import org.lanzadera.proyectos.data.repository.MovieRepositoryImpl
 import org.lanzadera.proyectos.data.repository.SearchRepositoryImpl
 import org.lanzadera.proyectos.data.repository.TvShowRepositoryImpl
 import org.lanzadera.proyectos.domain.repository.BooksRepository
+import org.lanzadera.proyectos.domain.repository.GameRepository
 import org.lanzadera.proyectos.domain.repository.LoadInitialData
 import org.lanzadera.proyectos.domain.repository.MovieRepository
 import org.lanzadera.proyectos.domain.repository.SearchRepository
 import org.lanzadera.proyectos.domain.repository.TvShowRepository
 import org.lanzadera.proyectos.domain.usecase.books.RefreshBooksUseCase
+import org.lanzadera.proyectos.domain.usecase.games.GetGameDetailsUseCase
+import org.lanzadera.proyectos.domain.usecase.games.RefreshGamesUseCase
 import org.lanzadera.proyectos.domain.usecase.load_initial_data.LoadInitialDataUseCase
 import org.lanzadera.proyectos.domain.usecase.search.SearchMoviesUseCase
 import org.lanzadera.proyectos.domain.usecase.tvshows.GetTvShowDetailsUseCase
 import org.lanzadera.proyectos.domain.usecase.tvshows.RefreshTvShowsUseCase
 import org.lanzadera.proyectos.ui.screens.detail.MovieDetailViewModel
 import org.lanzadera.proyectos.ui.screens.detail.SeriesDetailViewModel
+import org.lanzadera.proyectos.ui.screens.games.GameDetailViewModel
 import org.lanzadera.proyectos.ui.screens.home.HomeViewModel
 import org.lanzadera.proyectos.ui.screens.search.SearchViewModel
 
@@ -142,6 +148,34 @@ val dataModule = module {
 
     // API key for Google Books (optional). Replace value via DI or update this binding to use BuildConfig when you add the key.
     single(named("googleBooksApiKey")) { "" }
+
+    // HTTPS Client for IGDB API - named binding
+    // Note: expectSuccess = false because headers (Client-ID, Authorization) are added per-request
+    single(named("igdbClient")) {
+        HttpClient {
+            expectSuccess = false
+            install(HttpTimeout)
+            install(ContentNegotiation) { json(get()) }
+            install(LoggingPlugin)
+            defaultRequest {
+                url {
+                    protocol = URLProtocol.HTTPS
+                    host = "api.igdb.com"
+                    headers.append("accept", "application/json")
+                }
+            }
+        }
+    }
+
+    // IGDB Auth Manager
+    single {
+        IGDBAuthManager(
+            clientId = BuildConfig.IGDB_CLIENT_ID,
+            clientSecret = BuildConfig.IGDB_CLIENT_SECRET,
+            httpClient = get(named("igdbClient")),
+            json = get()
+        )
+    }
 }
 
 val viewModelsModule = module {
@@ -152,6 +186,8 @@ val viewModelsModule = module {
     single { RefreshTvShowsUseCase(get()) }
     single { GetTvShowDetailsUseCase(get()) }
     single { SearchMoviesUseCase(get()) }
+    single { RefreshGamesUseCase(get()) }
+    single { GetGameDetailsUseCase(get()) }
 
     // Repositories
     single<LoadInitialData> { LoadInitialDataImpl(get(), 5, get()) }
@@ -165,12 +201,14 @@ val viewModelsModule = module {
     single<TvShowRepository> { TvShowRepositoryImpl(get(), 5, get()) }
     single<MovieRepository> { MovieRepositoryImpl(get(), 5, get()) }
     single<SearchRepository> { SearchRepositoryImpl(get(), get()) }
+    single<GameRepository> { GameRepositoryImpl(get(), get(named("igdbClient")), 5, get()) }
 
     // ViewModels
-    viewModel { HomeViewModel(get(), get(), get()) }
+    viewModel { HomeViewModel(get(), get(), get(), get()) }
     viewModel { SeriesDetailViewModel(get()) }
     viewModel { MovieDetailViewModel(get()) }
     viewModel { SearchViewModel(get()) }
+    viewModel { GameDetailViewModel(get()) }
 }
 
 val nativeModule: Module = module {}

@@ -16,9 +16,11 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import org.lanzadera.proyectos.domain.models.book.Book
+import org.lanzadera.proyectos.domain.models.game.Game
 import org.lanzadera.proyectos.domain.models.movie.Movie
 import org.lanzadera.proyectos.domain.models.tvshow.TvShow
 import org.lanzadera.proyectos.domain.usecase.books.RefreshBooksUseCase
+import org.lanzadera.proyectos.domain.usecase.games.RefreshGamesUseCase
 import org.lanzadera.proyectos.domain.usecase.load_initial_data.LoadInitialDataUseCase
 import org.lanzadera.proyectos.domain.usecase.tvshows.RefreshTvShowsUseCase
 import kotlin.coroutines.cancellation.CancellationException
@@ -26,7 +28,8 @@ import kotlin.coroutines.cancellation.CancellationException
 class HomeViewModel(
     private val loadInitialData: LoadInitialDataUseCase,
     private val refreshBooksUseCase: RefreshBooksUseCase?,
-    private val refreshTvShowsUseCase: RefreshTvShowsUseCase? = null
+    private val refreshTvShowsUseCase: RefreshTvShowsUseCase? = null,
+    private val refreshGamesUseCase: RefreshGamesUseCase? = null
 ) : ViewModel() {
 
     // HomeTab: ahora con 5 pestañas: BOOKS, FILMS, SERIES, GAMES, <3
@@ -96,7 +99,27 @@ class HomeViewModel(
         all.filter { it !in onAir }.take(20)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    // Flags de UI
+    // Games flows - obtained from RefreshGamesUseCase which exposes repository flows
+    val games: StateFlow<List<Game>> = refreshGamesUseCase?.gamesFlow
+        ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+        ?: MutableStateFlow(emptyList())
+
+    val popularGames: StateFlow<List<Game>> = refreshGamesUseCase?.popularGamesFlow
+        ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+        ?: MutableStateFlow(emptyList())
+
+    val topRatedGames: StateFlow<List<Game>> = refreshGamesUseCase?.topRatedGamesFlow
+        ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+        ?: MutableStateFlow(emptyList())
+
+    val upcomingGames: StateFlow<List<Game>> = refreshGamesUseCase?.upcomingGamesFlow
+        ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+        ?: MutableStateFlow(emptyList())
+
+    val trendingGames: StateFlow<List<Game>> = refreshGamesUseCase?.trendingGamesFlow
+        ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+        ?: MutableStateFlow(emptyList())
+
     val refreshing = MutableStateFlow(false)
     val error = MutableStateFlow<String?>(null)
 
@@ -164,6 +187,30 @@ class HomeViewModel(
                 } catch (t: Throwable) {
                     error.value = t.message ?: "Error fetching tv shows"
                     println("SYNCRO HomeViewModel: error refreshing tv shows: ${t.message}")
+                } finally {
+                    refreshing.value = false
+                }
+            }
+        }
+
+        // Si selecciona GAMES y aún no hay datos, lanzar refresco
+        if (_selectedTab.value == HomeTab.GAMES) {
+            println("SYNCRO HomeViewModel: GAMES tab selected, games.size=${games.value.size}")
+            viewModelScope.launch {
+                try {
+                    if (refreshGamesUseCase != null && games.value.isEmpty()) {
+                        println("SYNCRO HomeViewModel: launching refreshGamesUseCase")
+                        refreshing.value = true
+                        refreshGamesUseCase.invoke()
+                        println("SYNCRO HomeViewModel: refreshGamesUseCase finished, games.size=${games.value.size}")
+                    } else {
+                        println("SYNCRO HomeViewModel: no refresh needed or no game use case")
+                    }
+                } catch (t: Throwable) {
+                    if (t !is CancellationException) {
+                        error.value = t.message ?: "Error fetching games"
+                        println("SYNCRO HomeViewModel: error refreshing games: ${t.message}")
+                    }
                 } finally {
                     refreshing.value = false
                 }

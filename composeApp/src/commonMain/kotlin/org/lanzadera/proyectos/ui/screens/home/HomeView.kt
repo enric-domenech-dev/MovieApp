@@ -41,6 +41,7 @@ import org.lanzadera.proyectos.domain.models.movie.Movie
 import org.lanzadera.proyectos.domain.models.tvshow.TvShow
 import org.lanzadera.proyectos.ui.components.PlaceholderScreen
 import org.lanzadera.proyectos.ui.components.sections.BookSection
+import org.lanzadera.proyectos.ui.components.sections.GameSection
 import org.lanzadera.proyectos.ui.components.sections.Section
 import org.lanzadera.proyectos.ui.components.sections.TvShowSection
 import org.lanzadera.proyectos.ui.components.tabs.NiaTab
@@ -321,19 +322,89 @@ fun HomeView(
                     }
                 }
 
-                selectedTab == HomeViewModel.HomeTab.GAMES || selectedTab == HomeViewModel.HomeTab.HEART -> {
+                selectedTab == HomeViewModel.HomeTab.GAMES -> {
+                    // Mostrar lista de juegos con secciones
+                    val games by vm.games.collectAsStateWithLifecycle()
+                    val popularGames by vm.popularGames.collectAsStateWithLifecycle()
+                    val topRatedGames by vm.topRatedGames.collectAsStateWithLifecycle()
+                    val upcomingGames by vm.upcomingGames.collectAsStateWithLifecycle()
+                    val trendingGames by vm.trendingGames.collectAsStateWithLifecycle()
+
+                    val allGamesEmpty = games.isEmpty() && popularGames.isEmpty() &&
+                            topRatedGames.isEmpty() && upcomingGames.isEmpty() && trendingGames.isEmpty()
+
+                    if (allGamesEmpty) {
+                        Column(
+                            modifier = Modifier.fillMaxSize().padding(paddingValues),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    } else {
+                        val gamesListState = rememberLazyListState()
+                        LazyColumn(
+                            state = gamesListState,
+                            modifier = Modifier.fillMaxSize().navigationBarsPadding(),
+                            contentPadding = PaddingValues(
+                                start = 8.dp,
+                                end = 8.dp,
+                                top = paddingValues.calculateTopPadding() + 8.dp,
+                                bottom = paddingValues.calculateBottomPadding() +
+                                        WindowInsets.navigationBars.asPaddingValues()
+                                            .calculateBottomPadding()
+                            ),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            val sections: List<Pair<String, List<org.lanzadera.proyectos.domain.models.game.Game>>> =
+                                listOf(
+                                    "Juegos Populares" to popularGames,
+                                    "Top Rated" to topRatedGames,
+                                    "Próximos Estrenos" to upcomingGames,
+                                    "Tendencias Actuales" to trendingGames,
+                                    "Todos los Juegos" to games,
+                                ).filter { it.second.isNotEmpty() }
+
+                            sections.forEachIndexed { idx, (sectionTitle, sectionGames) ->
+                                item {
+                                    when (idx) {
+                                        0 -> GameSection(
+                                            sectionTitle,
+                                            sectionGames,
+                                            nav,
+                                            sectionIndex = idx,
+                                            mode = SectionMode.HEADER
+                                        )
+
+                                        1 -> GameSection(
+                                            sectionTitle,
+                                            sectionGames,
+                                            nav,
+                                            sectionIndex = idx,
+                                            mode = SectionMode.SUBHEADER_SHOW_META
+                                        )
+
+                                        else -> GameSection(
+                                            sectionTitle,
+                                            sectionGames,
+                                            nav,
+                                            sectionIndex = idx,
+                                            mode = SectionMode.SUBHEADER_HIDE_META
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                selectedTab == HomeViewModel.HomeTab.HEART -> {
                     Column(
                         modifier = Modifier.fillMaxSize().padding(paddingValues),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        PlaceholderScreen(
-                            title = when (selectedTab) {
-                                HomeViewModel.HomeTab.GAMES -> Strings.Placeholders.GAMES
-                                HomeViewModel.HomeTab.HEART -> Strings.Placeholders.FAVORITES
-                                else -> ""
-                            }
-                        )
+                        PlaceholderScreen(title = Strings.Placeholders.FAVORITES)
                     }
                 }
 

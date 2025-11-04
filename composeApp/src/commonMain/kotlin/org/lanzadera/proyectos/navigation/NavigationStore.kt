@@ -1,6 +1,7 @@
 package org.lanzadera.proyectos.navigation
 
 import org.lanzadera.proyectos.domain.models.book.Book
+import org.lanzadera.proyectos.domain.models.game.Game
 import org.lanzadera.proyectos.domain.models.movie.Movie
 import org.lanzadera.proyectos.domain.models.tvshow.TvShow
 
@@ -13,4 +14,5 @@ object NavigationStore {
     var selectedMovie: Movie? = null
     var selectedBook: Book? = null
     var selectedTvShow: TvShow? = null
+    var selectedGame: Game? = null
 }
