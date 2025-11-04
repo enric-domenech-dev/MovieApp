@@ -35,6 +35,9 @@ object Constants {
             fun createRoute(tvShowId: Int) = "seriesDetail/$tvShowId"
         }
         object Search : Screen("search")
+        object GameDetail : Screen("gameDetail/{gameId}") {
+            fun createRoute(gameId: Int) = "gameDetail/$gameId"
+        }
         // Added settings/chat/profile to centralize routes and avoid literals
         object Settings : Screen("settings")
         object Chat : Screen("chat")
