@@ -1,7 +1,9 @@
 package org.lanzadera.proyectos.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -16,13 +18,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ExitToApp
 import androidx.compose.material.icons.automirrored.outlined.Send
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DrawerDefaults
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -51,6 +51,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.launch
+import movieapp.composeapp.generated.resources.Res
+import movieapp.composeapp.generated.resources.new_logo
+import org.jetbrains.compose.resources.painterResource
 import org.lanzadera.proyectos.BuildConfig
 import org.lanzadera.proyectos.utils.Constants
 import org.lanzadera.proyectos.utils.Strings
@@ -60,7 +63,7 @@ fun DrawerAppBar(
     navViewModel: NavHostController,
     drawerState: DrawerState,
     modifier: Modifier = Modifier,
-    drawerEnabled: Boolean = true,
+    drawerEnabled: Boolean = false,
     content: @Composable () -> Unit
 ) {
     var showDialog by remember { mutableStateOf(false) }
@@ -70,11 +73,10 @@ fun DrawerAppBar(
         ModalNavigationDrawer(
             modifier = modifier,
             drawerState = drawerState,
-            scrimColor = DrawerDefaults.scrimColor,
             drawerContent = {
                 Column(
                     modifier = Modifier
-                        .background(MaterialTheme.colorScheme.background)
+                        .background(MaterialTheme.colorScheme.surfaceContainer)
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
                         .padding(bottom = Constants.Dimensions.BOTTOM_NAV_BAR_HEIGHT)
@@ -84,18 +86,34 @@ fun DrawerAppBar(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.AccountCircle,
-                            contentDescription = "Imagen de Usuario",
-                            modifier = Modifier.size(100.dp)
-                        )
-                        Text(
-                            "Nombre de Usuario".uppercase(),
-                            modifier = Modifier.padding(16.dp),
-                            style = MaterialTheme.typography.headlineSmall
-                        )
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .padding(16.dp)
+                        ) {
+                            Surface(
+                                shape = MaterialTheme.shapes.medium,
+                                color = MaterialTheme.colorScheme.surfaceVariant,
+                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                shadowElevation = 4.dp,
+                                tonalElevation = 4.dp,
+                                border = androidx.compose.foundation.BorderStroke(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f)
+                                ),
+                                modifier = Modifier.size(240.dp)
+                            ) {
+                                Image(
+                                    painter = painterResource(Res.drawable.new_logo),
+                                    contentDescription = "App Logo",
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(12.dp),
+                                    contentScale = androidx.compose.ui.layout.ContentScale.Fit
+                                )
+                            }
+                        }
                     }
-                    HorizontalDivider()
 
                     Column(
                         modifier = Modifier
@@ -175,7 +193,7 @@ fun DrawerAppBar(
                         onConfirm = { navViewModel.navigate(Constants.Screen.Login.route) }
                     )
                     CustomBottomAppBar(
-                        containerColor = MaterialTheme.colorScheme.primary,
+                        containerColor = MaterialTheme.colorScheme.scrim,
                         contentColor = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier
                             .fillMaxWidth()
