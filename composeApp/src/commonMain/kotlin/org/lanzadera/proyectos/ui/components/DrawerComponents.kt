@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -52,7 +53,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.launch
 import movieapp.composeapp.generated.resources.Res
-import movieapp.composeapp.generated.resources.new_logo
+import movieapp.composeapp.generated.resources.new_edge_logo
 import org.jetbrains.compose.resources.painterResource
 import org.lanzadera.proyectos.BuildConfig
 import org.lanzadera.proyectos.utils.Constants
@@ -89,29 +90,18 @@ fun DrawerAppBar(
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
+                                .safeDrawingPadding()
+                                .padding(top = 16.dp)
                                 .padding(16.dp)
                         ) {
-                            Surface(
-                                shape = MaterialTheme.shapes.medium,
-                                color = MaterialTheme.colorScheme.surfaceVariant,
-                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                shadowElevation = 4.dp,
-                                tonalElevation = 4.dp,
-                                border = androidx.compose.foundation.BorderStroke(
-                                    1.dp,
-                                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f)
-                                ),
-                                modifier = Modifier.size(240.dp)
-                            ) {
                                 Image(
-                                    painter = painterResource(Res.drawable.new_logo),
+                                    painter = painterResource(Res.drawable.new_edge_logo),
                                     contentDescription = "App Logo",
                                     modifier = Modifier
-                                        .fillMaxSize()
+                                        .size(264.dp)
                                         .padding(12.dp),
                                     contentScale = androidx.compose.ui.layout.ContentScale.Fit
                                 )
-                            }
                         }
                     }
 
@@ -121,6 +111,23 @@ fun DrawerAppBar(
                         verticalArrangement = Arrangement.SpaceAround,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        CustomBottomAppBar(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 16.dp)
+                        ) {
+                            Text(
+                                text = "v${BuildConfig.APP_VERSION}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier.align(Alignment.CenterHorizontally),
+                                fontSize = 16.sp,
+                                fontFamily = FontFamily.SansSerif,
+                            )
+                        }
                         DropdownMenuItem(
                             text = { Text(Strings.Menu.PROFILE) },
                             onClick = { navViewModel.navigate(Constants.Screen.Search.route) },
@@ -192,24 +199,6 @@ fun DrawerAppBar(
                         onDismiss = { showDialog = false },
                         onConfirm = { navViewModel.navigate(Constants.Screen.Login.route) }
                     )
-                    CustomBottomAppBar(
-                        containerColor = MaterialTheme.colorScheme.scrim,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 16.dp)
-                    ) {
-                        Text(
-                            text = "v${BuildConfig.APP_VERSION}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.align(Alignment.CenterHorizontally),
-                            fontSize = 16.sp,
-                            fontFamily = FontFamily.SansSerif,
-                        )
-                    }
-
                 }
             },
             gesturesEnabled = true,

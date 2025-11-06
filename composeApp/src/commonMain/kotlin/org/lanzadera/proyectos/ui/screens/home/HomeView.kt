@@ -3,10 +3,7 @@ package org.lanzadera.proyectos.ui.screens.home
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
@@ -23,9 +20,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
@@ -58,8 +53,6 @@ fun HomeView(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val selectedTab by vm.selectedTab.collectAsStateWithLifecycle()
     val state by vm.uiState.collectAsStateWithLifecycle()
-    val primary by vm.primary.collectAsStateWithLifecycle()
-    val secondary by vm.secondary.collectAsStateWithLifecycle()
     val popular by vm.popular.collectAsStateWithLifecycle()
     val topRated by vm.topRated.collectAsStateWithLifecycle()
     val trendingWeek by vm.trendingWeek.collectAsStateWithLifecycle()
@@ -70,22 +63,12 @@ fun HomeView(
     val inCinemasToday by vm.inCinemasToday.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
 
-    // Derived ordering example
-    val primarySorted by remember(primary) {
-        derivedStateOf {
-            primary.sortedWith(
-                compareByDescending<Movie> { it.releaseDate }
-                    .thenByDescending { it.voteCount }
-            ).take(35)
-        }
-    }
-
     org.lanzadera.proyectos.ui.components.DrawerAppBar(
-        modifier = Modifier.safeDrawingPadding(),
         navViewModel = nav,
         drawerState = drawerState
     ) {
         Scaffold(
+            modifier = Modifier.fillMaxSize().safeDrawingPadding(),
             topBar = {
                 val selectedIndex = when (selectedTab) {
                     HomeViewModel.HomeTab.BOOKS -> 0
@@ -125,14 +108,16 @@ fun HomeView(
             },
             // bottomBar moved to top-level Navigation scaffold
         ) { paddingValues ->
-            val hasContent = primarySorted.isNotEmpty() || secondary.isNotEmpty()
-            val showLoading = state.isLoading && !hasContent
-            val showError = (state.error != null) && !hasContent
+            val movies by vm.movies.collectAsStateWithLifecycle()
+            val hasContent = movies.isNotEmpty()
 
             when {
-                showLoading -> {
+                state.isLoading && !hasContent -> {
                     Column(
-                        modifier = Modifier.fillMaxSize().padding(paddingValues),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                            .navigationBarsPadding(),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
@@ -140,9 +125,12 @@ fun HomeView(
                     }
                 }
 
-                showError -> {
+                (state.error != null) && !hasContent -> {
                     Column(
-                        modifier = Modifier.fillMaxSize().padding(paddingValues),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                            .navigationBarsPadding(),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
@@ -172,14 +160,15 @@ fun HomeView(
                         val booksListState = rememberLazyListState()
                         LazyColumn(
                             state = booksListState,
-                            modifier = Modifier.fillMaxSize().navigationBarsPadding(),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(paddingValues)
+                                .navigationBarsPadding(),
                             contentPadding = PaddingValues(
                                 start = 8.dp,
                                 end = 8.dp,
-                                top = paddingValues.calculateTopPadding() + 8.dp,
-                                bottom = paddingValues.calculateBottomPadding() +
-                                        WindowInsets.navigationBars.asPaddingValues()
-                                            .calculateBottomPadding()
+                                top = 8.dp,
+                                bottom = 80.dp
                             ),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
@@ -253,14 +242,15 @@ fun HomeView(
                         val seriesListState = rememberLazyListState()
                         LazyColumn(
                             state = seriesListState,
-                            modifier = Modifier.fillMaxSize().navigationBarsPadding(),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(paddingValues)
+                                .navigationBarsPadding(),
                             contentPadding = PaddingValues(
                                 start = 8.dp,
                                 end = 8.dp,
-                                top = paddingValues.calculateTopPadding() + 8.dp,
-                                bottom = paddingValues.calculateBottomPadding() +
-                                        WindowInsets.navigationBars.asPaddingValues()
-                                            .calculateBottomPadding()
+                                top = 8.dp,
+                                bottom = 80.dp
                             ),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
@@ -345,14 +335,15 @@ fun HomeView(
                         val gamesListState = rememberLazyListState()
                         LazyColumn(
                             state = gamesListState,
-                            modifier = Modifier.fillMaxSize().navigationBarsPadding(),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(paddingValues)
+                                .navigationBarsPadding(),
                             contentPadding = PaddingValues(
                                 start = 8.dp,
                                 end = 8.dp,
-                                top = paddingValues.calculateTopPadding() + 8.dp,
-                                bottom = paddingValues.calculateBottomPadding() +
-                                        WindowInsets.navigationBars.asPaddingValues()
-                                            .calculateBottomPadding()
+                                top = 8.dp,
+                                bottom = 80.dp
                             ),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
@@ -412,12 +403,15 @@ fun HomeView(
                     // FILMS tab
                     LazyColumn(
                         state = listState,
-                        modifier = Modifier.fillMaxSize().navigationBarsPadding(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                            .navigationBarsPadding(),
                         contentPadding = PaddingValues(
                             start = 8.dp,
                             end = 8.dp,
-                            top = paddingValues.calculateTopPadding() + 8.dp,
-                            bottom = paddingValues.calculateBottomPadding() + 16.dp
+                            top = 8.dp,
+                            bottom = 80.dp
                         ),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {

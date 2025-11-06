@@ -36,7 +36,7 @@ import org.lanzadera.proyectos.domain.repository.TvShowRepository
 import org.lanzadera.proyectos.domain.usecase.books.RefreshBooksUseCase
 import org.lanzadera.proyectos.domain.usecase.games.GetGameDetailsUseCase
 import org.lanzadera.proyectos.domain.usecase.games.RefreshGamesUseCase
-import org.lanzadera.proyectos.domain.usecase.load_initial_data.LoadInitialDataUseCase
+import org.lanzadera.proyectos.domain.usecase.load_initial_data.GetInitialDataUseCase
 import org.lanzadera.proyectos.domain.usecase.search.SearchMoviesUseCase
 import org.lanzadera.proyectos.domain.usecase.tvshows.GetTvShowDetailsUseCase
 import org.lanzadera.proyectos.domain.usecase.tvshows.RefreshTvShowsUseCase
@@ -45,6 +45,7 @@ import org.lanzadera.proyectos.ui.screens.detail.SeriesDetailViewModel
 import org.lanzadera.proyectos.ui.screens.games.GameDetailViewModel
 import org.lanzadera.proyectos.ui.screens.home.HomeViewModel
 import org.lanzadera.proyectos.ui.screens.search.SearchViewModel
+import org.lanzadera.proyectos.ui.screens.splash.SplashViewModel
 
 val appModule = module {
     single(named("apiBearerToken")) { BuildConfig.API_BEARER_TOKEN }
@@ -181,7 +182,7 @@ val dataModule = module {
 val viewModelsModule = module {
 
     // UseCases
-    single { LoadInitialDataUseCase(get()) }
+    single { GetInitialDataUseCase(get()) }
     single { RefreshBooksUseCase(get()) }
     single { RefreshTvShowsUseCase(get()) }
     single { GetTvShowDetailsUseCase(get()) }
@@ -204,6 +205,7 @@ val viewModelsModule = module {
     single<GameRepository> { GameRepositoryImpl(get(), get(named("igdbClient")), 5, get()) }
 
     // ViewModels
+    viewModel { SplashViewModel(get()) }
     viewModel { HomeViewModel(get(), get(), get(), get()) }
     viewModel { SeriesDetailViewModel(get()) }
     viewModel { MovieDetailViewModel(get()) }

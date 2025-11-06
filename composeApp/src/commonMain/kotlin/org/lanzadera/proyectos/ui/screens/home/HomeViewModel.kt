@@ -2,31 +2,27 @@ package org.lanzadera.proyectos.ui.screens.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import org.lanzadera.proyectos.domain.models.book.Book
 import org.lanzadera.proyectos.domain.models.game.Game
-import org.lanzadera.proyectos.domain.models.movie.Movie
 import org.lanzadera.proyectos.domain.models.tvshow.TvShow
 import org.lanzadera.proyectos.domain.usecase.books.RefreshBooksUseCase
 import org.lanzadera.proyectos.domain.usecase.games.RefreshGamesUseCase
-import org.lanzadera.proyectos.domain.usecase.load_initial_data.LoadInitialDataUseCase
+import org.lanzadera.proyectos.domain.usecase.load_initial_data.GetInitialDataUseCase
 import org.lanzadera.proyectos.domain.usecase.tvshows.RefreshTvShowsUseCase
 import kotlin.coroutines.cancellation.CancellationException
 
 class HomeViewModel(
-    private val loadInitialData: LoadInitialDataUseCase,
+    private val getInitialData: GetInitialDataUseCase,
     private val refreshBooksUseCase: RefreshBooksUseCase?,
     private val refreshTvShowsUseCase: RefreshTvShowsUseCase? = null,
     private val refreshGamesUseCase: RefreshGamesUseCase? = null
@@ -35,24 +31,24 @@ class HomeViewModel(
     // HomeTab: ahora con 5 pestañas: BOOKS, FILMS, SERIES, GAMES, <3
     enum class HomeTab { BOOKS, FILMS, SERIES, GAMES, HEART }
 
-    // --- todos los flows, calientes y listos ---
-    val movies = loadInitialData.moviesFlow
+    // --- todos los flows, calientes y listos (desde el use case) ---
+    val movies = getInitialData.moviesFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-    val trendingWeek = loadInitialData.trendingMoviesFlow
+    val trendingWeek = getInitialData.trendingMoviesFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-    val trendingDay = loadInitialData.trendingMoviesDailyFlow
+    val trendingDay = getInitialData.trendingMoviesDailyFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-    val popular = loadInitialData.popularMoviesFlow
+    val popular = getInitialData.popularMoviesFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-    val topRated = loadInitialData.topRatedMoviesFlow
+    val topRated = getInitialData.topRatedMoviesFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-    val upcoming = loadInitialData.upcomingMoviesFlow
+    val upcoming = getInitialData.upcomingMoviesFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-    val discover = loadInitialData.discoverMoviesFlow
+    val discover = getInitialData.discoverMoviesFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-    val hero = loadInitialData.heroMoviesFlow
+    val hero = getInitialData.heroMoviesFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-    val inCinemasToday = loadInitialData.inCinemasTodayFlow
+    val inCinemasToday = getInitialData.inCinemasTodayFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     // Books flow (if use case provided)
@@ -220,31 +216,10 @@ class HomeViewModel(
 
     // clearError removed: UI will reset `error` directly (vm.error.value = null) to avoid unused warnings
 
-    // mapping de tab -> par de listas (primary y secondary)
-    private fun feedsFor(tab: HomeTab): Pair<Flow<List<Movie>>, Flow<List<Movie>>> =
-        when (tab) {
-            HomeTab.BOOKS -> trendingDay to inCinemasToday     // placeholder: Books will be shown in a different UI; keep compatibility
-            HomeTab.FILMS -> movies to movies                 // FILMS mostrará secciones separadas en la UI
-            HomeTab.SERIES -> trendingWeek to upcoming        // placeholder si aún no hay series
-            HomeTab.GAMES -> hero to discover                 // placeholder
-            HomeTab.HEART -> discover to discover            // placeholder
-        }
-
-    // listas visibles según el tab (conmutadas sin recarga)
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val primary: StateFlow<List<Movie>> =
-        selectedTab.flatMapLatest { feedsFor(it).first }
-            .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val secondary: StateFlow<List<Movie>> =
-        selectedTab.flatMapLatest { feedsFor(it).second }
-            .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-
     // UiState mínimo
     val uiState: StateFlow<UiState> =
-        combine(refreshing, error, primary, secondary) { isRefreshing, err, p, s ->
-            val hasContent = p.isNotEmpty() || s.isNotEmpty()
+        combine(refreshing, error, movies) { isRefreshing, err, mov ->
+            val hasContent = mov.isNotEmpty()
             UiState(
                 isLoading = isRefreshing && !hasContent,
                 isRefreshing = isRefreshing,
@@ -271,31 +246,9 @@ class HomeViewModel(
         val yaHayDatos = movies.value.isNotEmpty()
         if (!force && yaHayDatos) return
 
-        viewModelScope.launch {
-            refreshing.value = true
-            error.value = null
-            try {
-                supervisorScope {
-                    awaitAll(
-                        async { loadInitialData.refreshMovies() },
-                        async { loadInitialData.refreshTrendingMovies() },
-                        async { loadInitialData.refreshPopularMovies() },
-                        async { loadInitialData.refreshTopRatedMovies() },
-                        async { loadInitialData.refreshUpcomingMovies() },
-                        async { loadInitialData.refreshDiscoverMovies() },
-                        async { loadInitialData.refreshHeroMovies() },
-                        async { loadInitialData.refreshTrendingMoviesDaily() },
-                        async { loadInitialData.refreshInCinemasToday() }
-                    )
-                }
-            } catch (ce: CancellationException) {
-                error.value = ce.message ?: "Error desconocido"
-            } catch (t: Throwable) {
-                error.value = t.message ?: "Error desconocido"
-            } finally {
-                refreshing.value = false
-            }
-        }
+        // Los datos ya están siendo cargados por SplashViewModel en background
+        // Aquí solo marcamos que no estamos en estado de carga
+        refreshing.value = false
     }
 
     fun refresh(force: Boolean) {
@@ -308,6 +261,9 @@ class HomeViewModel(
         val firstLoadFinished: Boolean = false,
         val error: String? = null,
         val selectedTab: Int = 0,
-        val activeFilters: Set<Int> = emptySet()
-    )
+        val activeFilters: Set<Int> = emptySet(),
+        val onError: Boolean = error != null
+    ) {
+
+    }
 }

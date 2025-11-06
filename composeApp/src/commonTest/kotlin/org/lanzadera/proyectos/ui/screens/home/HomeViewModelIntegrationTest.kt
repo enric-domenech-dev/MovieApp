@@ -23,7 +23,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlinx.serialization.json.Json
 import org.lanzadera.proyectos.data.repository.LoadInitialDataImpl
-import org.lanzadera.proyectos.domain.usecase.load_initial_data.LoadInitialDataUseCase
+import org.lanzadera.proyectos.domain.usecase.load_initial_data.GetInitialDataUseCase
 import org.lanzadera.proyectos.movieListJsonCompleta
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -93,8 +93,8 @@ class HomeViewModelIntegrationTest {
                 client = client,
                 maxPages = 1,
                 json = Json { ignoreUnknownKeys = true; explicitNulls = false })
-            val useCase = LoadInitialDataUseCase(repo)
-            val vm = HomeViewModel(useCase)
+            val useCase = GetInitialDataUseCase(repo)
+            val vm = HomeViewModel(useCase, null, null, null)
 
             println("Subscribiendo a uiState para disparar onStart { refreshIfNeeded() }\n")
             // 4) Suscríbete a uiState para disparar onStart { refreshAllIfNeeded() }
@@ -316,7 +316,8 @@ class HomeViewModelIntegrationTest {
             client = client,
             maxPages = 1,
             json = Json { ignoreUnknownKeys = true; explicitNulls = false })
-        return HomeViewModel(LoadInitialDataUseCase(repo))
+        val useCase = GetInitialDataUseCase(repo)
+        return HomeViewModel(useCase, null, null, null)
     }
 
     private fun MockRequestHandleScope.respondJson(
