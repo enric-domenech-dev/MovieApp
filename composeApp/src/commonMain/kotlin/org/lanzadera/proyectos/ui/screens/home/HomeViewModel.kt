@@ -13,9 +13,12 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import org.lanzadera.proyectos.domain.models.book.Book
+import org.lanzadera.proyectos.domain.models.favorite.FavoriteItem
 import org.lanzadera.proyectos.domain.models.game.Game
 import org.lanzadera.proyectos.domain.models.tvshow.TvShow
 import org.lanzadera.proyectos.domain.usecase.books.RefreshBooksUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.ObserveFavoritesUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.ToggleFavoriteUseCase
 import org.lanzadera.proyectos.domain.usecase.games.RefreshGamesUseCase
 import org.lanzadera.proyectos.domain.usecase.load_initial_data.GetInitialDataUseCase
 import org.lanzadera.proyectos.domain.usecase.tvshows.RefreshTvShowsUseCase
@@ -25,7 +28,9 @@ class HomeViewModel(
     private val getInitialData: GetInitialDataUseCase,
     private val refreshBooksUseCase: RefreshBooksUseCase?,
     private val refreshTvShowsUseCase: RefreshTvShowsUseCase? = null,
-    private val refreshGamesUseCase: RefreshGamesUseCase? = null
+    private val refreshGamesUseCase: RefreshGamesUseCase? = null,
+    private val observeFavoritesUseCase: ObserveFavoritesUseCase,
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase
 ) : ViewModel() {
 
     // HomeTab: ahora con 5 pestañas: BOOKS, FILMS, SERIES, GAMES, <3
@@ -115,6 +120,9 @@ class HomeViewModel(
     val trendingGames: StateFlow<List<Game>> = refreshGamesUseCase?.trendingGamesFlow
         ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
         ?: MutableStateFlow(emptyList())
+
+    val favorites: StateFlow<List<FavoriteItem>> = observeFavoritesUseCase()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val refreshing = MutableStateFlow(false)
     val error = MutableStateFlow<String?>(null)
@@ -212,6 +220,10 @@ class HomeViewModel(
                 }
             }
         }
+    }
+
+    fun toggleFavorite(item: FavoriteItem) {
+        viewModelScope.launch { toggleFavoriteUseCase(item) }
     }
 
     // clearError removed: UI will reset `error` directly (vm.error.value = null) to avoid unused warnings

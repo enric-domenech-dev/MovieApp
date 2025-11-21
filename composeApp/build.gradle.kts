@@ -67,6 +67,7 @@ kotlin {
             implementation(libs.androidx.biometric)
 
             implementation(libs.androidx.compose.material.iconsExtended)
+            implementation(libs.androidx.room.ktx)
         }
         commonMain.dependencies {
 

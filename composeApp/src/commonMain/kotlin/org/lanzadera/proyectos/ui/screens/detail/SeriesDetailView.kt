@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.ButtonDefaults
@@ -32,7 +33,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
@@ -41,6 +41,7 @@ import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
+import org.lanzadera.proyectos.domain.models.favorite.FavoriteType
 import org.lanzadera.proyectos.domain.models.tvshow.TvShow
 import org.lanzadera.proyectos.navigation.NavigationStore
 import org.lanzadera.proyectos.ui.components.CustomTopAppBar
@@ -60,7 +61,11 @@ fun SeriesDetailView(
     val tvShowDetail by vm.tvShowDetail.collectAsStateWithLifecycle()
     val isLoading by vm.isLoading.collectAsStateWithLifecycle()
     val error by vm.error.collectAsStateWithLifecycle()
+    val favorites by vm.favorites.collectAsStateWithLifecycle()
     val selectedTab = remember { mutableStateOf(0) }
+    val isFavorite = remember(tvShowDetail, favorites) {
+        favorites.any { it.id == tvShowDetail?.id?.toString() && it.type == FavoriteType.TV_SHOW }
+    }
 
     // Si recibimos un tvShowId, cargar por ID
     LaunchedEffect(tvShowId) {
@@ -136,14 +141,14 @@ fun SeriesDetailView(
                     ) {
                         // Like Button - Green
                         IconButton(
-                            onClick = { /* TODO: Implement favorite functionality */ },
+                            onClick = { vm.toggleFavorite() },
                             modifier = Modifier.size(40.dp)
                         ) {
                             Icon(
-                                imageVector = Icons.Outlined.FavoriteBorder,
+                                imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                                 contentDescription = "Agregar a favoritos",
                                 modifier = Modifier.size(ButtonDefaults.IconSize),
-                                tint = Color(0xFF2AE98E)
+                                tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
                             )
                         }
                     }
@@ -257,4 +262,3 @@ fun SeriesDetailView(
         }
     )
 }
-

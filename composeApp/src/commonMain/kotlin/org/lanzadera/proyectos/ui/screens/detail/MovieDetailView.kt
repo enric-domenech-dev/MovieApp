@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.ButtonDefaults
@@ -40,6 +41,7 @@ import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
+import org.lanzadera.proyectos.domain.models.favorite.FavoriteType
 import org.lanzadera.proyectos.ui.components.CustomTopAppBar
 import org.lanzadera.proyectos.ui.components.MovieCreditsTab
 import org.lanzadera.proyectos.ui.components.MovieInfoTabContent
@@ -55,6 +57,11 @@ fun MovieDetailView(
     val movieDetail by viewModel.movieDetail.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val error by viewModel.error.collectAsStateWithLifecycle()
+    val favorites by viewModel.favorites.collectAsStateWithLifecycle()
+
+    val isFavorite = remember(movieDetail, favorites) {
+        favorites.any { it.id == movieDetail?.id?.toString() && it.type == FavoriteType.MOVIE }
+    }
 
     // Cargar los detalles de la película cuando el composable se monta
     LaunchedEffect(movieId) {
@@ -150,14 +157,14 @@ fun MovieDetailView(
                     ) {
                         // Like Button - Green
                         IconButton(
-                            onClick = { /* TODO: Implement favorite functionality */ },
+                            onClick = { viewModel.toggleFavorite() },
                             modifier = Modifier.size(40.dp)
                         ) {
                             Icon(
-                                imageVector = Icons.Outlined.FavoriteBorder,
+                                imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                                 contentDescription = "Agregar a favoritos",
                                 modifier = Modifier.size(ButtonDefaults.IconSize),
-                                tint = androidx.compose.ui.graphics.Color(0xFF2AE98E)
+                                tint = if (isFavorite) androidx.compose.ui.graphics.Color(0xFF2AE98E) else MaterialTheme.colorScheme.onBackground
                             )
                         }
                     }
@@ -254,4 +261,3 @@ fun MovieDetailView(
         }
     )
 }
-

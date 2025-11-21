@@ -21,19 +21,26 @@ import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
 import org.lanzadera.proyectos.BuildConfig
 import org.lanzadera.proyectos.data.authentication.IGDBAuthManager
+import org.lanzadera.proyectos.data.datasource.FavoritesLocalDataSource
+import org.lanzadera.proyectos.data.datasource.createFavoritesLocalDataSource
 import org.lanzadera.proyectos.data.repository.BooksRepositoryImpl
+import org.lanzadera.proyectos.data.repository.FavoritesRepositoryImpl
 import org.lanzadera.proyectos.data.repository.GameRepositoryImpl
 import org.lanzadera.proyectos.data.repository.LoadInitialDataImpl
 import org.lanzadera.proyectos.data.repository.MovieRepositoryImpl
 import org.lanzadera.proyectos.data.repository.SearchRepositoryImpl
 import org.lanzadera.proyectos.data.repository.TvShowRepositoryImpl
 import org.lanzadera.proyectos.domain.repository.BooksRepository
+import org.lanzadera.proyectos.domain.repository.FavoritesRepository
 import org.lanzadera.proyectos.domain.repository.GameRepository
 import org.lanzadera.proyectos.domain.repository.LoadInitialData
 import org.lanzadera.proyectos.domain.repository.MovieRepository
 import org.lanzadera.proyectos.domain.repository.SearchRepository
 import org.lanzadera.proyectos.domain.repository.TvShowRepository
 import org.lanzadera.proyectos.domain.usecase.books.RefreshBooksUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.ObserveFavoritesUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.SyncFavoritesUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.ToggleFavoriteUseCase
 import org.lanzadera.proyectos.domain.usecase.games.GetGameDetailsUseCase
 import org.lanzadera.proyectos.domain.usecase.games.RefreshGamesUseCase
 import org.lanzadera.proyectos.domain.usecase.load_initial_data.GetInitialDataUseCase
@@ -177,6 +184,10 @@ val dataModule = module {
             json = get()
         )
     }
+
+    // Favorites persistence
+    single<FavoritesLocalDataSource> { createFavoritesLocalDataSource() }
+    single<FavoritesRepository> { FavoritesRepositoryImpl(get()) }
 }
 
 val viewModelsModule = module {
@@ -189,6 +200,9 @@ val viewModelsModule = module {
     single { SearchMoviesUseCase(get()) }
     single { RefreshGamesUseCase(get()) }
     single { GetGameDetailsUseCase(get()) }
+    single { ObserveFavoritesUseCase(get()) }
+    single { ToggleFavoriteUseCase(get()) }
+    single { SyncFavoritesUseCase(get()) }
 
     // Repositories
     single<LoadInitialData> { LoadInitialDataImpl(get(), 5, get()) }
@@ -206,9 +220,9 @@ val viewModelsModule = module {
 
     // ViewModels
     viewModel { SplashViewModel(get()) }
-    viewModel { HomeViewModel(get(), get(), get(), get()) }
-    viewModel { SeriesDetailViewModel(get()) }
-    viewModel { MovieDetailViewModel(get()) }
+    viewModel { HomeViewModel(get(), get(), get(), get(), get(), get()) }
+    viewModel { SeriesDetailViewModel(get(), get(), get()) }
+    viewModel { MovieDetailViewModel(get(), get(), get()) }
     viewModel { SearchViewModel(get()) }
     viewModel { GameDetailViewModel(get()) }
 }

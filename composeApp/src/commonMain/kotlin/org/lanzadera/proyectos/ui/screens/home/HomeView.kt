@@ -1,22 +1,33 @@
 package org.lanzadera.proyectos.ui.screens.home
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -30,17 +41,26 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import coil3.compose.AsyncImage
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.lanzadera.proyectos.domain.models.book.Book
+import org.lanzadera.proyectos.domain.models.favorite.FavoriteItem
+import org.lanzadera.proyectos.domain.models.favorite.FavoriteType
 import org.lanzadera.proyectos.domain.models.movie.Movie
 import org.lanzadera.proyectos.domain.models.tvshow.TvShow
+import org.lanzadera.proyectos.navigation.NavigationStore
+import org.lanzadera.proyectos.ui.components.BookHeader
+import org.lanzadera.proyectos.ui.components.GameHeader
+import org.lanzadera.proyectos.ui.components.MovieHeader
 import org.lanzadera.proyectos.ui.components.PlaceholderScreen
+import org.lanzadera.proyectos.ui.components.TvShowHeader
 import org.lanzadera.proyectos.ui.components.sections.BookSection
 import org.lanzadera.proyectos.ui.components.sections.GameSection
 import org.lanzadera.proyectos.ui.components.sections.Section
 import org.lanzadera.proyectos.ui.components.sections.TvShowSection
 import org.lanzadera.proyectos.ui.components.tabs.NiaTab
 import org.lanzadera.proyectos.ui.components.tabs.NiaTabRow
+import org.lanzadera.proyectos.utils.Constants
 import org.lanzadera.proyectos.utils.Constants.MenuOptions.topBarTitles
 import org.lanzadera.proyectos.utils.Strings
 
@@ -390,12 +410,96 @@ fun HomeView(
                 }
 
                 selectedTab == HomeViewModel.HomeTab.HEART -> {
-                    Column(
-                        modifier = Modifier.fillMaxSize().padding(paddingValues),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        PlaceholderScreen(title = Strings.Placeholders.FAVORITES)
+                    val favorites by vm.favorites.collectAsStateWithLifecycle()
+                    val movies by vm.movies.collectAsStateWithLifecycle()
+                    val tvShows by vm.tvShows.collectAsStateWithLifecycle()
+                    val books by vm.books.collectAsStateWithLifecycle()
+                    val games by vm.games.collectAsStateWithLifecycle()
+                    if (favorites.isEmpty()) {
+                        Column(
+                            modifier = Modifier.fillMaxSize().padding(paddingValues),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            PlaceholderScreen(title = Strings.Placeholders.FAVORITES)
+                        }
+                    } else {
+                        val moviesFavorites = favorites.filter { it.type == FavoriteType.MOVIE }
+                        val seriesFavorites = favorites.filter { it.type == FavoriteType.TV_SHOW }
+                        val bookFavorites = favorites.filter { it.type == FavoriteType.BOOK }
+                        val gameFavorites = favorites.filter { it.type == FavoriteType.GAME }
+                        val navigateFavorite: (FavoriteItem) -> Unit = { item ->
+                            when (item.type) {
+                                FavoriteType.MOVIE -> item.id.toIntOrNull()?.let { movieId ->
+                                    NavigationStore.selectedMovie = movies.find { it.id == movieId }
+                                    nav.navigate(Constants.Screen.MovieDetail.createRoute(movieId))
+                                }
+
+                                FavoriteType.TV_SHOW -> item.id.toIntOrNull()?.let { showId ->
+                                    NavigationStore.selectedTvShow = tvShows.find { it.id == showId }
+                                    nav.navigate(Constants.Screen.SeriesDetail.createRoute(showId))
+                                }
+
+                                FavoriteType.BOOK -> {
+                                    NavigationStore.selectedBook = books.find { it.id == item.id }
+                                    nav.navigate(Constants.Screen.Detail.route)
+                                }
+
+                                FavoriteType.GAME -> item.id.toIntOrNull()?.let { gameId ->
+                                    NavigationStore.selectedGame = games.find { it.id == gameId }
+                                    nav.navigate(Constants.Screen.GameDetail.createRoute(gameId))
+                                }
+                            }
+                        }
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(paddingValues)
+                                .navigationBarsPadding(),
+                            verticalArrangement = Arrangement.spacedBy(24.dp),
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp)
+                        ) {
+                            item {
+                                FavoriteMoviesRow(
+                                    nav = nav,
+                                    title = Strings.Placeholders.MOVIES,
+                                    favorites = moviesFavorites,
+                                    movies = movies,
+                                    onToggle = vm::toggleFavorite,
+                                    onMissingNavigate = navigateFavorite
+                                )
+                            }
+                            item {
+                                FavoriteSeriesRow(
+                                    nav = nav,
+                                    title = Strings.Placeholders.SERIES,
+                                    favorites = seriesFavorites,
+                                    tvShows = tvShows,
+                                    onToggle = vm::toggleFavorite,
+                                    onMissingNavigate = navigateFavorite
+                                )
+                            }
+                            item {
+                                FavoriteBooksRow(
+                                    nav = nav,
+                                    title = Strings.Placeholders.BOOKS,
+                                    favorites = bookFavorites,
+                                    books = books,
+                                    onToggle = vm::toggleFavorite,
+                                    onMissingNavigate = navigateFavorite
+                                )
+                            }
+                            item {
+                                FavoriteGamesRow(
+                                    nav = nav,
+                                    title = Strings.Placeholders.GAMES,
+                                    favorites = gameFavorites,
+                                    games = games,
+                                    onToggle = vm::toggleFavorite,
+                                    onMissingNavigate = navigateFavorite
+                                )
+                            }
+                        }
                     }
                 }
 
@@ -462,4 +566,204 @@ fun HomeView(
             }
         }
     }
+}
+
+@Composable
+private fun FavoriteMoviesRow(
+    nav: NavHostController,
+    title: String,
+    favorites: List<FavoriteItem>,
+    movies: List<Movie>,
+    onToggle: (FavoriteItem) -> Unit,
+    onMissingNavigate: (FavoriteItem) -> Unit
+) {
+    if (favorites.isEmpty()) return
+    FavoriteCategoryHeader(title = title)
+    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        items(favorites, key = { it.type.name + it.id }) { favorite ->
+            val movie = movies.firstOrNull { it.id?.toString() == favorite.id } ?: favorite.toMovie()
+            if (movie != null) {
+                FavoriteHeaderCard(onToggle = { onToggle(favorite) }) {
+                    MovieHeader(modifier = Modifier.width(160.dp), nav = nav, movie = movie)
+                }
+            } else {
+                FavoriteFallbackCard(
+                    item = favorite,
+                    onToggle = { onToggle(favorite) },
+                    onClick = { onMissingNavigate(favorite) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun FavoriteSeriesRow(
+    nav: NavHostController,
+    title: String,
+    favorites: List<FavoriteItem>,
+    tvShows: List<TvShow>,
+    onToggle: (FavoriteItem) -> Unit,
+    onMissingNavigate: (FavoriteItem) -> Unit
+) {
+    if (favorites.isEmpty()) return
+    FavoriteCategoryHeader(title = title)
+    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        items(favorites, key = { it.type.name + it.id }) { favorite ->
+            val tvShow = tvShows.firstOrNull { it.id?.toString() == favorite.id } ?: favorite.toTvShow()
+            if (tvShow != null) {
+                FavoriteHeaderCard(onToggle = { onToggle(favorite) }) {
+                    TvShowHeader(modifier = Modifier.width(160.dp), nav = nav, tvShow = tvShow)
+                }
+            } else {
+                FavoriteFallbackCard(
+                    item = favorite,
+                    onToggle = { onToggle(favorite) },
+                    onClick = { onMissingNavigate(favorite) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun FavoriteBooksRow(
+    nav: NavHostController,
+    title: String,
+    favorites: List<FavoriteItem>,
+    books: List<Book>,
+    onToggle: (FavoriteItem) -> Unit,
+    onMissingNavigate: (FavoriteItem) -> Unit
+) {
+    if (favorites.isEmpty()) return
+    FavoriteCategoryHeader(title = title)
+    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        items(favorites, key = { it.type.name + it.id }) { favorite ->
+            val book = books.firstOrNull { it.id == favorite.id }
+            if (book != null) {
+                FavoriteHeaderCard(onToggle = { onToggle(favorite) }) {
+                    BookHeader(modifier = Modifier.width(160.dp), nav = nav, book = book)
+                }
+            } else {
+                FavoriteFallbackCard(
+                    item = favorite,
+                    onToggle = { onToggle(favorite) },
+                    onClick = { onMissingNavigate(favorite) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun FavoriteGamesRow(
+    nav: NavHostController,
+    title: String,
+    favorites: List<FavoriteItem>,
+    games: List<org.lanzadera.proyectos.domain.models.game.Game>,
+    onToggle: (FavoriteItem) -> Unit,
+    onMissingNavigate: (FavoriteItem) -> Unit
+) {
+    if (favorites.isEmpty()) return
+    FavoriteCategoryHeader(title = title)
+    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        items(favorites, key = { it.type.name + it.id }) { favorite ->
+            val game = games.firstOrNull { it.id?.toString() == favorite.id }
+            if (game != null) {
+                FavoriteHeaderCard(onToggle = { onToggle(favorite) }) {
+                    GameHeader(modifier = Modifier.width(160.dp), nav = nav, game = game)
+                }
+            } else {
+                FavoriteFallbackCard(
+                    item = favorite,
+                    onToggle = { onToggle(favorite) },
+                    onClick = { onMissingNavigate(favorite) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun FavoriteCategoryHeader(title: String) {
+    Text(text = title.uppercase(), style = MaterialTheme.typography.titleMedium)
+}
+
+@Composable
+private fun FavoriteHeaderCard(
+    onToggle: () -> Unit,
+    content: @Composable () -> Unit
+) {
+    Box {
+        content()
+        IconButton(
+            onClick = onToggle,
+            modifier = Modifier.align(Alignment.TopEnd)
+        ) {
+            Icon(imageVector = Icons.Filled.Favorite, contentDescription = "Quitar de favoritos")
+        }
+    }
+}
+
+@Composable
+private fun FavoriteFallbackCard(
+    item: FavoriteItem,
+    onToggle: () -> Unit,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .width(160.dp)
+            .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            val poster = item.posterUrl
+            if (poster != null) {
+                AsyncImage(
+                    model = poster,
+                    contentDescription = item.title,
+                    modifier = Modifier
+                        .height(120.dp)
+                        .fillMaxWidth()
+                )
+            } else {
+                Surface(
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    modifier = Modifier
+                        .height(120.dp)
+                        .fillMaxWidth()
+                ) {}
+            }
+            Text(text = item.title, style = MaterialTheme.typography.titleSmall, maxLines = 2)
+            IconButton(onClick = onToggle, modifier = Modifier.align(Alignment.End)) {
+                Icon(imageVector = Icons.Filled.Favorite, contentDescription = "Quitar de favoritos")
+            }
+        }
+    }
+}
+
+private fun FavoriteItem.toMovie(): Movie? {
+    val movieId = id.toIntOrNull() ?: return null
+    return Movie(
+        id = movieId,
+        title = title,
+        originalTitle = title,
+        posterPath = posterUrl,
+        overview = overview
+    )
+}
+
+private fun FavoriteItem.toTvShow(): TvShow? {
+    val showId = id.toIntOrNull() ?: return null
+    return TvShow(
+        id = showId,
+        name = title,
+        originalName = title,
+        posterPath = posterUrl,
+        overview = overview
+    )
 }
