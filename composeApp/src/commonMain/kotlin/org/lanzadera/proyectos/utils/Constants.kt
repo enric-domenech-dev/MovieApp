@@ -46,7 +46,7 @@ object Constants {
 
     // MENU OPTIONS
     object MenuOptions {
-        val topBarTitles = listOf("LIBROS", "PELÍCULAS", "SERIES", "JUEGOS", "<3")
+        val topBarTitles = listOf("SIGUIENDO", "LIBROS", "PELÍCULAS", "SERIES", "JUEGOS")
         val bottomBarTitles = listOf("Menu", "Buscar", "Inicio", "Chat", "Perfil")
         val bottomBarIcons = listOf(
             Icons.AutoMirrored.Outlined.List,

@@ -5,9 +5,22 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import org.lanzadera.proyectos.utils.AppContextProvider
 
-@Database(entities = [RoomFavoriteEntity::class], version = 1, exportSchema = true)
+@Database(
+    entities = [
+        RoomFavoriteEntity::class,
+        WatchedEpisodeEntity::class,
+        FavoriteTvShowEntity::class,
+        FavoriteMovieEntity::class
+    ],
+    version = 3,
+    exportSchema = true
+)
 abstract class FavoritesDatabase : RoomDatabase() {
     abstract fun favoriteDao(): FavoriteDao
+    abstract fun watchedEpisodeDao(): WatchedEpisodeDao
+    abstract fun favoriteTvShowDao(): FavoriteTvShowDao
+    abstract fun favoriteMovieDao(): FavoriteMovieDao
+    abstract fun favoriteItemDao(): FavoriteItemDao
 
     companion object {
         val instance: FavoritesDatabase by lazy {

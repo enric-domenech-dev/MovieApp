@@ -978,6 +978,63 @@ fun MovieCreditsTab(movie: Movie?, modifier: Modifier = Modifier) {
     }
 }
 
+@Composable
+fun MovieHeaderWithReleaseInfo(
+    modifier: Modifier = Modifier,
+    nav: NavHostController,
+    movieWithRelease: org.lanzadera.proyectos.domain.models.movie.MovieWithReleaseInfo
+) {
+    val movie = movieWithRelease.movie
+    val releaseInfo = movieWithRelease.releaseInfo
+
+    Column(
+        modifier = modifier
+            .wrapContentHeight()
+            .clickable {
+                NavigationStore.selectedMovie = movie
+                movie.id?.let { movieId ->
+                    nav.navigate(Constants.Screen.MovieDetail.createRoute(movieId))
+                }
+            }
+    ) {
+        Box(
+            modifier = Modifier
+                .aspectRatio(2f / 3f)
+                .clip(MaterialTheme.shapes.small)
+        ) {
+            AsyncImage(
+                model = "https://image.tmdb.org/t/p/w500${movie.posterPath}",
+                contentDescription = movie.title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+                placeholder = painterResource(Res.drawable.film)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+        movie.title?.let {
+            Text(
+                text = it,
+                fontWeight = FontWeight.Bold,
+                fontSize = 17.sp,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        releaseInfo?.let { info ->
+            Text(
+                text = info.displayText,
+                fontSize = 14.sp,
+                color = if (info.isReleased) Color(0xFF4CAF50) else Color(0xFFFF9800),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
 // Helper function to format numbers with thousand separators
 fun formatNumber(number: Int): String {
     return number.toString().reversed().chunked(3).joinToString(",").reversed()

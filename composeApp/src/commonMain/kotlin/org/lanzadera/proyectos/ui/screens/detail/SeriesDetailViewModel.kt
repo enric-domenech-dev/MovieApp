@@ -8,9 +8,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.lanzadera.proyectos.domain.models.WatchedEpisode
 import org.lanzadera.proyectos.domain.models.favorite.FavoriteItem
 import org.lanzadera.proyectos.domain.models.favorite.FavoriteType
 import org.lanzadera.proyectos.domain.models.tvshow.TvShow
+import org.lanzadera.proyectos.domain.usecase.episodes.ObserveWatchedEpisodesUseCase
+import org.lanzadera.proyectos.domain.usecase.episodes.ToggleEpisodeWatchedUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.ObserveFavoritesUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.ToggleFavoriteUseCase
 import org.lanzadera.proyectos.domain.usecase.tvshows.RefreshTvShowsUseCase
@@ -18,7 +21,9 @@ import org.lanzadera.proyectos.domain.usecase.tvshows.RefreshTvShowsUseCase
 class SeriesDetailViewModel(
     private val refreshTvShowsUseCase: RefreshTvShowsUseCase,
     observeFavoritesUseCase: ObserveFavoritesUseCase,
-    private val toggleFavoriteUseCase: ToggleFavoriteUseCase
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
+    private val observeWatchedEpisodesUseCase: ObserveWatchedEpisodesUseCase,
+    private val toggleEpisodeWatchedUseCase: ToggleEpisodeWatchedUseCase
 ) : ViewModel() {
 
     private val _tvShowDetail = MutableStateFlow<TvShow?>(null)
@@ -33,6 +38,9 @@ class SeriesDetailViewModel(
     val favorites = observeFavoritesUseCase()
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
+    private val _watchedEpisodes = MutableStateFlow<List<WatchedEpisode>>(emptyList())
+    val watchedEpisodes: StateFlow<List<WatchedEpisode>> = _watchedEpisodes.asStateFlow()
+
     fun loadTvShowDetails(tvShowId: Int) {
         viewModelScope.launch {
             try {
@@ -42,6 +50,13 @@ class SeriesDetailViewModel(
                 _tvShowDetail.value = details
                 if (details == null) {
                     _error.value = "No se pudieron cargar los detalles de la serie"
+                } else {
+                    // Observar episodios vistos en un Job separado
+                    viewModelScope.launch {
+                        observeWatchedEpisodesUseCase(tvShowId.toString())
+                            .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+                            .collect { _watchedEpisodes.value = it }
+                    }
                 }
             } catch (e: Exception) {
                 _error.value = "Error: ${e.message}"
@@ -53,8 +68,9 @@ class SeriesDetailViewModel(
 
     fun setTvShowDetail(tvShow: TvShow) {
         _tvShowDetail.value = tvShow
-        // Automáticamente cargar detalles completos (temporadas, episodios, etc.)
-        tvShow.id?.let { loadTvShowDetails(it) }
+        tvShow.id?.let {
+            loadTvShowDetails(it)
+        }
     }
 
     fun toggleFavorite() {
@@ -67,5 +83,102 @@ class SeriesDetailViewModel(
             overview = tvShow.overview
         )
         viewModelScope.launch { toggleFavoriteUseCase(item) }
+    }
+
+    fun toggleEpisodeWatched(seasonNumber: Int, episodeNumber: Int, isWatched: Boolean) {
+        val tvShowId = _tvShowDetail.value?.id?.toString() ?: return
+        val tvShow = _tvShowDetail.value ?: return
+
+        viewModelScope.launch {
+            if (isWatched) {
+                // Marcar este episodio y todos los anteriores como vistos
+                val episodesToMark = mutableListOf<WatchedEpisode>()
+
+                tvShow.seasons?.forEach { season ->
+                    val currentSeasonNumber = season.seasonNumber ?: return@forEach
+
+                    // Para temporadas anteriores a la actual, marcar todos los episodios
+                    if (currentSeasonNumber < seasonNumber) {
+                        season.episodes?.forEach { episode ->
+                            val epNum = episode.episodeNumber ?: return@forEach
+                            episodesToMark.add(
+                                WatchedEpisode(
+                                    tvShowId = tvShowId,
+                                    seasonNumber = currentSeasonNumber,
+                                    episodeNumber = epNum
+                                )
+                            )
+                        }
+                    }
+                    // Para la temporada actual, marcar solo los episodios hasta el seleccionado
+                    else if (currentSeasonNumber == seasonNumber) {
+                        season.episodes?.forEach { episode ->
+                            val epNum = episode.episodeNumber ?: return@forEach
+                            if (epNum <= episodeNumber) {
+                                episodesToMark.add(
+                                    WatchedEpisode(
+                                        tvShowId = tvShowId,
+                                        seasonNumber = currentSeasonNumber,
+                                        episodeNumber = epNum
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Marcar todos los episodios recopilados
+                episodesToMark.forEach { episode ->
+                    toggleEpisodeWatchedUseCase(episode, true)
+                }
+            } else {
+                // Al desmarcar, desmarcar este episodio y todos los posteriores
+                val episodesToUnmark = mutableListOf<WatchedEpisode>()
+
+                tvShow.seasons?.forEach { season ->
+                    val currentSeasonNumber = season.seasonNumber ?: return@forEach
+
+                    // Para temporadas posteriores a la actual, desmarcar todos los episodios
+                    if (currentSeasonNumber > seasonNumber) {
+                        season.episodes?.forEach { episode ->
+                            val epNum = episode.episodeNumber ?: return@forEach
+                            episodesToUnmark.add(
+                                WatchedEpisode(
+                                    tvShowId = tvShowId,
+                                    seasonNumber = currentSeasonNumber,
+                                    episodeNumber = epNum
+                                )
+                            )
+                        }
+                    }
+                    // Para la temporada actual, desmarcar solo los episodios desde el seleccionado en adelante
+                    else if (currentSeasonNumber == seasonNumber) {
+                        season.episodes?.forEach { episode ->
+                            val epNum = episode.episodeNumber ?: return@forEach
+                            if (epNum >= episodeNumber) {
+                                episodesToUnmark.add(
+                                    WatchedEpisode(
+                                        tvShowId = tvShowId,
+                                        seasonNumber = currentSeasonNumber,
+                                        episodeNumber = epNum
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Desmarcar todos los episodios recopilados
+                episodesToUnmark.forEach { episode ->
+                    toggleEpisodeWatchedUseCase(episode, false)
+                }
+            }
+        }
+    }
+
+    fun isEpisodeWatched(seasonNumber: Int, episodeNumber: Int): Boolean {
+        return _watchedEpisodes.value.any {
+            it.seasonNumber == seasonNumber && it.episodeNumber == episodeNumber
+        }
     }
 }

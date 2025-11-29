@@ -62,9 +62,13 @@ fun SeriesDetailView(
     val isLoading by vm.isLoading.collectAsStateWithLifecycle()
     val error by vm.error.collectAsStateWithLifecycle()
     val favorites by vm.favorites.collectAsStateWithLifecycle()
+    val watchedEpisodes by vm.watchedEpisodes.collectAsStateWithLifecycle()
     val selectedTab = remember { mutableStateOf(0) }
     val isFavorite = remember(tvShowDetail, favorites) {
         favorites.any { it.id == tvShowDetail?.id?.toString() && it.type == FavoriteType.TV_SHOW }
+    }
+    val watchedEpisodesSet = remember(watchedEpisodes) {
+        watchedEpisodes.map { "${it.seasonNumber}-${it.episodeNumber}" }.toSet()
     }
 
     // Si recibimos un tvShowId, cargar por ID
@@ -139,16 +143,23 @@ fun SeriesDetailView(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Like Button - Green
+                        // Like Button - Deshabilitado mientras carga
                         IconButton(
                             onClick = { vm.toggleFavorite() },
-                            modifier = Modifier.size(40.dp)
+                            modifier = Modifier.size(40.dp),
+                            enabled = !isLoading
                         ) {
                             Icon(
                                 imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                                 contentDescription = "Agregar a favoritos",
                                 modifier = Modifier.size(ButtonDefaults.IconSize),
-                                tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+                                tint = if (isLoading) {
+                                    MaterialTheme.colorScheme.onBackground.copy(alpha = 0.38f)
+                                } else if (isFavorite) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onBackground
+                                }
                             )
                         }
                     }
@@ -252,7 +263,35 @@ fun SeriesDetailView(
                         Box(modifier = Modifier.fillMaxSize()) {
                             when (selectedTab.value) {
                                 0 -> SeriesInfoTab(tvShow = displayedTvShow)
-                                1 -> SeriesSeasonsTab(tvShow = displayedTvShow)
+                                1 -> {
+                                    if (isLoading) {
+                                        // Mostrar loading en el tab de temporadas
+                                        Box(
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Column(
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                                            ) {
+                                                CircularProgressIndicator()
+                                                Text(
+                                                    "Cargando temporadas y episodios...",
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                        }
+                                    } else {
+                                        SeriesSeasonsTab(
+                                            tvShow = displayedTvShow,
+                                            watchedEpisodes = watchedEpisodesSet,
+                                            onEpisodeToggle = { season, episode, isWatched ->
+                                                vm.toggleEpisodeWatched(season, episode, isWatched)
+                                            }
+                                        )
+                                    }
+                                }
                                 2 -> SeriesCreditsTab(tvShow = displayedTvShow)
                             }
                         }

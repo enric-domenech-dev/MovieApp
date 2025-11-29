@@ -5,6 +5,10 @@ import org.lanzadera.proyectos.data.storage.models.StorageFavorite
 import org.lanzadera.proyectos.domain.models.favorite.FavoriteItem
 import org.lanzadera.proyectos.domain.models.favorite.FavoriteType
 
+expect class FavoriteItemDtoMapper {
+    fun fromDto(dto: Any, baseImageUrl: String): FavoriteItem
+}
+
 object FavoriteMapper {
     fun toStorage(item: FavoriteItem): StorageFavorite = StorageFavorite(
         id = item.id,

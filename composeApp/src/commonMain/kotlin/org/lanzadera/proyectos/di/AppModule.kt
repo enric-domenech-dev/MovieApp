@@ -22,7 +22,10 @@ import org.koin.dsl.module
 import org.lanzadera.proyectos.BuildConfig
 import org.lanzadera.proyectos.data.authentication.IGDBAuthManager
 import org.lanzadera.proyectos.data.datasource.FavoritesLocalDataSource
+import org.lanzadera.proyectos.data.datasource.WatchedEpisodesDataSource
+import org.lanzadera.proyectos.data.datasource.createFavoriteDetailsRepository
 import org.lanzadera.proyectos.data.datasource.createFavoritesLocalDataSource
+import org.lanzadera.proyectos.data.datasource.createWatchedEpisodesDataSource
 import org.lanzadera.proyectos.data.repository.BooksRepositoryImpl
 import org.lanzadera.proyectos.data.repository.FavoritesRepositoryImpl
 import org.lanzadera.proyectos.data.repository.GameRepositoryImpl
@@ -30,14 +33,19 @@ import org.lanzadera.proyectos.data.repository.LoadInitialDataImpl
 import org.lanzadera.proyectos.data.repository.MovieRepositoryImpl
 import org.lanzadera.proyectos.data.repository.SearchRepositoryImpl
 import org.lanzadera.proyectos.data.repository.TvShowRepositoryImpl
+import org.lanzadera.proyectos.data.repository.WatchedEpisodesRepositoryImpl
 import org.lanzadera.proyectos.domain.repository.BooksRepository
+import org.lanzadera.proyectos.domain.repository.FavoriteDetailsRepository
 import org.lanzadera.proyectos.domain.repository.FavoritesRepository
 import org.lanzadera.proyectos.domain.repository.GameRepository
 import org.lanzadera.proyectos.domain.repository.LoadInitialData
 import org.lanzadera.proyectos.domain.repository.MovieRepository
 import org.lanzadera.proyectos.domain.repository.SearchRepository
 import org.lanzadera.proyectos.domain.repository.TvShowRepository
+import org.lanzadera.proyectos.domain.repository.WatchedEpisodesRepository
 import org.lanzadera.proyectos.domain.usecase.books.RefreshBooksUseCase
+import org.lanzadera.proyectos.domain.usecase.episodes.ObserveWatchedEpisodesUseCase
+import org.lanzadera.proyectos.domain.usecase.episodes.ToggleEpisodeWatchedUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.ObserveFavoritesUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.SyncFavoritesUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.ToggleFavoriteUseCase
@@ -188,6 +196,13 @@ val dataModule = module {
     // Favorites persistence
     single<FavoritesLocalDataSource> { createFavoritesLocalDataSource() }
     single<FavoritesRepository> { FavoritesRepositoryImpl(get()) }
+
+    // Favorite details with full info (Room)
+    single<FavoriteDetailsRepository> { createFavoriteDetailsRepository() }
+
+    // Watched episodes persistence
+    single<WatchedEpisodesDataSource> { createWatchedEpisodesDataSource() }
+    single<WatchedEpisodesRepository> { WatchedEpisodesRepositoryImpl(get()) }
 }
 
 val viewModelsModule = module {
@@ -201,8 +216,10 @@ val viewModelsModule = module {
     single { RefreshGamesUseCase(get()) }
     single { GetGameDetailsUseCase(get()) }
     single { ObserveFavoritesUseCase(get()) }
-    single { ToggleFavoriteUseCase(get()) }
+    single { ToggleFavoriteUseCase(get(), get(), get(), get(), get()) }
     single { SyncFavoritesUseCase(get()) }
+    single { ObserveWatchedEpisodesUseCase(get()) }
+    single { ToggleEpisodeWatchedUseCase(get()) }
 
     // Repositories
     single<LoadInitialData> { LoadInitialDataImpl(get(), 5, get()) }
@@ -220,8 +237,8 @@ val viewModelsModule = module {
 
     // ViewModels
     viewModel { SplashViewModel(get()) }
-    viewModel { HomeViewModel(get(), get(), get(), get(), get(), get()) }
-    viewModel { SeriesDetailViewModel(get(), get(), get()) }
+    viewModel { HomeViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { SeriesDetailViewModel(get(), get(), get(), get(), get()) }
     viewModel { MovieDetailViewModel(get(), get(), get()) }
     viewModel { SearchViewModel(get()) }
     viewModel { GameDetailViewModel(get()) }

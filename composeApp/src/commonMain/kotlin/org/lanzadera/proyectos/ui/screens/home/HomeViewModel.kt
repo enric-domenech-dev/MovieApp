@@ -12,10 +12,19 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
+import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import org.lanzadera.proyectos.domain.models.WatchedEpisode
 import org.lanzadera.proyectos.domain.models.book.Book
 import org.lanzadera.proyectos.domain.models.favorite.FavoriteItem
 import org.lanzadera.proyectos.domain.models.game.Game
+import org.lanzadera.proyectos.domain.models.tvshow.NextEpisodeInfo
 import org.lanzadera.proyectos.domain.models.tvshow.TvShow
+import org.lanzadera.proyectos.domain.models.tvshow.TvShowWithNextEpisode
+import org.lanzadera.proyectos.domain.repository.FavoriteDetailsRepository
+import org.lanzadera.proyectos.domain.repository.WatchedEpisodesRepository
 import org.lanzadera.proyectos.domain.usecase.books.RefreshBooksUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.ObserveFavoritesUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.ToggleFavoriteUseCase
@@ -30,11 +39,13 @@ class HomeViewModel(
     private val refreshTvShowsUseCase: RefreshTvShowsUseCase? = null,
     private val refreshGamesUseCase: RefreshGamesUseCase? = null,
     private val observeFavoritesUseCase: ObserveFavoritesUseCase,
-    private val toggleFavoriteUseCase: ToggleFavoriteUseCase
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
+    private val watchedEpisodesRepository: WatchedEpisodesRepository,
+    private val favoriteDetailsRepository: FavoriteDetailsRepository
 ) : ViewModel() {
 
-    // HomeTab: ahora con 5 pestañas: BOOKS, FILMS, SERIES, GAMES, <3
-    enum class HomeTab { BOOKS, FILMS, SERIES, GAMES, HEART }
+    // HomeTab: ahora con 5 pestañas: FOLLOWING, BOOKS, FILMS, SERIES, GAMES
+    enum class HomeTab { FOLLOWING, BOOKS, FILMS, SERIES, GAMES }
 
     // --- todos los flows, calientes y listos (desde el use case) ---
     val movies = getInitialData.moviesFlow
@@ -124,6 +135,130 @@ class HomeViewModel(
     val favorites: StateFlow<List<FavoriteItem>> = observeFavoritesUseCase()
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
+    // Flows para el tab FOLLOWING - usando Room directamente
+    val allWatchedEpisodes = watchedEpisodesRepository.observeAllWatchedEpisodes()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val seriesWithUnwatchedEpisodes: StateFlow<List<TvShowWithNextEpisode>> = combine(
+        favoriteDetailsRepository.observeFavoriteTvShows(),
+        allWatchedEpisodes
+    ) { favoriteTvShows, watched ->
+        println("SIGUIENDO: Total favorite shows from Room: ${favoriteTvShows.size}, Watched episodes: ${watched.size}")
+
+        val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+
+        favoriteTvShows.mapNotNull { show ->
+            val showId = show.id?.toString() ?: return@mapNotNull null
+            val seasons = show.seasons ?: return@mapNotNull null
+
+            println("SIGUIENDO: Analizando ${show.name} (ID: $showId)")
+
+            // Encontrar el próximo episodio sin ver
+            val nextEpisode = findNextUnwatchedEpisode(seasons, showId, watched, today)
+
+            if (nextEpisode != null) {
+                println("SIGUIENDO:   - Próximo episodio: ${nextEpisode.episodeCode} - ${nextEpisode.displayText}")
+                TvShowWithNextEpisode(show, nextEpisode)
+            } else {
+                println("SIGUIENDO:   - No hay más episodios por ver")
+                null
+            }
+        }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    private fun findNextUnwatchedEpisode(
+        seasons: List<org.lanzadera.proyectos.domain.models.tvshow.Season>,
+        showId: String,
+        watched: List<WatchedEpisode>,
+        today: LocalDate
+    ): NextEpisodeInfo? {
+        // Ordenar temporadas por número (ignorar temporada 0)
+        val sortedSeasons = seasons.filter { (it.seasonNumber ?: 0) > 0 }.sortedBy { it.seasonNumber ?: 0 }
+
+        for (season in sortedSeasons) {
+            val seasonNumber = season.seasonNumber ?: continue
+            val episodes = season.episodes ?: continue
+
+            // Ordenar episodios por número
+            val sortedEpisodes = episodes.sortedBy { it.episodeNumber ?: 0 }
+
+            for (episode in sortedEpisodes) {
+                val episodeNumber = episode.episodeNumber ?: continue
+
+                // Verificar si está visto
+                val isWatched = watched.any {
+                    it.tvShowId == showId &&
+                            it.seasonNumber == seasonNumber &&
+                            it.episodeNumber == episodeNumber
+                }
+
+                if (!isWatched) {
+                    // Este es el próximo episodio sin ver
+                    val airDate = episode.airDate
+                    val airDateParsed = airDate?.let { parseDateString(it) }
+                    val isAired =
+                        airDateParsed?.let { it <= today } ?: true // Si no hay fecha, asumir que está disponible
+                    val daysUntilAir = if (airDateParsed != null && !isAired) {
+                        (airDateParsed.toEpochDays() - today.toEpochDays()).toInt()
+                    } else null
+
+                    return NextEpisodeInfo(
+                        seasonNumber = seasonNumber,
+                        episodeNumber = episodeNumber,
+                        episodeName = episode.name,
+                        airDate = airDate,
+                        isAired = isAired,
+                        daysUntilAir = daysUntilAir
+                    )
+                }
+            }
+        }
+
+        return null
+    }
+
+    private fun parseDateString(dateString: String): LocalDate? {
+        return try {
+            if (dateString.isBlank()) return null
+            val parts = dateString.split("-")
+            if (parts.size == 3) {
+                LocalDate(parts[0].toInt(), parts[1].toInt(), parts[2].toInt())
+            } else null
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    val upcomingFavoriteMovies: StateFlow<List<org.lanzadera.proyectos.domain.models.movie.Movie>> =
+        favoriteDetailsRepository.observeUpcomingFavoriteMovies(
+            Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date.toString()
+        ).stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val moviesWithReleaseInfo: StateFlow<List<org.lanzadera.proyectos.domain.models.movie.MovieWithReleaseInfo>> =
+        combine(
+            favoriteDetailsRepository.observeFavoriteMovies(),
+            movies
+        ) { favoriteMovies, allMovies ->
+            val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+
+            favoriteMovies.mapNotNull { movie ->
+                val releaseDate = movie.releaseDate
+                val releaseDateParsed = releaseDate?.let { parseDateString(it) }
+                val isReleased = releaseDateParsed?.let { it <= today } ?: true
+                val daysUntilRelease = if (releaseDateParsed != null && !isReleased) {
+                    (releaseDateParsed.toEpochDays() - today.toEpochDays()).toInt()
+                } else null
+
+                val releaseInfo = org.lanzadera.proyectos.domain.models.movie.ReleaseInfo(
+                    releaseDate = releaseDate,
+                    isReleased = isReleased,
+                    daysUntilRelease = daysUntilRelease
+                )
+
+                org.lanzadera.proyectos.domain.models.movie.MovieWithReleaseInfo(movie, releaseInfo)
+            }
+        }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
     val refreshing = MutableStateFlow(false)
     val error = MutableStateFlow<String?>(null)
 
@@ -131,16 +266,48 @@ class HomeViewModel(
     var didFirstLoad = false
 
     // tab seleccionado (lo guarda el VM; la UI solo lo notifica)
-    private val _selectedTab = MutableStateFlow(HomeTab.FILMS)
+    private val _selectedTab = MutableStateFlow(HomeTab.FOLLOWING)
     val selectedTab: StateFlow<HomeTab> = _selectedTab
 
     fun selectTab(index: Int) {
         _selectedTab.value = when (index) {
-            0 -> HomeTab.BOOKS
-            1 -> HomeTab.FILMS
-            2 -> HomeTab.SERIES
-            3 -> HomeTab.GAMES
-            else -> HomeTab.HEART
+            0 -> HomeTab.FOLLOWING
+            1 -> HomeTab.BOOKS
+            2 -> HomeTab.FILMS
+            3 -> HomeTab.SERIES
+            else -> HomeTab.GAMES
+        }
+
+        // Si selecciona FOLLOWING y aún no hay datos de series, cargarlas
+        if (_selectedTab.value == HomeTab.FOLLOWING) {
+            println("SYNCRO HomeViewModel: FOLLOWING tab selected, tvShows.size=${tvShows.value.size}")
+            viewModelScope.launch {
+                try {
+                    if (refreshTvShowsUseCase != null && tvShows.value.isEmpty()) {
+                        println("SYNCRO HomeViewModel: launching refreshTvShowsUseCase for FOLLOWING tab")
+                        refreshing.value = true
+                        supervisorScope {
+                            awaitAll(
+                                async { refreshTvShowsUseCase.refreshTvShows(force = false) },
+                                async { refreshTvShowsUseCase.refreshPopularTvShows(force = false) },
+                                async { refreshTvShowsUseCase.refreshTopRatedTvShows(force = false) },
+                                async { refreshTvShowsUseCase.refreshOnAirTvShows(force = false) },
+                                async { refreshTvShowsUseCase.refreshTrendingTvShows(force = false) },
+                                async { refreshTvShowsUseCase.refreshAiringTodayTvShows(force = false) },
+                                async { refreshTvShowsUseCase.refreshTrendingTvShowsWeek(force = false) }
+                            )
+                        }
+                        println("SYNCRO HomeViewModel: refreshTvShowsUseCase finished for FOLLOWING, tvShows.size=${tvShows.value.size}")
+                    } else {
+                        println("SYNCRO HomeViewModel: no refresh needed for FOLLOWING or no use case")
+                    }
+                } catch (t: Throwable) {
+                    error.value = t.message ?: "Error fetching tv shows"
+                    println("SYNCRO HomeViewModel: error refreshing tv shows for FOLLOWING: ${t.message}")
+                } finally {
+                    refreshing.value = false
+                }
+            }
         }
 
         // Si selecciona BOOKS y aún no hay datos, lanzar refresco
@@ -243,6 +410,8 @@ class HomeViewModel(
                 if (!didFirstLoad) {
                     didFirstLoad = true
                     refreshIfNeeded()
+                    // Cargar series para el tab FOLLOWING inicial
+                    selectTab(0)
                 }
             }
             .stateIn(

@@ -536,7 +536,12 @@ private fun StatCard(label: String, value: String, modifier: Modifier = Modifier
 }
 
 @Composable
-fun SeriesSeasonsTab(tvShow: TvShow?, modifier: Modifier = Modifier) {
+fun SeriesSeasonsTab(
+    tvShow: TvShow?,
+    watchedEpisodes: Set<String>,
+    onEpisodeToggle: (Int, Int, Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
     if (tvShow == null || tvShow.seasons.isNullOrEmpty()) return
 
     LazyColumn(
@@ -610,7 +615,11 @@ fun SeriesSeasonsTab(tvShow: TvShow?, modifier: Modifier = Modifier) {
 
         // Seasons List
         items(tvShow.seasons.size) { index ->
-            SeasonListItem(season = tvShow.seasons[index])
+            SeasonListItem(
+                season = tvShow.seasons[index],
+                watchedEpisodes = watchedEpisodes,
+                onEpisodeToggle = onEpisodeToggle
+            )
         }
 
         item { Spacer(modifier = Modifier.height(8.dp)) }
@@ -618,7 +627,11 @@ fun SeriesSeasonsTab(tvShow: TvShow?, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun SeasonListItem(season: Season) {
+fun SeasonListItem(
+    season: Season,
+    watchedEpisodes: Set<String>,
+    onEpisodeToggle: (Int, Int, Boolean) -> Unit
+) {
     val isExpanded = rememberSaveable { mutableStateOf(false) }
 
     Surface(
@@ -669,7 +682,21 @@ fun SeasonListItem(season: Season) {
 
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     season.episodes.forEach { episode ->
-                        EpisodeListItem(episode = episode)
+                        EpisodeListItem(
+                            episode = episode,
+                            isWatched = episode.seasonNumber?.let { sn ->
+                                episode.episodeNumber?.let { en ->
+                                    watchedEpisodes.contains("$sn-$en")
+                                }
+                            } ?: false,
+                            onToggle = { isWatched ->
+                                episode.seasonNumber?.let { sn ->
+                                    episode.episodeNumber?.let { en ->
+                                        onEpisodeToggle(sn, en, isWatched)
+                                    }
+                                }
+                            }
+                        )
                     }
                 }
             }
@@ -678,9 +705,7 @@ fun SeasonListItem(season: Season) {
 }
 
 @Composable
-fun EpisodeListItem(episode: Episode) {
-    val isWatched = rememberSaveable { mutableStateOf(false) }
-
+fun EpisodeListItem(episode: Episode, isWatched: Boolean, onToggle: (Boolean) -> Unit) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -697,8 +722,8 @@ fun EpisodeListItem(episode: Episode) {
             verticalAlignment = Alignment.Top
         ) {
             Checkbox(
-                checked = isWatched.value,
-                onCheckedChange = { isWatched.value = it },
+                checked = isWatched,
+                onCheckedChange = { onToggle(it) },
                 modifier = Modifier
                     .size(18.dp)
                     .padding(top = 2.dp)
@@ -984,6 +1009,59 @@ fun CrewMemberCardModern(crewMember: AggregateCrew) {
                     fontSize = 8.sp
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun TvShowHeaderWithNextEpisode(
+    modifier: Modifier = Modifier,
+    nav: NavHostController,
+    tvShowWithNext: org.lanzadera.proyectos.domain.models.tvshow.TvShowWithNextEpisode
+) {
+    val tvShow = tvShowWithNext.tvShow
+    val nextEpisode = tvShowWithNext.nextEpisode
+
+    Column(
+        modifier = modifier
+            .wrapContentHeight()
+            .clickable {
+                NavigationStore.selectedTvShow = tvShow
+                tvShow.id?.let { tvShowId ->
+                    nav.navigate(Constants.Screen.SeriesDetail.createRoute(tvShowId))
+                }
+            }
+    ) {
+        Box(
+            modifier = Modifier
+                .aspectRatio(2f / 3f)
+                .clip(MaterialTheme.shapes.small)
+        ) {
+            AsyncImage(
+                model = "https://image.tmdb.org/t/p/w500${tvShow.posterPath}",
+                contentDescription = tvShow.name,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+                placeholder = painterResource(Res.drawable.film)
+            )
+        }
+
+        // Solo mostrar información del próximo episodio, sin título de serie
+        nextEpisode?.let { episode ->
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = episode.episodeCode,
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = episode.displayText,
+                fontSize = 14.sp,
+                color = if (episode.isAired) Color(0xFF4CAF50) else Color(0xFFFF9800),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
