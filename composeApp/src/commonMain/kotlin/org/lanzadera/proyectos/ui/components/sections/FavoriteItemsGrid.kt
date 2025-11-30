@@ -9,16 +9,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import org.lanzadera.proyectos.domain.models.favorite.FavoriteItem
-import org.lanzadera.proyectos.domain.models.favorite.FavoriteType
-import org.lanzadera.proyectos.domain.models.movie.Movie
-import org.lanzadera.proyectos.domain.models.tvshow.TvShow
+import org.lanzadera.proyectos.domain.models.favorite.FavoriteItemWithInfo
 import org.lanzadera.proyectos.ui.components.MovieHeader
-import org.lanzadera.proyectos.ui.components.TvShowHeader
+import org.lanzadera.proyectos.ui.components.MovieHeaderWithReleaseInfo
+import org.lanzadera.proyectos.ui.components.TvShowHeaderFinished
+import org.lanzadera.proyectos.ui.components.TvShowHeaderWithNextEpisode
 
 @Composable
 fun FavoriteItemsGrid(
-    items: List<FavoriteItem>,
+    items: List<FavoriteItemWithInfo>,
     nav: NavHostController,
     modifier: Modifier = Modifier
 ) {
@@ -36,43 +35,38 @@ fun FavoriteItemsGrid(
     ) {
         itemsIndexed(
             items = items,
-            key = { _, item -> "${item.type}_${item.id}" }
+            key = { _, item -> item.id }
         ) { _, item ->
-            when (item.type) {
-                FavoriteType.MOVIE -> {
-                    val movie = Movie(
-                        id = item.id.toIntOrNull(),
-                        title = item.title,
-                        posterPath = item.posterUrl?.substringAfter("w500"),
-                        overview = item.overview,
-                        releaseDate = null,
-                        backdropPath = null
+            when (item) {
+                is FavoriteItemWithInfo.MovieItem -> {
+                    MovieHeaderWithReleaseInfo(
+                        nav = nav,
+                        movieWithRelease = item.movieWithRelease
                     )
+                }
+
+                is FavoriteItemWithInfo.TvShowItem -> {
+                    TvShowHeaderWithNextEpisode(
+                        nav = nav,
+                        tvShowWithNext = item.tvShowWithNext
+                    )
+                }
+
+                is FavoriteItemWithInfo.WatchedMovieItem -> {
                     MovieHeader(
                         nav = nav,
-                        movie = movie
+                        movie = item.movie
                     )
                 }
 
-                FavoriteType.TV_SHOW -> {
-                    val tvShow = TvShow(
-                        id = item.id.toIntOrNull(),
-                        name = item.title,
-                        posterPath = item.posterUrl?.substringAfter("w500"),
-                        overview = item.overview,
-                        firstAirDate = null,
-                        backdropPath = null
-                    )
-                    TvShowHeader(
+                is FavoriteItemWithInfo.FinishedSeriesItem -> {
+                    TvShowHeaderFinished(
                         nav = nav,
-                        tvShow = tvShow
+                        tvShow = item.tvShow
                     )
-                }
-
-                else -> {
-                    // BOOK, GAME - not yet implemented
                 }
             }
         }
     }
 }
+

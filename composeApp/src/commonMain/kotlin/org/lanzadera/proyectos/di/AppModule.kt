@@ -26,6 +26,7 @@ import org.lanzadera.proyectos.data.datasource.WatchedEpisodesDataSource
 import org.lanzadera.proyectos.data.datasource.createFavoriteDetailsRepository
 import org.lanzadera.proyectos.data.datasource.createFavoritesLocalDataSource
 import org.lanzadera.proyectos.data.datasource.createWatchedEpisodesDataSource
+import org.lanzadera.proyectos.data.datasource.createWatchedMoviesDataSource
 import org.lanzadera.proyectos.data.repository.BooksRepositoryImpl
 import org.lanzadera.proyectos.data.repository.FavoritesRepositoryImpl
 import org.lanzadera.proyectos.data.repository.GameRepositoryImpl
@@ -34,6 +35,7 @@ import org.lanzadera.proyectos.data.repository.MovieRepositoryImpl
 import org.lanzadera.proyectos.data.repository.SearchRepositoryImpl
 import org.lanzadera.proyectos.data.repository.TvShowRepositoryImpl
 import org.lanzadera.proyectos.data.repository.WatchedEpisodesRepositoryImpl
+import org.lanzadera.proyectos.data.repository.WatchedMoviesRepositoryImpl
 import org.lanzadera.proyectos.domain.repository.BooksRepository
 import org.lanzadera.proyectos.domain.repository.FavoriteDetailsRepository
 import org.lanzadera.proyectos.domain.repository.FavoritesRepository
@@ -43,6 +45,7 @@ import org.lanzadera.proyectos.domain.repository.MovieRepository
 import org.lanzadera.proyectos.domain.repository.SearchRepository
 import org.lanzadera.proyectos.domain.repository.TvShowRepository
 import org.lanzadera.proyectos.domain.repository.WatchedEpisodesRepository
+import org.lanzadera.proyectos.domain.repository.WatchedMoviesRepository
 import org.lanzadera.proyectos.domain.usecase.books.RefreshBooksUseCase
 import org.lanzadera.proyectos.domain.usecase.episodes.ObserveWatchedEpisodesUseCase
 import org.lanzadera.proyectos.domain.usecase.episodes.ToggleEpisodeWatchedUseCase
@@ -52,6 +55,7 @@ import org.lanzadera.proyectos.domain.usecase.favorites.ToggleFavoriteUseCase
 import org.lanzadera.proyectos.domain.usecase.games.GetGameDetailsUseCase
 import org.lanzadera.proyectos.domain.usecase.games.RefreshGamesUseCase
 import org.lanzadera.proyectos.domain.usecase.load_initial_data.GetInitialDataUseCase
+import org.lanzadera.proyectos.domain.usecase.movies.ToggleMovieWatchedUseCase
 import org.lanzadera.proyectos.domain.usecase.search.SearchMoviesUseCase
 import org.lanzadera.proyectos.domain.usecase.tvshows.GetTvShowDetailsUseCase
 import org.lanzadera.proyectos.domain.usecase.tvshows.RefreshTvShowsUseCase
@@ -203,6 +207,9 @@ val dataModule = module {
     // Watched episodes persistence
     single<WatchedEpisodesDataSource> { createWatchedEpisodesDataSource() }
     single<WatchedEpisodesRepository> { WatchedEpisodesRepositoryImpl(get()) }
+
+    // Watched movies persistence - need provider
+    single<WatchedMoviesRepository> { WatchedMoviesRepositoryImpl(createWatchedMoviesDataSource()) }
 }
 
 val viewModelsModule = module {
@@ -220,6 +227,7 @@ val viewModelsModule = module {
     single { SyncFavoritesUseCase(get()) }
     single { ObserveWatchedEpisodesUseCase(get()) }
     single { ToggleEpisodeWatchedUseCase(get()) }
+    single { ToggleMovieWatchedUseCase(get()) }
 
     // Repositories
     single<LoadInitialData> { LoadInitialDataImpl(get(), 5, get()) }
@@ -237,9 +245,9 @@ val viewModelsModule = module {
 
     // ViewModels
     viewModel { SplashViewModel(get()) }
-    viewModel { HomeViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { HomeViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     viewModel { SeriesDetailViewModel(get(), get(), get(), get(), get()) }
-    viewModel { MovieDetailViewModel(get(), get(), get()) }
+    viewModel { MovieDetailViewModel(get(), get(), get(), get(), get()) }
     viewModel { SearchViewModel(get()) }
     viewModel { GameDetailViewModel(get()) }
 }

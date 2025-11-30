@@ -6,19 +6,25 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.lanzadera.proyectos.domain.models.favorite.FavoriteItem
 import org.lanzadera.proyectos.domain.models.favorite.FavoriteType
 import org.lanzadera.proyectos.domain.models.movie.Movie
 import org.lanzadera.proyectos.domain.repository.MovieRepository
+import org.lanzadera.proyectos.domain.repository.WatchedMoviesRepository
 import org.lanzadera.proyectos.domain.usecase.favorites.ObserveFavoritesUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.ToggleFavoriteUseCase
+import org.lanzadera.proyectos.domain.usecase.movies.ToggleMovieWatchedUseCase
+import org.lanzadera.proyectos.utils.DateUtils
 
 class MovieDetailViewModel(
     private val movieRepository: MovieRepository,
     observeFavoritesUseCase: ObserveFavoritesUseCase,
-    private val toggleFavoriteUseCase: ToggleFavoriteUseCase
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
+    private val watchedMoviesRepository: WatchedMoviesRepository,
+    private val toggleMovieWatchedUseCase: ToggleMovieWatchedUseCase
 ) : ViewModel() {
 
     private val _movieDetail = MutableStateFlow<Movie?>(null)
@@ -32,6 +38,19 @@ class MovieDetailViewModel(
 
     val favorites = observeFavoritesUseCase()
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val watchedMovies = watchedMoviesRepository.observeAllWatchedMovies()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val isWatched: StateFlow<Boolean> = watchedMovies.map { watched ->
+        _movieDetail.value?.id?.toString()?.let { movieId ->
+            watched.any { it.movieId == movieId }
+        } ?: false
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    val isReleased: StateFlow<Boolean> = _movieDetail.map { movie ->
+        DateUtils.hasDatePassed(movie?.releaseDate)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
     fun loadMovieDetails(movieId: Int) {
         viewModelScope.launch {
@@ -67,5 +86,20 @@ class MovieDetailViewModel(
             overview = movie.overview
         )
         viewModelScope.launch { toggleFavoriteUseCase(item) }
+    }
+
+    fun toggleWatched() {
+        val movieId = _movieDetail.value?.id?.toString() ?: return
+        val currentWatched = isWatched.value
+        val movieIsReleased = isReleased.value
+
+        // Solo permitir marcar como visto si ya se estrenó
+        if (!movieIsReleased && !currentWatched) {
+            return
+        }
+
+        viewModelScope.launch {
+            toggleMovieWatchedUseCase(movieId, !currentWatched)
+        }
     }
 }

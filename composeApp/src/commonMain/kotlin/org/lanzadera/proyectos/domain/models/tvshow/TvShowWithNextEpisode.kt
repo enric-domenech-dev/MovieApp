@@ -1,5 +1,7 @@
 package org.lanzadera.proyectos.domain.models.tvshow
 
+import org.lanzadera.proyectos.utils.DateUtils
+
 data class TvShowWithNextEpisode(
     val tvShow: TvShow,
     val nextEpisode: NextEpisodeInfo?
@@ -19,7 +21,8 @@ data class NextEpisodeInfo(
             daysUntilAir != null && daysUntilAir == 0 -> "Se emite hoy"
             daysUntilAir != null && daysUntilAir == 1 -> "Se emite mañana"
             daysUntilAir != null && daysUntilAir > 1 -> "Se emite en $daysUntilAir días"
-            else -> "Fecha de emisión desconocida"
+            airDate != null -> DateUtils.formatDateShort(airDate, adjustForTimezone = true) ?: "Fecha desconocida"
+            else -> "Fecha desconocida"
         }
 
     val episodeCode: String

@@ -53,7 +53,7 @@ import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import kotlinx.datetime.LocalDate
 import movieapp.composeapp.generated.resources.Res
-import movieapp.composeapp.generated.resources.film
+import movieapp.composeapp.generated.resources.new_edge_logo
 import org.jetbrains.compose.resources.painterResource
 import org.lanzadera.proyectos.domain.models.tvshow.AggregateCast
 import org.lanzadera.proyectos.domain.models.tvshow.AggregateCrew
@@ -89,7 +89,7 @@ fun TvShowItem(
                 contentDescription = tvShow.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
-                placeholder = painterResource(Res.drawable.film)
+                error = painterResource(Res.drawable.new_edge_logo)
             )
         }
 
@@ -151,7 +151,7 @@ fun TvShowHeader(modifier: Modifier = Modifier, nav: NavHostController, tvShow: 
                 contentDescription = tvShow.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
-                placeholder = painterResource(Res.drawable.film)
+                error = painterResource(Res.drawable.new_edge_logo)
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
@@ -197,7 +197,7 @@ fun TvShowSubheader(modifier: Modifier = Modifier, nav: NavHostController, tvSho
                 contentDescription = tvShow.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
-                placeholder = painterResource(Res.drawable.film)
+                error = painterResource(Res.drawable.new_edge_logo)
             )
         }
         if (showMeta) {
@@ -250,7 +250,7 @@ fun CastMemberCard(actor: org.lanzadera.proyectos.domain.models.tvshow.Aggregate
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    painter = painterResource(Res.drawable.film),
+                    painter = painterResource(Res.drawable.new_edge_logo),
                     contentDescription = null,
                     modifier = Modifier.size(40.dp),
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
@@ -320,7 +320,7 @@ fun CrewMemberCard(crewMember: org.lanzadera.proyectos.domain.models.tvshow.Aggr
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    painter = painterResource(Res.drawable.film),
+                    painter = painterResource(Res.drawable.new_edge_logo),
                     contentDescription = null,
                     modifier = Modifier.size(40.dp),
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
@@ -910,7 +910,7 @@ fun CastMemberCardModern(actor: AggregateCast) {
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        painter = painterResource(Res.drawable.film),
+                        painter = painterResource(Res.drawable.new_edge_logo),
                         contentDescription = null,
                         modifier = Modifier.size(40.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -977,7 +977,7 @@ fun CrewMemberCardModern(crewMember: AggregateCrew) {
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        painter = painterResource(Res.drawable.film),
+                        painter = painterResource(Res.drawable.new_edge_logo),
                         contentDescription = null,
                         modifier = Modifier.size(40.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -1042,7 +1042,7 @@ fun TvShowHeaderWithNextEpisode(
                 contentDescription = tvShow.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
-                placeholder = painterResource(Res.drawable.film)
+                error = painterResource(Res.drawable.new_edge_logo)
             )
         }
 
@@ -1061,6 +1061,63 @@ fun TvShowHeaderWithNextEpisode(
                 color = if (episode.isAired) Color(0xFF4CAF50) else Color(0xFFFF9800),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+@Composable
+fun TvShowHeaderFinished(
+    modifier: Modifier = Modifier,
+    nav: NavHostController,
+    tvShow: TvShow
+) {
+    Column(
+        modifier = modifier
+            .wrapContentHeight()
+            .clickable {
+                NavigationStore.selectedTvShow = tvShow
+                tvShow.id?.let { tvShowId ->
+                    nav.navigate(Constants.Screen.SeriesDetail.createRoute(tvShowId))
+                }
+            }
+    ) {
+        Box(
+            modifier = Modifier
+                .aspectRatio(2f / 3f)
+                .clip(MaterialTheme.shapes.small)
+        ) {
+            AsyncImage(
+                model = "https://image.tmdb.org/t/p/w500${tvShow.posterPath}",
+                contentDescription = tvShow.name,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+                error = painterResource(Res.drawable.new_edge_logo)
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        tvShow.name?.let {
+            Text(
+                text = it,
+                fontWeight = FontWeight.Bold,
+                fontSize = 17.sp,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        tvShow.status?.let { status ->
+            Text(
+                text = when (status.lowercase()) {
+                    "ended" -> "Finalizada"
+                    "canceled", "cancelled" -> "Cancelada"
+                    "returning series" -> "En producción"
+                    "in production" -> "En producción"
+                    "planned" -> "Planeada"
+                    else -> status
+                },
+                fontSize = 14.sp,
+                color = Color.Gray,
             )
         }
     }

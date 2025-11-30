@@ -48,7 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import movieapp.composeapp.generated.resources.Res
-import movieapp.composeapp.generated.resources.film
+import movieapp.composeapp.generated.resources.new_edge_logo
 import org.jetbrains.compose.resources.painterResource
 import org.lanzadera.proyectos.domain.models.movie.Movie
 import org.lanzadera.proyectos.domain.models.tvshow.TvShow
@@ -265,7 +265,7 @@ fun MovieCard(
                 } else {
                     // Placeholder when no image
                     Icon(
-                        painter = painterResource(Res.drawable.film),
+                        painter = painterResource(Res.drawable.new_edge_logo),
                         contentDescription = "No imagen disponible",
                         modifier = Modifier
                             .fillMaxSize()
@@ -386,7 +386,7 @@ fun TvShowCard(
                 } else {
                     // Placeholder when no image
                     Icon(
-                        painter = painterResource(Res.drawable.film),
+                        painter = painterResource(Res.drawable.new_edge_logo),
                         contentDescription = "No imagen disponible",
                         modifier = Modifier
                             .fillMaxSize()

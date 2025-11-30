@@ -30,6 +30,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
+import movieapp.composeapp.generated.resources.Res
+import movieapp.composeapp.generated.resources.new_edge_logo
+import org.jetbrains.compose.resources.painterResource
 import org.lanzadera.proyectos.domain.models.game.Game
 import org.lanzadera.proyectos.navigation.NavigationStore
 import org.lanzadera.proyectos.utils.Constants
@@ -93,14 +96,13 @@ fun GameSubheader(modifier: Modifier = Modifier, nav: NavHostController, game: G
                 .clip(MaterialTheme.shapes.small)
                 .background(MaterialTheme.colorScheme.surfaceVariant)
         ) {
-            if (game.cover != null) {
-                AsyncImage(
-                    model = game.cover.getImageUrl(),
-                    contentDescription = game.name,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
+            AsyncImage(
+                model = game.cover?.getImageUrl(),
+                contentDescription = game.name,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+                error = painterResource(Res.drawable.new_edge_logo)
+            )
         }
 
         Spacer(modifier = Modifier.height(8.dp))

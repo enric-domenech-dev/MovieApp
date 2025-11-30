@@ -73,7 +73,7 @@ fun HomeView(
             modifier = Modifier.fillMaxSize().safeDrawingPadding(),
             topBar = {
                 val selectedIndex = when (selectedTab) {
-                    HomeViewModel.HomeTab.FOLLOWING -> 0
+                    HomeViewModel.HomeTab.FAVORITES -> 0
                     HomeViewModel.HomeTab.BOOKS -> 1
                     HomeViewModel.HomeTab.FILMS -> 2
                     HomeViewModel.HomeTab.SERIES -> 3
@@ -146,11 +146,24 @@ fun HomeView(
                 }
 
                 selectedTab == HomeViewModel.HomeTab.BOOKS -> {
-                    // Mostrar lista de libros con secciones
-                    val books by vm.books.collectAsStateWithLifecycle()
+                    // Mostrar lista de libros con secciones por categoría
+                    val fictionBooks by vm.fictionBooks.collectAsStateWithLifecycle()
+                    val scienceBooks by vm.scienceBooks.collectAsStateWithLifecycle()
+                    val historyBooks by vm.historyBooks.collectAsStateWithLifecycle()
+                    val biographyBooks by vm.biographyBooks.collectAsStateWithLifecycle()
+                    val businessBooks by vm.businessBooks.collectAsStateWithLifecycle()
+                    val technologyBooks by vm.technologyBooks.collectAsStateWithLifecycle()
+                    val selfHelpBooks by vm.selfHelpBooks.collectAsStateWithLifecycle()
+                    val recentBooks by vm.recentBooks.collectAsStateWithLifecycle()
                     val isRefreshingBooks by vm.refreshing.collectAsStateWithLifecycle()
 
-                    if (books.isEmpty()) {
+                    val allBooksEmpty = fictionBooks.isEmpty() &&
+                            scienceBooks.isEmpty() && historyBooks.isEmpty() &&
+                            biographyBooks.isEmpty() && businessBooks.isEmpty() &&
+                            technologyBooks.isEmpty() && selfHelpBooks.isEmpty() &&
+                            recentBooks.isEmpty()
+
+                    if (allBooksEmpty) {
                         if (isRefreshingBooks) {
                             Column(
                                 modifier = Modifier.fillMaxSize().padding(paddingValues),
@@ -164,6 +177,7 @@ fun HomeView(
                         }
                     } else {
                         val booksListState = rememberLazyListState()
+
                         LazyColumn(
                             state = booksListState,
                             modifier = Modifier
@@ -179,10 +193,14 @@ fun HomeView(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             val sections: List<Pair<String, List<Book>>> = listOf(
-                                Strings.BookSections.FEATURED_BOOKS to books.take(35),
-                                Strings.BookSections.POPULAR_BOOKS to books.drop(35).take(35),
-                                Strings.BookSections.LATEST_RELEASES to books.drop(70).take(35),
-                                Strings.BookSections.TRENDING_BOOKS to books.drop(105).take(35),
+                                "Novedades Destacadas" to recentBooks,
+                                "Ficción" to fictionBooks,
+                                "Ciencia" to scienceBooks,
+                                "Historia" to historyBooks,
+                                "Biografías" to biographyBooks,
+                                "Negocios" to businessBooks,
+                                "Tecnología" to technologyBooks,
+                                "Autoayuda" to selfHelpBooks,
                             ).filter { it.second.isNotEmpty() }
 
                             sections.forEachIndexed { idx, (sectionTitle, sectionBooks) ->
@@ -395,10 +413,10 @@ fun HomeView(
                     }
                 }
 
-                selectedTab == HomeViewModel.HomeTab.FOLLOWING -> {
-                    val favorites by vm.favorites.collectAsStateWithLifecycle()
+                selectedTab == HomeViewModel.HomeTab.FAVORITES -> {
+                    val favoritesWithInfo by vm.favoritesWithInfo.collectAsStateWithLifecycle()
 
-                    if (favorites.isEmpty()) {
+                    if (favoritesWithInfo.isEmpty()) {
                         Column(
                             modifier = Modifier.fillMaxSize().padding(paddingValues),
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -408,7 +426,7 @@ fun HomeView(
                         }
                     } else {
                         FavoriteItemsGrid(
-                            items = favorites,
+                            items = favoritesWithInfo,
                             nav = nav,
                             modifier = Modifier
                                 .fillMaxSize()

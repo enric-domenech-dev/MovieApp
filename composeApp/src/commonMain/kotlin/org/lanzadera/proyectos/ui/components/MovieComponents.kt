@@ -50,7 +50,7 @@ import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import kotlinx.datetime.LocalDate
 import movieapp.composeapp.generated.resources.Res
-import movieapp.composeapp.generated.resources.film
+import movieapp.composeapp.generated.resources.new_edge_logo
 import org.jetbrains.compose.resources.painterResource
 import org.lanzadera.proyectos.domain.models.movie.Movie
 import org.lanzadera.proyectos.navigation.NavigationStore
@@ -82,7 +82,7 @@ fun MovieItem(
                 contentDescription = movie.title,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
-                placeholder = painterResource(Res.drawable.film)
+                error = painterResource(Res.drawable.new_edge_logo)
             )
         }
 
@@ -138,7 +138,7 @@ fun MovieHeader(modifier: Modifier = Modifier, nav: NavHostController, movie: Mo
                 contentDescription = movie.title,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
-                placeholder = painterResource(Res.drawable.film)
+                error = painterResource(Res.drawable.new_edge_logo)
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
@@ -184,7 +184,7 @@ fun MovieSubheader(modifier: Modifier = Modifier, nav: NavHostController, movie:
                 contentDescription = movie.title,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
-                placeholder = painterResource(Res.drawable.film)
+                error = painterResource(Res.drawable.new_edge_logo)
             )
         }
         if (showMeta) {
@@ -594,7 +594,7 @@ fun MovieCastMemberCard(actor: org.lanzadera.proyectos.domain.models.tvshow.Aggr
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    painter = painterResource(Res.drawable.film),
+                    painter = painterResource(Res.drawable.new_edge_logo),
                     contentDescription = null,
                     modifier = Modifier.size(40.dp),
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
@@ -658,7 +658,7 @@ fun MovieCrewMemberCard(crewMember: org.lanzadera.proyectos.domain.models.tvshow
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    painter = painterResource(Res.drawable.film),
+                    painter = painterResource(Res.drawable.new_edge_logo),
                     contentDescription = null,
                     modifier = Modifier.size(40.dp),
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
@@ -1007,7 +1007,7 @@ fun MovieHeaderWithReleaseInfo(
                 contentDescription = movie.title,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
-                placeholder = painterResource(Res.drawable.film)
+                error = painterResource(Res.drawable.new_edge_logo)
             )
         }
 

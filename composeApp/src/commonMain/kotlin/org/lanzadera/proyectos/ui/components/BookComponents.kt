@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import movieapp.composeapp.generated.resources.Res
-import movieapp.composeapp.generated.resources.unicorn
+import movieapp.composeapp.generated.resources.new_edge_logo
 import org.jetbrains.compose.resources.painterResource
 import org.lanzadera.proyectos.domain.models.book.Book
 import org.lanzadera.proyectos.navigation.NavigationStore
@@ -63,7 +63,7 @@ fun BookItem(
                 contentDescription = book.title,
                 contentScale = ContentScale.FillBounds,
                 modifier = Modifier.fillMaxSize(),
-                placeholder = painterResource(Res.drawable.unicorn)
+                error = painterResource(Res.drawable.new_edge_logo)
             )
         }
 
@@ -104,7 +104,7 @@ fun BookDetail(book: Book?) {
                 contentDescription = book.title,
                 contentScale = ContentScale.FillWidth,
                 modifier = Modifier.fillMaxWidth().size(240.dp),
-                placeholder = painterResource(Res.drawable.unicorn)
+                error = painterResource(Res.drawable.new_edge_logo)
             )
         }
 
@@ -156,7 +156,7 @@ fun BookHeader(modifier: Modifier = Modifier, nav: NavHostController, book: Book
                 contentDescription = book.title,
                 contentScale = ContentScale.FillBounds,
                 modifier = Modifier.fillMaxSize(),
-                placeholder = painterResource(Res.drawable.unicorn)
+                error = painterResource(Res.drawable.new_edge_logo)
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
@@ -201,7 +201,7 @@ fun BookSubheader(modifier: Modifier = Modifier, nav: NavHostController, book: B
                 contentDescription = book.title,
                 contentScale = ContentScale.FillBounds,
                 modifier = Modifier.fillMaxSize(),
-                placeholder = painterResource(Res.drawable.unicorn)
+                error = painterResource(Res.drawable.new_edge_logo)
             )
         }
         if (showMeta) {

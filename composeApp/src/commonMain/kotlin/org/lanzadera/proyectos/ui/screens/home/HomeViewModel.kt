@@ -12,25 +12,25 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
-import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import org.lanzadera.proyectos.domain.models.WatchedEpisode
 import org.lanzadera.proyectos.domain.models.book.Book
 import org.lanzadera.proyectos.domain.models.favorite.FavoriteItem
+import org.lanzadera.proyectos.domain.models.favorite.FavoriteItemWithInfo
 import org.lanzadera.proyectos.domain.models.game.Game
 import org.lanzadera.proyectos.domain.models.tvshow.NextEpisodeInfo
 import org.lanzadera.proyectos.domain.models.tvshow.TvShow
 import org.lanzadera.proyectos.domain.models.tvshow.TvShowWithNextEpisode
 import org.lanzadera.proyectos.domain.repository.FavoriteDetailsRepository
 import org.lanzadera.proyectos.domain.repository.WatchedEpisodesRepository
+import org.lanzadera.proyectos.domain.repository.WatchedMoviesRepository
 import org.lanzadera.proyectos.domain.usecase.books.RefreshBooksUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.ObserveFavoritesUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.ToggleFavoriteUseCase
 import org.lanzadera.proyectos.domain.usecase.games.RefreshGamesUseCase
 import org.lanzadera.proyectos.domain.usecase.load_initial_data.GetInitialDataUseCase
 import org.lanzadera.proyectos.domain.usecase.tvshows.RefreshTvShowsUseCase
+import org.lanzadera.proyectos.utils.DateUtils
 import kotlin.coroutines.cancellation.CancellationException
 
 class HomeViewModel(
@@ -41,11 +41,12 @@ class HomeViewModel(
     private val observeFavoritesUseCase: ObserveFavoritesUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
     private val watchedEpisodesRepository: WatchedEpisodesRepository,
-    private val favoriteDetailsRepository: FavoriteDetailsRepository
+    private val favoriteDetailsRepository: FavoriteDetailsRepository,
+    private val watchedMoviesRepository: WatchedMoviesRepository
 ) : ViewModel() {
 
     // HomeTab: ahora con 5 pestañas: FOLLOWING, BOOKS, FILMS, SERIES, GAMES
-    enum class HomeTab { FOLLOWING, BOOKS, FILMS, SERIES, GAMES }
+    enum class HomeTab { FAVORITES, BOOKS, FILMS, SERIES, GAMES }
 
     // --- todos los flows, calientes y listos (desde el use case) ---
     val movies = getInitialData.moviesFlow
@@ -69,6 +70,38 @@ class HomeViewModel(
 
     // Books flow (if use case provided)
     val books: StateFlow<List<Book>> = refreshBooksUseCase?.booksFlow
+        ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+        ?: MutableStateFlow(emptyList())
+
+    val fictionBooks: StateFlow<List<Book>> = refreshBooksUseCase?.fictionBooksFlow
+        ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+        ?: MutableStateFlow(emptyList())
+
+    val scienceBooks: StateFlow<List<Book>> = refreshBooksUseCase?.scienceBooksFlow
+        ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+        ?: MutableStateFlow(emptyList())
+
+    val historyBooks: StateFlow<List<Book>> = refreshBooksUseCase?.historyBooksFlow
+        ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+        ?: MutableStateFlow(emptyList())
+
+    val biographyBooks: StateFlow<List<Book>> = refreshBooksUseCase?.biographyBooksFlow
+        ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+        ?: MutableStateFlow(emptyList())
+
+    val businessBooks: StateFlow<List<Book>> = refreshBooksUseCase?.businessBooksFlow
+        ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+        ?: MutableStateFlow(emptyList())
+
+    val technologyBooks: StateFlow<List<Book>> = refreshBooksUseCase?.technologyBooksFlow
+        ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+        ?: MutableStateFlow(emptyList())
+
+    val selfHelpBooks: StateFlow<List<Book>> = refreshBooksUseCase?.selfHelpBooksFlow
+        ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+        ?: MutableStateFlow(emptyList())
+
+    val recentBooks: StateFlow<List<Book>> = refreshBooksUseCase?.recentBooksFlow
         ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
         ?: MutableStateFlow(emptyList())
 
@@ -145,7 +178,7 @@ class HomeViewModel(
     ) { favoriteTvShows, watched ->
         println("SIGUIENDO: Total favorite shows from Room: ${favoriteTvShows.size}, Watched episodes: ${watched.size}")
 
-        val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+        val today = DateUtils.getTodayInUserTimezone()
 
         favoriteTvShows.mapNotNull { show ->
             val showId = show.id?.toString() ?: return@mapNotNull null
@@ -163,6 +196,22 @@ class HomeViewModel(
                 println("SIGUIENDO:   - No hay más episodios por ver")
                 null
             }
+        }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    // Series finalizadas (todas vistas)
+    val finishedSeries: StateFlow<List<TvShow>> = combine(
+        favoriteDetailsRepository.observeFavoriteTvShows(),
+        allWatchedEpisodes
+    ) { favoriteTvShows, watched ->
+        val today = DateUtils.getTodayInUserTimezone()
+
+        favoriteTvShows.filter { show ->
+            val showId = show.id?.toString() ?: return@filter false
+            val seasons = show.seasons ?: return@filter false
+
+            // Si no hay próximo episodio, está finalizada
+            findNextUnwatchedEpisode(seasons, showId, watched, today) == null
         }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
@@ -195,12 +244,10 @@ class HomeViewModel(
                 if (!isWatched) {
                     // Este es el próximo episodio sin ver
                     val airDate = episode.airDate
-                    val airDateParsed = airDate?.let { parseDateString(it) }
-                    val isAired =
-                        airDateParsed?.let { it <= today } ?: true // Si no hay fecha, asumir que está disponible
-                    val daysUntilAir = if (airDateParsed != null && !isAired) {
-                        (airDateParsed.toEpochDays() - today.toEpochDays()).toInt()
-                    } else null
+                    val isAired = DateUtils.hasDatePassed(airDate)
+                    val daysUntilAir = DateUtils.daysUntilDate(airDate, adjustForTimezone = true)?.let { days ->
+                        if (days > 0) days else null
+                    }
 
                     return NextEpisodeInfo(
                         seasonNumber = seasonNumber,
@@ -217,47 +264,116 @@ class HomeViewModel(
         return null
     }
 
-    private fun parseDateString(dateString: String): LocalDate? {
-        return try {
-            if (dateString.isBlank()) return null
-            val parts = dateString.split("-")
-            if (parts.size == 3) {
-                LocalDate(parts[0].toInt(), parts[1].toInt(), parts[2].toInt())
-            } else null
-        } catch (e: Exception) {
-            null
-        }
-    }
-
     val upcomingFavoriteMovies: StateFlow<List<org.lanzadera.proyectos.domain.models.movie.Movie>> =
         favoriteDetailsRepository.observeUpcomingFavoriteMovies(
-            Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date.toString()
+            DateUtils.getTodayInUserTimezone().toString()
         ).stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val moviesWithReleaseInfo: StateFlow<List<org.lanzadera.proyectos.domain.models.movie.MovieWithReleaseInfo>> =
         combine(
             favoriteDetailsRepository.observeFavoriteMovies(),
-            movies
-        ) { favoriteMovies, allMovies ->
-            val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+            movies,
+            watchedMoviesRepository.observeAllWatchedMovies()
+        ) { favoriteMovies, allMovies, watchedMovies ->
+            val today = DateUtils.getTodayInUserTimezone()
+            val watchedMovieIds = watchedMovies.map { it.movieId }.toSet()
 
-            favoriteMovies.mapNotNull { movie ->
-                val releaseDate = movie.releaseDate
-                val releaseDateParsed = releaseDate?.let { parseDateString(it) }
-                val isReleased = releaseDateParsed?.let { it <= today } ?: true
-                val daysUntilRelease = if (releaseDateParsed != null && !isReleased) {
-                    (releaseDateParsed.toEpochDays() - today.toEpochDays()).toInt()
-                } else null
+            favoriteMovies
+                .filter { movie ->
+                    val movieId = movie.id?.toString() ?: return@filter false
+                    !watchedMovieIds.contains(movieId)
+                }
+                .mapNotNull { movie ->
+                    val releaseDate = movie.releaseDate
+                    val isReleased = DateUtils.hasDatePassed(releaseDate)
+                    val daysUntilRelease = DateUtils.daysUntilDate(releaseDate, adjustForTimezone = true)?.let { days ->
+                        if (days > 0) days else null
+                    }
 
-                val releaseInfo = org.lanzadera.proyectos.domain.models.movie.ReleaseInfo(
-                    releaseDate = releaseDate,
-                    isReleased = isReleased,
-                    daysUntilRelease = daysUntilRelease
-                )
+                    val releaseInfo = org.lanzadera.proyectos.domain.models.movie.ReleaseInfo(
+                        releaseDate = releaseDate,
+                        isReleased = isReleased,
+                        daysUntilRelease = daysUntilRelease
+                    )
 
-                org.lanzadera.proyectos.domain.models.movie.MovieWithReleaseInfo(movie, releaseInfo)
+                    org.lanzadera.proyectos.domain.models.movie.MovieWithReleaseInfo(movie, releaseInfo)
+                }
+        }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    // Películas vistas
+    val watchedMoviesWithInfo: StateFlow<List<org.lanzadera.proyectos.domain.models.movie.Movie>> =
+        combine(
+            favoriteDetailsRepository.observeFavoriteMovies(),
+            watchedMoviesRepository.observeAllWatchedMovies()
+        ) { favoriteMovies, watchedMovies ->
+            val watchedMovieIds = watchedMovies.map { it.movieId }.toSet()
+
+            favoriteMovies.filter { movie ->
+                val movieId = movie.id?.toString() ?: return@filter false
+                watchedMovieIds.contains(movieId)
             }
         }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val favoritesWithInfo: StateFlow<List<FavoriteItemWithInfo>> = combine(
+        moviesWithReleaseInfo,
+        seriesWithUnwatchedEpisodes,
+        watchedMoviesWithInfo,
+        finishedSeries
+    ) { movies, series, watchedMovies, finishedShows ->
+        val movieItems = movies.map { movieWithRelease ->
+            FavoriteItemWithInfo.MovieItem(
+                movieWithRelease = movieWithRelease,
+                id = movieWithRelease.movie.id?.toString() ?: "",
+                posterUrl = movieWithRelease.movie.posterPath,
+                updatedAt = System.currentTimeMillis()
+            )
+        }
+
+        val seriesItems = series.map { tvShowWithNext ->
+            FavoriteItemWithInfo.TvShowItem(
+                tvShowWithNext = tvShowWithNext,
+                id = tvShowWithNext.tvShow.id?.toString() ?: "",
+                posterUrl = tvShowWithNext.tvShow.posterPath,
+                updatedAt = System.currentTimeMillis()
+            )
+        }
+
+        val watchedMovieItems = watchedMovies.map { movie ->
+            FavoriteItemWithInfo.WatchedMovieItem(
+                movie = movie,
+                id = movie.id?.toString() ?: "",
+                posterUrl = movie.posterPath,
+                updatedAt = System.currentTimeMillis()
+            )
+        }
+
+        val finishedSeriesItems = finishedShows.map { tvShow ->
+            FavoriteItemWithInfo.FinishedSeriesItem(
+                tvShow = tvShow,
+                id = tvShow.id?.toString() ?: "",
+                posterUrl = tvShow.posterPath,
+                updatedAt = System.currentTimeMillis()
+            )
+        }
+
+        // Ordenamiento personalizado:
+        // 1. Items completados al final (isCompleted = true)
+        // 2. Disponibles para ver (isAvailable = true, isCompleted = false)
+        // 3. Próximamente ordenados por días (menos a más)
+        // 4. Sin fecha o fecha desconocida
+        (movieItems + seriesItems + watchedMovieItems + finishedSeriesItems).sortedWith(
+            compareBy<FavoriteItemWithInfo> { it.isCompleted }
+                .thenByDescending { if (!it.isCompleted) it.isAvailable else false }
+                .thenBy { item ->
+                    // Si no está disponible y no está completado, ordenar por días
+                    if (!item.isCompleted && !item.isAvailable) {
+                        item.daysUntilAvailable ?: Int.MAX_VALUE
+                    } else {
+                        -1
+                    }
+                }
+        )
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val refreshing = MutableStateFlow(false)
     val error = MutableStateFlow<String?>(null)
@@ -266,12 +382,12 @@ class HomeViewModel(
     var didFirstLoad = false
 
     // tab seleccionado (lo guarda el VM; la UI solo lo notifica)
-    private val _selectedTab = MutableStateFlow(HomeTab.FOLLOWING)
+    private val _selectedTab = MutableStateFlow(HomeTab.FAVORITES)
     val selectedTab: StateFlow<HomeTab> = _selectedTab
 
     fun selectTab(index: Int) {
         _selectedTab.value = when (index) {
-            0 -> HomeTab.FOLLOWING
+            0 -> HomeTab.FAVORITES
             1 -> HomeTab.BOOKS
             2 -> HomeTab.FILMS
             3 -> HomeTab.SERIES
@@ -279,7 +395,7 @@ class HomeViewModel(
         }
 
         // Si selecciona FOLLOWING y aún no hay datos de series, cargarlas
-        if (_selectedTab.value == HomeTab.FOLLOWING) {
+        if (_selectedTab.value == HomeTab.FAVORITES) {
             println("SYNCRO HomeViewModel: FOLLOWING tab selected, tvShows.size=${tvShows.value.size}")
             viewModelScope.launch {
                 try {
@@ -316,9 +432,20 @@ class HomeViewModel(
             viewModelScope.launch {
                 try {
                     if (refreshBooksUseCase != null && books.value.isEmpty()) {
-                        println("SYNCRO HomeViewModel: launching refreshBooksUseCase.refreshBooks()")
+                        println("SYNCRO HomeViewModel: launching refreshBooksUseCase for all categories")
                         refreshing.value = true
-                        refreshBooksUseCase.refreshBooks(force = false, query = "")
+                        supervisorScope {
+                            awaitAll(
+                                async { refreshBooksUseCase.refreshRecentBooks(force = false) },
+                                async { refreshBooksUseCase.refreshFictionBooks(force = false) },
+                                async { refreshBooksUseCase.refreshScienceBooks(force = false) },
+                                async { refreshBooksUseCase.refreshHistoryBooks(force = false) },
+                                async { refreshBooksUseCase.refreshBiographyBooks(force = false) },
+                                async { refreshBooksUseCase.refreshBusinessBooks(force = false) },
+                                async { refreshBooksUseCase.refreshTechnologyBooks(force = false) },
+                                async { refreshBooksUseCase.refreshSelfHelpBooks(force = false) }
+                            )
+                        }
                         println("SYNCRO HomeViewModel: refreshBooksUseCase finished, books.size=${books.value.size}")
                     } else {
                         println("SYNCRO HomeViewModel: no refresh needed or no use case")

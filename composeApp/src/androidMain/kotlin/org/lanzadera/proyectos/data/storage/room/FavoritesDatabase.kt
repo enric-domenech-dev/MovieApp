@@ -9,15 +9,17 @@ import org.lanzadera.proyectos.utils.AppContextProvider
     entities = [
         RoomFavoriteEntity::class,
         WatchedEpisodeEntity::class,
+        WatchedMovieEntity::class,
         FavoriteTvShowEntity::class,
         FavoriteMovieEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = true
 )
 abstract class FavoritesDatabase : RoomDatabase() {
     abstract fun favoriteDao(): FavoriteDao
     abstract fun watchedEpisodeDao(): WatchedEpisodeDao
+    abstract fun watchedMovieDao(): WatchedMovieDao
     abstract fun favoriteTvShowDao(): FavoriteTvShowDao
     abstract fun favoriteMovieDao(): FavoriteMovieDao
     abstract fun favoriteItemDao(): FavoriteItemDao

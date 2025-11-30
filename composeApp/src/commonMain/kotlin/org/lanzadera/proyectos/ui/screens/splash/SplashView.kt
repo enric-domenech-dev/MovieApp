@@ -13,11 +13,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import movieapp.composeapp.generated.resources.Res
-import movieapp.composeapp.generated.resources.full_background_logo
+import movieapp.composeapp.generated.resources.new_edge_logo
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
@@ -42,15 +41,13 @@ fun SplashView(
             }
         }
     }
-    Scaffold(
-    ) { paddingValues ->
+    Scaffold { paddingValues ->
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
             Image(
-                painter = painterResource(Res.drawable.full_background_logo),
+                painter = painterResource(Res.drawable.new_edge_logo),
                 contentDescription = "Logo",
-                contentScale = ContentScale.FillBounds,
                 modifier = Modifier.fillMaxSize().safeDrawingPadding()
             )
         }

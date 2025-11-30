@@ -27,7 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import movieapp.composeapp.generated.resources.Res
-import movieapp.composeapp.generated.resources.unicorn
+import movieapp.composeapp.generated.resources.new_edge_logo
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.lanzadera.proyectos.AppTheme
@@ -84,7 +84,7 @@ fun LoginView(
             Spacer(modifier = Modifier.height(16.dp))
 
             Image(
-                painter = painterResource(resource = Res.drawable.unicorn),
+                painter = painterResource(resource = Res.drawable.new_edge_logo),
                 contentDescription = null,
                 modifier = Modifier.size(200.dp)
             )
