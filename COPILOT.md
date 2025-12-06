@@ -170,6 +170,52 @@ val domainItem = DomainFavoriteItem(...)
 val uiItem = UIFavoriteItem(...)
 ```
 
+### 2. Use Cases Must Have Only One Public Method
+
+**RULE:** A use case should follow Single Responsibility Principle and have **only one public method**: `operator fun invoke(...)`
+
+**❌ WRONG - Multiple public methods:**
+```kotlin
+class ObserveWatchedEpisodesUseCase(
+    private val repository: WatchedEpisodesRepository
+) {
+    operator fun invoke(tvShowId: String): Flow<List<WatchedEpisode>> {
+        return repository.observeWatchedEpisodes(tvShowId)
+    }
+    
+    fun observeAll(): Flow<List<WatchedEpisode>> { // ❌ Second public method!
+        return repository.observeAllWatchedEpisodes()
+    }
+}
+```
+
+**✅ CORRECT - Separate use cases:**
+```kotlin
+// Use case 1: Observe episodes for a specific show
+class ObserveWatchedEpisodesUseCase(
+    private val repository: WatchedEpisodesRepository
+) {
+    operator fun invoke(tvShowId: String): Flow<List<WatchedEpisode>> {
+        return repository.observeWatchedEpisodes(tvShowId)
+    }
+}
+
+// Use case 2: Observe all episodes
+class ObserveAllWatchedEpisodesUseCase(
+    private val repository: WatchedEpisodesRepository
+) {
+    operator fun invoke(): Flow<List<WatchedEpisode>> {
+        return repository.observeAllWatchedEpisodes()
+    }
+}
+```
+
+**Why?** 
+- Single Responsibility Principle
+- Easier to test
+- Clearer naming and intent
+- Better maintainability
+
 ---
 
 ## Build & Run Commands

@@ -51,6 +51,7 @@ import org.lanzadera.proyectos.domain.repository.TvShowRepository
 import org.lanzadera.proyectos.domain.repository.WatchedEpisodesRepository
 import org.lanzadera.proyectos.domain.repository.WatchedMoviesRepository
 import org.lanzadera.proyectos.domain.usecase.books.RefreshBooksUseCase
+import org.lanzadera.proyectos.domain.usecase.episodes.ObserveAllWatchedEpisodesUseCase
 import org.lanzadera.proyectos.domain.usecase.episodes.ObserveWatchedEpisodesUseCase
 import org.lanzadera.proyectos.domain.usecase.episodes.ToggleEpisodeWatchedUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.GetFavoriteDetailsUseCase
@@ -246,6 +247,7 @@ val viewModelsModule = module {
     single { ToggleFavoriteUseCase(get(), get(), get(), get(), get()) }
     single { SyncFavoritesUseCase(get()) }
     single { ObserveWatchedEpisodesUseCase(get()) }
+    single { ObserveAllWatchedEpisodesUseCase(get()) }
     single { ToggleEpisodeWatchedUseCase(get()) }
     single { ToggleMovieWatchedUseCase(get()) }
     single { ObserveWatchedMoviesUseCase(get()) }

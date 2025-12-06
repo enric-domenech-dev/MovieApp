@@ -48,14 +48,14 @@ After completing each task, update:
 
 ## 📊 PROGRESS TRACKING
 
-### Overall Progress: 10/136 tasks completed (7.35%)
+### Overall Progress: 11/136 tasks completed (8.09%)
 
 ### Phase Status:
 
 - [x] **Phase 0: Quick Wins** (8/8 completed) ✅ **COMPLETE**
-- [ ] **Phase 1: Architecture Fixes** (2/17 completed) - 🎯 **CURRENT** 
-  - **Next Task:** 1.2 - Refactor HomeViewModel to remove repository injections
-  - **Recent:** ✅ Task 1.1.5 COMPLETE - All UI components use UI models only
+- [ ] **Phase 1: Architecture Fixes** (3/17 completed) - 🎯 **CURRENT** 
+  - **Next Task:** 1.3 - Refactor MovieDetailViewModel
+  - **Recent:** ✅ Task 1.2 COMPLETE - HomeViewModel uses only use cases
 - [ ] **Phase 2: Code Quality** (0/12 completed) - Week 2
 - [ ] **Phase 3: Testing - Use Cases** (0/15 completed) - Week 3
 - [ ] **Phase 4: Testing - Repositories** (0/12 completed) - Week 4
@@ -67,8 +67,8 @@ After completing each task, update:
 ### Current Sprint:
 
 **Active Phase:** Phase 1 - Architecture Fixes  
-**Next Task:** Task 1.2 - Refactor HomeViewModel to remove repository injections  
-**Estimated Time Remaining in Phase:** ~35-38 hours
+**Next Task:** Task 1.3 - Refactor MovieDetailViewModel  
+**Estimated Time Remaining in Phase:** ~33-36 hours
 
 ---
 
@@ -151,6 +151,25 @@ After completing each task, update:
     - Fixed: GameMapper.kt, GameUI.kt
   - **Time:** ~5 hours
   - **Next:** Task 1.2 - Refactor HomeViewModel to remove repository injections
+- **Session 5** (Dec 6, 2025):
+  - 🎉 **Task 1.2: COMPLETE** - HomeViewModel refactored to use only use cases
+  - ✅ **Architecture improvements**:
+    - Created ObserveAllWatchedEpisodesUseCase (new use case)
+    - Removed 3 repository injections from HomeViewModel
+    - Replaced with use cases: ObserveAllWatchedEpisodesUseCase, GetFavoriteDetailsUseCase, ObserveWatchedMoviesUseCase
+    - HomeViewModel now follows Clean Architecture - only injects use cases
+  - 📝 **Documentation**:
+    - Added "Use Cases Must Have Only One Public Method" rule to COPILOT.md
+    - Documented SRP for use cases with examples
+  - 📊 **Results**:
+    - Android build: BUILD SUCCESSFUL ✅
+    - 0 repository references in HomeViewModel ✅
+    - All dependencies properly injected via Koin ✅
+  - 📦 **Files**:
+    - Created: ObserveAllWatchedEpisodesUseCase.kt
+    - Updated: HomeViewModel.kt, AppModule.kt, COPILOT.md
+  - **Time:** ~2 hours
+  - **Next:** Task 1.3 - Refactor MovieDetailViewModel
 
 ---
 

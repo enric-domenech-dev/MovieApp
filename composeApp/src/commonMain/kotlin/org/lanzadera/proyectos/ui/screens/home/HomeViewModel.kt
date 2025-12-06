@@ -23,15 +23,14 @@ import org.lanzadera.proyectos.domain.models.movie.MovieWithReleaseInfo
 import org.lanzadera.proyectos.domain.models.tvshow.NextEpisodeInfo
 import org.lanzadera.proyectos.domain.models.tvshow.TvShow
 import org.lanzadera.proyectos.domain.models.tvshow.TvShowWithNextEpisode
-import org.lanzadera.proyectos.utils.Logger
-import org.lanzadera.proyectos.domain.repository.FavoriteDetailsRepository
-import org.lanzadera.proyectos.domain.repository.WatchedEpisodesRepository
-import org.lanzadera.proyectos.domain.repository.WatchedMoviesRepository
 import org.lanzadera.proyectos.domain.usecase.books.RefreshBooksUseCase
+import org.lanzadera.proyectos.domain.usecase.episodes.ObserveAllWatchedEpisodesUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.GetFavoriteDetailsUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.ObserveFavoritesUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.ToggleFavoriteUseCase
 import org.lanzadera.proyectos.domain.usecase.games.RefreshGamesUseCase
 import org.lanzadera.proyectos.domain.usecase.load_initial_data.GetInitialDataUseCase
+import org.lanzadera.proyectos.domain.usecase.movies.ObserveWatchedMoviesUseCase
 import org.lanzadera.proyectos.domain.usecase.tvshows.RefreshTvShowsUseCase
 import org.lanzadera.proyectos.ui.mapper.toUI
 import org.lanzadera.proyectos.ui.models.BookUI
@@ -42,6 +41,7 @@ import org.lanzadera.proyectos.ui.models.GameUI
 import org.lanzadera.proyectos.ui.models.MovieUI
 import org.lanzadera.proyectos.ui.models.TvShowUI
 import org.lanzadera.proyectos.utils.DateUtils
+import org.lanzadera.proyectos.utils.Logger
 import kotlin.coroutines.cancellation.CancellationException
 
 class HomeViewModel(
@@ -51,9 +51,9 @@ class HomeViewModel(
     private val refreshGamesUseCase: RefreshGamesUseCase? = null,
     private val observeFavoritesUseCase: ObserveFavoritesUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
-    private val watchedEpisodesRepository: WatchedEpisodesRepository,
-    private val favoriteDetailsRepository: FavoriteDetailsRepository,
-    private val watchedMoviesRepository: WatchedMoviesRepository
+    private val observeAllWatchedEpisodesUseCase: ObserveAllWatchedEpisodesUseCase,
+    private val getFavoriteDetailsUseCase: GetFavoriteDetailsUseCase,
+    private val observeWatchedMoviesUseCase: ObserveWatchedMoviesUseCase
 ) : ViewModel() {
 
     // HomeTab: ahora con 5 pestañas: FOLLOWING, BOOKS, FILMS, SERIES, GAMES
@@ -210,12 +210,12 @@ class HomeViewModel(
         .map { it.toUI() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    // Flows para el tab FOLLOWING - usando Room directamente
-    val allWatchedEpisodes = watchedEpisodesRepository.observeAllWatchedEpisodes()
+    // Flows para el tab FOLLOWING - usando use cases
+    val allWatchedEpisodes = observeAllWatchedEpisodesUseCase()
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val seriesWithUnwatchedEpisodes: StateFlow<List<TvShowWithNextEpisode>> = combine(
-        favoriteDetailsRepository.observeFavoriteTvShows(),
+        getFavoriteDetailsUseCase.observeFavoriteTvShows(),
         allWatchedEpisodes
     ) { favoriteTvShows, watched ->
         Logger.d("SIGUIENDO: Total favorite shows from Room: ${favoriteTvShows.size}, Watched episodes: ${watched.size}", tag = "HomeViewModel")
@@ -243,7 +243,7 @@ class HomeViewModel(
 
     // Series finalizadas (todas vistas)
     val finishedSeries: StateFlow<List<TvShow>> = combine(
-        favoriteDetailsRepository.observeFavoriteTvShows(),
+        getFavoriteDetailsUseCase.observeFavoriteTvShows(),
         allWatchedEpisodes
     ) { favoriteTvShows, watched ->
         val today = DateUtils.getTodayInUserTimezone()
@@ -307,15 +307,15 @@ class HomeViewModel(
     }
 
     val upcomingFavoriteMovies: StateFlow<List<org.lanzadera.proyectos.domain.models.movie.Movie>> =
-        favoriteDetailsRepository.observeUpcomingFavoriteMovies(
+        getFavoriteDetailsUseCase.observeUpcomingFavoriteMovies(
             DateUtils.getTodayInUserTimezone().toString()
         ).stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val moviesWithReleaseInfo: StateFlow<List<org.lanzadera.proyectos.domain.models.movie.MovieWithReleaseInfo>> =
         combine(
-            favoriteDetailsRepository.observeFavoriteMovies(),
+            getFavoriteDetailsUseCase.observeFavoriteMovies(),
             movies,
-            watchedMoviesRepository.observeAllWatchedMovies()
+            observeWatchedMoviesUseCase()
         ) { favoriteMovies, allMovies, watchedMovies ->
             val today = DateUtils.getTodayInUserTimezone()
             val watchedMovieIds = watchedMovies.map { it.movieId }.toSet()
@@ -345,8 +345,8 @@ class HomeViewModel(
     // Películas vistas
     val watchedMoviesWithInfo: StateFlow<List<org.lanzadera.proyectos.domain.models.movie.Movie>> =
         combine(
-            favoriteDetailsRepository.observeFavoriteMovies(),
-            watchedMoviesRepository.observeAllWatchedMovies()
+            getFavoriteDetailsUseCase.observeFavoriteMovies(),
+            observeWatchedMoviesUseCase()
         ) { favoriteMovies, watchedMovies ->
             val watchedMovieIds = watchedMovies.map { it.movieId }.toSet()
 
