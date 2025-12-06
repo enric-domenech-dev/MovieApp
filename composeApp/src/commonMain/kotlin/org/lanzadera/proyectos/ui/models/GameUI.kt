@@ -17,7 +17,11 @@ data class GameUI(
     val platforms: List<String>?
 ) {
     val coverImageUrl: String
-        get() = coverUrl?.replace("t_thumb", "t_cover_big") ?: ""
+        get() {
+            if (coverUrl.isNullOrEmpty()) return ""
+            val url = coverUrl.replace("t_thumb", "t_cover_big")
+            return if (url.startsWith("//")) "https:$url" else url
+        }
     
     val hasValidCover: Boolean
         get() = !coverUrl.isNullOrEmpty()
