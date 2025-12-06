@@ -37,7 +37,7 @@ import org.lanzadera.proyectos.utils.Strings
 @Preview
 fun DetailView(
     nav: NavHostController,
-    movie: MovieUI?,
+    movie: MovieUI? = null,
     vm: MovieDetailViewModel = koinInject(),
     selectedTheme: AppTheme = AppTheme.SYSTEM,
     darkTheme: Boolean = false
@@ -46,17 +46,17 @@ fun DetailView(
     val isLoading by vm.isLoading.collectAsStateWithLifecycle()
     val error by vm.error.collectAsStateWithLifecycle()
 
-    // Si recibimos una película del NavigationStore, úsala
-    // Si no, intenta cargar por ID (para casos donde se recarga la página)
+    // Load movie by ID from NavigationStore or parameter
     LaunchedEffect(movie) {
-        when {
-            movie != null -> vm.setMovieDetail(movie)
-            NavigationStore.selectedMovie != null -> vm.setMovieDetail(NavigationStore.selectedMovie!!)
-            else -> nav.popBackStack() // Fallback: navega atrás si no hay datos
+        val movieToLoad = movie ?: NavigationStore.selectedMovie
+        movieToLoad?.id?.let { movieId ->
+            vm.loadMovieDetails(movieId)
+        } ?: run {
+            nav.popBackStack() // No movie to show
         }
     }
 
-    val displayedMovie = movieDetail ?: movie ?: NavigationStore.selectedMovie
+    val displayedMovie = movieDetail
 
     if (displayedMovie == null) {
         Scaffold(

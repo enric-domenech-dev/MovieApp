@@ -55,9 +55,9 @@ fun GameHeader(modifier: Modifier = Modifier, nav: NavHostController, game: Game
                 .clip(MaterialTheme.shapes.small)
                 .background(MaterialTheme.colorScheme.surfaceVariant)
         ) {
-            if (game.cover != null) {
+            if (game.hasValidCover) {
                 AsyncImage(
-                    model = game.cover.getImageUrl(),
+                    model = game.coverImageUrl,
                     contentDescription = game.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
@@ -97,7 +97,7 @@ fun GameSubheader(modifier: Modifier = Modifier, nav: NavHostController, game: G
                 .background(MaterialTheme.colorScheme.surfaceVariant)
         ) {
             AsyncImage(
-                model = game.cover?.getImageUrl(),
+                model = game.coverImageUrl,
                 contentDescription = game.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
@@ -123,7 +123,7 @@ fun GameSubheader(modifier: Modifier = Modifier, nav: NavHostController, game: G
                             .padding(end = 4.dp)
                     )
                     Text(
-                        text = game.ratingFormatted,
+                        text = game.ratingText,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface

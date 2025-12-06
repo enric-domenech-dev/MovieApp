@@ -17,6 +17,8 @@ import org.lanzadera.proyectos.domain.repository.WatchedMoviesRepository
 import org.lanzadera.proyectos.domain.usecase.favorites.ObserveFavoritesUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.ToggleFavoriteUseCase
 import org.lanzadera.proyectos.domain.usecase.movies.ToggleMovieWatchedUseCase
+import org.lanzadera.proyectos.ui.mapper.toDetailUI
+import org.lanzadera.proyectos.ui.models.MovieDetailUI
 import org.lanzadera.proyectos.utils.DateUtils
 
 class MovieDetailViewModel(
@@ -27,8 +29,13 @@ class MovieDetailViewModel(
     private val toggleMovieWatchedUseCase: ToggleMovieWatchedUseCase
 ) : ViewModel() {
 
-    private val _movieDetail = MutableStateFlow<Movie?>(null)
-    val movieDetail: StateFlow<Movie?> = _movieDetail.asStateFlow()
+    // Internal domain model state
+    private val _movieDetailDomain = MutableStateFlow<Movie?>(null)
+    
+    // Public UI model state - mapped from domain
+    val movieDetail: StateFlow<MovieDetailUI?> = _movieDetailDomain
+        .map { it?.toDetailUI() }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -43,12 +50,12 @@ class MovieDetailViewModel(
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val isWatched: StateFlow<Boolean> = watchedMovies.map { watched ->
-        _movieDetail.value?.id?.toString()?.let { movieId ->
+        _movieDetailDomain.value?.id?.toString()?.let { movieId ->
             watched.any { it.movieId == movieId }
         } ?: false
     }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
-    val isReleased: StateFlow<Boolean> = _movieDetail.map { movie ->
+    val isReleased: StateFlow<Boolean> = _movieDetailDomain.map { movie ->
         DateUtils.hasDatePassed(movie?.releaseDate)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
@@ -58,7 +65,7 @@ class MovieDetailViewModel(
                 _isLoading.value = true
                 _error.value = null
                 val details = movieRepository.getMovieDetails(movieId)
-                _movieDetail.value = details
+                _movieDetailDomain.value = details
                 if (details == null) {
                     _error.value = "No se pudieron cargar los detalles de la película"
                 }
@@ -71,13 +78,13 @@ class MovieDetailViewModel(
     }
 
     fun setMovieDetail(movie: Movie) {
-        _movieDetail.value = movie
+        _movieDetailDomain.value = movie
         // Automáticamente cargar detalles completos (cast, crew, etc.)
         movie.id?.let { loadMovieDetails(it) }
     }
 
     fun toggleFavorite() {
-        val movie = _movieDetail.value ?: return
+        val movie = _movieDetailDomain.value ?: return
         val item = FavoriteItem(
             id = movie.id?.toString() ?: return,
             type = FavoriteType.MOVIE,

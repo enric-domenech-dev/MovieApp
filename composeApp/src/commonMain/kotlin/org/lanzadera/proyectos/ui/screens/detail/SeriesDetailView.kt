@@ -42,7 +42,7 @@ import coil3.compose.AsyncImage
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
 import org.lanzadera.proyectos.domain.models.favorite.FavoriteType
-import org.lanzadera.proyectos.domain.models.tvshow.TvShow
+import org.lanzadera.proyectos.ui.models.TvShowUI
 import org.lanzadera.proyectos.navigation.NavigationStore
 import org.lanzadera.proyectos.ui.components.CustomTopAppBar
 import org.lanzadera.proyectos.ui.components.SeriesCreditsTab
@@ -54,7 +54,7 @@ import org.lanzadera.proyectos.utils.Strings
 @Preview
 fun SeriesDetailView(
     nav: NavHostController,
-    tvShow: TvShow? = null,
+    tvShow: TvShowUI? = null,
     tvShowId: Int? = null,
     vm: SeriesDetailViewModel = koinInject()
 ) {
@@ -71,23 +71,15 @@ fun SeriesDetailView(
         watchedEpisodes.map { "${it.seasonNumber}-${it.episodeNumber}" }.toSet()
     }
 
-    // Si recibimos un tvShowId, cargar por ID
-    LaunchedEffect(tvShowId) {
-        if (tvShowId != null && tvShowId > 0) {
-            vm.loadTvShowDetails(tvShowId)
+    // Load by ID from NavigationStore or parameter
+    LaunchedEffect(tvShow, tvShowId) {
+        val idToLoad = tvShowId ?: tvShow?.id ?: NavigationStore.selectedTvShow?.id
+        idToLoad?.let {
+            vm.loadTvShowDetails(it)
         }
     }
 
-    // Si recibimos un tvShow del NavigationStore, úsalo
-    // Si no, intenta cargar por ID (para casos donde se recarga la página)
-    LaunchedEffect(tvShow) {
-        when {
-            tvShow != null -> vm.setTvShowDetail(tvShow)
-            NavigationStore.selectedTvShow != null -> vm.setTvShowDetail(NavigationStore.selectedTvShow!!)
-        }
-    }
-
-    val displayedTvShow = tvShowDetail ?: tvShow ?: NavigationStore.selectedTvShow
+    val displayedTvShow = tvShowDetail
 
     if (displayedTvShow == null) {
         Scaffold(

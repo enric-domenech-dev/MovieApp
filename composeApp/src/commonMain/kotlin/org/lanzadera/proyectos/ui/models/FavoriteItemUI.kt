@@ -113,7 +113,15 @@ data class ReleaseInfoUI(
     val releaseDate: String?,
     val isReleased: Boolean,
     val daysUntilRelease: Int?
-)
+) {
+    val displayText: String
+        get() = when {
+            isReleased -> "Estrenada"
+            daysUntilRelease != null && daysUntilRelease > 0 -> 
+                "Estreno en $daysUntilRelease día${if (daysUntilRelease > 1) "s" else ""}"
+            else -> "Próximamente"
+        }
+}
 
 /**
  * UI model for next episode information.

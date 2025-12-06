@@ -54,13 +54,14 @@ import movieapp.composeapp.generated.resources.new_edge_logo
 import org.jetbrains.compose.resources.painterResource
 import org.lanzadera.proyectos.ui.models.MovieUI
 import org.lanzadera.proyectos.ui.models.MovieWithReleaseInfoUI
+import org.lanzadera.proyectos.ui.models.MovieDetailUI
 import org.lanzadera.proyectos.navigation.NavigationStore
 import org.lanzadera.proyectos.utils.Constants
 
 @Composable
 fun MovieItem(
     nav: NavHostController,
-    movie: Movie,
+    movie: MovieUI,
     modifier: Modifier = Modifier.wrapContentHeight(),
     showMeta: Boolean = true
 ) {
@@ -68,9 +69,7 @@ fun MovieItem(
         modifier = modifier
             .clickable {
                 NavigationStore.selectedMovie = movie
-                movie.id?.let { movieId ->
-                    nav.navigate(Constants.Screen.MovieDetail.createRoute(movieId))
-                }
+                nav.navigate(Constants.Screen.MovieDetail.createRoute(movie.id))
             }
     ) {
         Box(
@@ -79,7 +78,7 @@ fun MovieItem(
                 .clip(MaterialTheme.shapes.small)
         ) {
             AsyncImage(
-                model = "https://image.tmdb.org/t/p/w500${movie.posterPath}",
+                model = movie.posterUrl,
                 contentDescription = movie.title,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
@@ -89,16 +88,14 @@ fun MovieItem(
 
         if (showMeta) {
             Spacer(modifier = Modifier.height(6.dp))
-            movie.title?.let {
-                Text(
-                    text = it,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 15.sp,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
+            Text(
+                text = movie.displayTitle,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 15.sp,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
 
             val formattedDate = remember(movie.releaseDate) {
                 movie.releaseDate?.let {
@@ -212,7 +209,7 @@ fun MovieSubheader(modifier: Modifier = Modifier, nav: NavHostController, movie:
 }
 
 @Composable
-fun MovieDetail(movie: Movie?, modifier: Modifier = Modifier) {
+fun MovieDetail(movie: MovieDetailUI?, modifier: Modifier = Modifier) {
     val isFavorite = rememberSaveable { mutableStateOf(false) }
     if (movie == null) return
 
@@ -228,7 +225,7 @@ fun MovieDetail(movie: Movie?, modifier: Modifier = Modifier) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 AsyncImage(
-                    model = "https://image.tmdb.org/t/p/w500${movie.backdropPath}",
+                    model = movie.backdropUrl,
                     contentDescription = movie.title,
                     contentScale = ContentScale.FillWidth,
                     modifier = Modifier
