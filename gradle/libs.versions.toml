@@ -33,6 +33,7 @@ truthVersion = "1.4.4"
 turbineVersion = "1.1.0"
 realm = "1.16.0"
 napier = "2.7.1"
+kover = "0.8.3"
 
 [libraries]
 coil = { module = "io.coil-kt.coil3:coil", version.ref = "coilComposeCore" }
@@ -96,3 +97,4 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 androidxRoom = { id = "androidx.room", version.ref = "androidx-room" }
 gradleBuildConfig = { id = "com.github.gmazzo.buildconfig", version.ref = "buildConfig" }
 realm = { id = "io.realm.kotlin", version.ref = "realm" }
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
