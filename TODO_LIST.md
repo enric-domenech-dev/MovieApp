@@ -48,12 +48,12 @@ After completing each task, update:
 
 ## 📊 PROGRESS TRACKING
 
-### Overall Progress: 8/135 tasks completed (5.93%)
+### Overall Progress: 9/136 tasks completed (6.62%)
 
 ### Phase Status:
 
 - [x] **Phase 0: Quick Wins** (8/8 completed) ✅ **COMPLETE**
-- [ ] **Phase 1: Architecture Fixes** (0/15 completed) - 🎯 **CURRENT**
+- [ ] **Phase 1: Architecture Fixes** (1/16 completed) - 🎯 **CURRENT** (Task 1.1.5 CRITICAL added)
 - [ ] **Phase 2: Code Quality** (0/12 completed) - Week 2
 - [ ] **Phase 3: Testing - Use Cases** (0/15 completed) - Week 3
 - [ ] **Phase 4: Testing - Repositories** (0/12 completed) - Week 4
@@ -391,7 +391,7 @@ After completing each task, update:
 
 **Priority:** P0 - CRITICAL  
 **Goal:** Fix architectural violations, reach 100/100 in Architecture  
-**Estimated Time:** 28-32 hours
+**Estimated Time:** 34-38 hours (added 6h for Task 1.1.5)
 
 ## Task 1.1: Create Missing Use Cases for ViewModels
 
