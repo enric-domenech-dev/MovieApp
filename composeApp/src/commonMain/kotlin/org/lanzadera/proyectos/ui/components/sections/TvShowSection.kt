@@ -26,7 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import org.lanzadera.proyectos.domain.models.tvshow.TvShow
+import org.lanzadera.proyectos.ui.models.TvShowUI
 import org.lanzadera.proyectos.ui.components.TvShowHeader
 import org.lanzadera.proyectos.ui.components.TvShowSubheader
 import org.lanzadera.proyectos.ui.components.dialogs.TvShowSectionDialog
@@ -35,7 +35,7 @@ import org.lanzadera.proyectos.ui.screens.home.SectionMode
 @Composable
 fun TvShowSection(
     title: String,
-    items: List<TvShow>,
+    items: List<TvShowUI>,
     nav: NavHostController,
     sectionIndex: Int = 0,
     mode: SectionMode = SectionMode.HEADER

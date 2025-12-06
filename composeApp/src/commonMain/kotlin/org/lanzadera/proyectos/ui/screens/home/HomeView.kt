@@ -32,9 +32,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import org.lanzadera.proyectos.domain.models.book.Book
-import org.lanzadera.proyectos.domain.models.movie.Movie
-import org.lanzadera.proyectos.domain.models.tvshow.TvShow
 import org.lanzadera.proyectos.ui.components.PlaceholderScreen
 import org.lanzadera.proyectos.ui.components.sections.BookSection
 import org.lanzadera.proyectos.ui.components.sections.FavoriteItemsGrid
@@ -43,6 +40,10 @@ import org.lanzadera.proyectos.ui.components.sections.Section
 import org.lanzadera.proyectos.ui.components.sections.TvShowSection
 import org.lanzadera.proyectos.ui.components.tabs.NiaTab
 import org.lanzadera.proyectos.ui.components.tabs.NiaTabRow
+import org.lanzadera.proyectos.ui.models.BookUI
+import org.lanzadera.proyectos.ui.models.MovieUI
+import org.lanzadera.proyectos.ui.models.TvShowUI
+import org.lanzadera.proyectos.ui.models.GameUI
 import org.lanzadera.proyectos.utils.Constants.MenuOptions.topBarTitles
 import org.lanzadera.proyectos.utils.Strings
 
@@ -192,7 +193,7 @@ fun HomeView(
                             ),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            val sections: List<Pair<String, List<Book>>> = listOf(
+                            val sections: List<Pair<String, List<BookUI>>> = listOf(
                                 "Novedades Destacadas" to recentBooks,
                                 "Ficción" to fictionBooks,
                                 "Ciencia" to scienceBooks,
@@ -278,7 +279,7 @@ fun HomeView(
                             ),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            val sections: List<Pair<String, List<TvShow>>> = listOf(
+                            val sections: List<Pair<String, List<TvShowUI>>> = listOf(
                                 Strings.TVShowSections.NOW_AIRING to onAirTvShows,
                                 Strings.TVShowSections.POPULAR_SERIES to popularTvShows,
                                 Strings.TVShowSections.TOP_RATED to topRatedTvShows,
@@ -371,7 +372,7 @@ fun HomeView(
                             ),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            val sections: List<Pair<String, List<org.lanzadera.proyectos.domain.models.game.Game>>> =
+                            val sections: List<Pair<String, List<GameUI>>> =
                                 listOf(
                                     "Juegos Populares" to popularGames,
                                     "Top Rated" to topRatedGames,
@@ -452,7 +453,7 @@ fun HomeView(
                         ),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        val sections: List<Pair<String, List<Movie>>> = listOf(
+                        val sections: List<Pair<String, List<MovieUI>>> = listOf(
                             Strings.MovieSections.UPCOMING to upcoming,
                             Strings.MovieSections.POPULAR_MOVIES to popular,
                             Strings.MovieSections.DISCOVER to discover,

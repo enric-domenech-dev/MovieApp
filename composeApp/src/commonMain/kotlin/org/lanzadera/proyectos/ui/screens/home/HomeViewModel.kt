@@ -8,20 +8,22 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import org.lanzadera.proyectos.domain.models.WatchedEpisode
-import org.lanzadera.proyectos.utils.Logger
-import org.lanzadera.proyectos.domain.models.book.Book
-import org.lanzadera.proyectos.domain.models.favorite.FavoriteItem
+import org.lanzadera.proyectos.domain.models.favorite.FavoriteItem as DomainFavoriteItem
 import org.lanzadera.proyectos.domain.models.favorite.FavoriteItemWithInfo
-import org.lanzadera.proyectos.domain.models.game.Game
+import org.lanzadera.proyectos.domain.models.favorite.FavoriteType as DomainFavoriteType
+import org.lanzadera.proyectos.domain.models.movie.MovieWithReleaseInfo
 import org.lanzadera.proyectos.domain.models.tvshow.NextEpisodeInfo
 import org.lanzadera.proyectos.domain.models.tvshow.TvShow
 import org.lanzadera.proyectos.domain.models.tvshow.TvShowWithNextEpisode
+import org.lanzadera.proyectos.utils.Logger
 import org.lanzadera.proyectos.domain.repository.FavoriteDetailsRepository
 import org.lanzadera.proyectos.domain.repository.WatchedEpisodesRepository
 import org.lanzadera.proyectos.domain.repository.WatchedMoviesRepository
@@ -31,6 +33,14 @@ import org.lanzadera.proyectos.domain.usecase.favorites.ToggleFavoriteUseCase
 import org.lanzadera.proyectos.domain.usecase.games.RefreshGamesUseCase
 import org.lanzadera.proyectos.domain.usecase.load_initial_data.GetInitialDataUseCase
 import org.lanzadera.proyectos.domain.usecase.tvshows.RefreshTvShowsUseCase
+import org.lanzadera.proyectos.ui.mapper.toUI
+import org.lanzadera.proyectos.ui.models.BookUI
+import org.lanzadera.proyectos.ui.models.FavoriteItemUI
+import org.lanzadera.proyectos.ui.models.FavoriteItemWithInfoUI
+import org.lanzadera.proyectos.ui.models.FavoriteTypeUI
+import org.lanzadera.proyectos.ui.models.GameUI
+import org.lanzadera.proyectos.ui.models.MovieUI
+import org.lanzadera.proyectos.ui.models.TvShowUI
 import org.lanzadera.proyectos.utils.DateUtils
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -49,124 +59,155 @@ class HomeViewModel(
     // HomeTab: ahora con 5 pestañas: FOLLOWING, BOOKS, FILMS, SERIES, GAMES
     enum class HomeTab { FAVORITES, BOOKS, FILMS, SERIES, GAMES }
 
-    // --- todos los flows, calientes y listos (desde el use case) ---
-    val movies = getInitialData.moviesFlow
+    // --- todos los flows, mapeados a UI models ---
+    val movies: StateFlow<List<MovieUI>> = getInitialData.moviesFlow
+        .map { it.toUI() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-    val trendingWeek = getInitialData.trendingMoviesFlow
+    val trendingWeek: StateFlow<List<MovieUI>> = getInitialData.trendingMoviesFlow
+        .map { it.toUI() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-    val trendingDay = getInitialData.trendingMoviesDailyFlow
+    val trendingDay: StateFlow<List<MovieUI>> = getInitialData.trendingMoviesDailyFlow
+        .map { it.toUI() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-    val popular = getInitialData.popularMoviesFlow
+    val popular: StateFlow<List<MovieUI>> = getInitialData.popularMoviesFlow
+        .map { it.toUI() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-    val topRated = getInitialData.topRatedMoviesFlow
+    val topRated: StateFlow<List<MovieUI>> = getInitialData.topRatedMoviesFlow
+        .map { it.toUI() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-    val upcoming = getInitialData.upcomingMoviesFlow
+    val upcoming: StateFlow<List<MovieUI>> = getInitialData.upcomingMoviesFlow
+        .map { it.toUI() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-    val discover = getInitialData.discoverMoviesFlow
+    val discover: StateFlow<List<MovieUI>> = getInitialData.discoverMoviesFlow
+        .map { it.toUI() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-    val hero = getInitialData.heroMoviesFlow
+    val hero: StateFlow<List<MovieUI>> = getInitialData.heroMoviesFlow
+        .map { it.toUI() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-    val inCinemasToday = getInitialData.inCinemasTodayFlow
+    val inCinemasToday: StateFlow<List<MovieUI>> = getInitialData.inCinemasTodayFlow
+        .map { it.toUI() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    // Books flow (if use case provided)
-    val books: StateFlow<List<Book>> = refreshBooksUseCase?.booksFlow
+    // Books flow (if use case provided) - mapped to UI
+    val books: StateFlow<List<BookUI>> = refreshBooksUseCase?.booksFlow
+        ?.map { it.toUI() }
         ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
         ?: MutableStateFlow(emptyList())
 
-    val fictionBooks: StateFlow<List<Book>> = refreshBooksUseCase?.fictionBooksFlow
+    val fictionBooks: StateFlow<List<BookUI>> = refreshBooksUseCase?.fictionBooksFlow
+        ?.map { it.toUI() }
         ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
         ?: MutableStateFlow(emptyList())
 
-    val scienceBooks: StateFlow<List<Book>> = refreshBooksUseCase?.scienceBooksFlow
+    val scienceBooks: StateFlow<List<BookUI>> = refreshBooksUseCase?.scienceBooksFlow
+        ?.map { it.toUI() }
         ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
         ?: MutableStateFlow(emptyList())
 
-    val historyBooks: StateFlow<List<Book>> = refreshBooksUseCase?.historyBooksFlow
+    val historyBooks: StateFlow<List<BookUI>> = refreshBooksUseCase?.historyBooksFlow
+        ?.map { it.toUI() }
         ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
         ?: MutableStateFlow(emptyList())
 
-    val biographyBooks: StateFlow<List<Book>> = refreshBooksUseCase?.biographyBooksFlow
+    val biographyBooks: StateFlow<List<BookUI>> = refreshBooksUseCase?.biographyBooksFlow
+        ?.map { it.toUI() }
         ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
         ?: MutableStateFlow(emptyList())
 
-    val businessBooks: StateFlow<List<Book>> = refreshBooksUseCase?.businessBooksFlow
+    val businessBooks: StateFlow<List<BookUI>> = refreshBooksUseCase?.businessBooksFlow
+        ?.map { it.toUI() }
         ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
         ?: MutableStateFlow(emptyList())
 
-    val technologyBooks: StateFlow<List<Book>> = refreshBooksUseCase?.technologyBooksFlow
+    val technologyBooks: StateFlow<List<BookUI>> = refreshBooksUseCase?.technologyBooksFlow
+        ?.map { it.toUI() }
         ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
         ?: MutableStateFlow(emptyList())
 
-    val selfHelpBooks: StateFlow<List<Book>> = refreshBooksUseCase?.selfHelpBooksFlow
+    val selfHelpBooks: StateFlow<List<BookUI>> = refreshBooksUseCase?.selfHelpBooksFlow
+        ?.map { it.toUI() }
         ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
         ?: MutableStateFlow(emptyList())
 
-    val recentBooks: StateFlow<List<Book>> = refreshBooksUseCase?.recentBooksFlow
+    val recentBooks: StateFlow<List<BookUI>> = refreshBooksUseCase?.recentBooksFlow
+        ?.map { it.toUI() }
         ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
         ?: MutableStateFlow(emptyList())
 
-    // TvShows flows (if use case provided)
-    val tvShows: StateFlow<List<TvShow>> = refreshTvShowsUseCase?.tvShowsFlow
+    // TvShows flows (if use case provided) - mapped to UI
+    val tvShows: StateFlow<List<TvShowUI>> = refreshTvShowsUseCase?.tvShowsFlow
+        ?.map { it.toUI() }
         ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
         ?: MutableStateFlow(emptyList())
-    val popularTvShows: StateFlow<List<TvShow>> = refreshTvShowsUseCase?.popularTvShowsFlow
+    val popularTvShows: StateFlow<List<TvShowUI>> = refreshTvShowsUseCase?.popularTvShowsFlow
+        ?.map { it.toUI() }
         ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
         ?: MutableStateFlow(emptyList())
-    val topRatedTvShows: StateFlow<List<TvShow>> = refreshTvShowsUseCase?.topRatedTvShowsFlow
+    val topRatedTvShows: StateFlow<List<TvShowUI>> = refreshTvShowsUseCase?.topRatedTvShowsFlow
+        ?.map { it.toUI() }
         ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
         ?: MutableStateFlow(emptyList())
-    val onAirTvShows: StateFlow<List<TvShow>> = refreshTvShowsUseCase?.onAirTvShowsFlow
+    val onAirTvShows: StateFlow<List<TvShowUI>> = refreshTvShowsUseCase?.onAirTvShowsFlow
+        ?.map { it.toUI() }
         ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
         ?: MutableStateFlow(emptyList())
-    val trendingTvShows: StateFlow<List<TvShow>> = refreshTvShowsUseCase?.trendingTvShowsFlow
-        ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-        ?: MutableStateFlow(emptyList())
-
-    val airingTodayTvShows: StateFlow<List<TvShow>> = refreshTvShowsUseCase?.airingTodayTvShowsFlow
-        ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-        ?: MutableStateFlow(emptyList())
-
-    val trendingTvShowsWeek: StateFlow<List<TvShow>> = refreshTvShowsUseCase?.trendingTvShowsWeekFlow
+    val trendingTvShows: StateFlow<List<TvShowUI>> = refreshTvShowsUseCase?.trendingTvShowsFlow
+        ?.map { it.toUI() }
         ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
         ?: MutableStateFlow(emptyList())
 
-    // Derived TV show flows for additional sections
-    val airingTodayAndTrendingTvShows: StateFlow<List<TvShow>> =
+    val airingTodayTvShows: StateFlow<List<TvShowUI>> = refreshTvShowsUseCase?.airingTodayTvShowsFlow
+        ?.map { it.toUI() }
+        ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+        ?: MutableStateFlow(emptyList())
+
+    val trendingTvShowsWeek: StateFlow<List<TvShowUI>> = refreshTvShowsUseCase?.trendingTvShowsWeekFlow
+        ?.map { it.toUI() }
+        ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+        ?: MutableStateFlow(emptyList())
+
+    // Derived TV show flows for additional sections - using UI models
+    val airingTodayAndTrendingTvShows: StateFlow<List<TvShowUI>> =
         combine(onAirTvShows, airingTodayTvShows) { onAir, airingToday ->
             (onAir + airingToday).distinctBy { it.id }.take(20)
         }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    val recommendedTvShows: StateFlow<List<TvShow>> = combine(topRatedTvShows, popularTvShows) { topRated, popular ->
+    val recommendedTvShows: StateFlow<List<TvShowUI>> = combine(topRatedTvShows, popularTvShows) { topRated, popular ->
         (topRated + popular).distinctBy { it.id }.shuffled().take(20)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    val upcomingTvShows: StateFlow<List<TvShow>> = tvShows.combine(onAirTvShows) { all, onAir ->
-        all.filter { it !in onAir }.take(20)
+    val upcomingTvShows: StateFlow<List<TvShowUI>> = tvShows.combine(onAirTvShows) { all, onAir ->
+        all.filter { show -> onAir.none { it.id == show.id } }.take(20)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    // Games flows - obtained from RefreshGamesUseCase which exposes repository flows
-    val games: StateFlow<List<Game>> = refreshGamesUseCase?.gamesFlow
+    // Games flows - mapped to UI
+    val games: StateFlow<List<GameUI>> = refreshGamesUseCase?.gamesFlow
+        ?.map { it.toUI() }
         ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
         ?: MutableStateFlow(emptyList())
 
-    val popularGames: StateFlow<List<Game>> = refreshGamesUseCase?.popularGamesFlow
+    val popularGames: StateFlow<List<GameUI>> = refreshGamesUseCase?.popularGamesFlow
+        ?.map { it.toUI() }
         ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
         ?: MutableStateFlow(emptyList())
 
-    val topRatedGames: StateFlow<List<Game>> = refreshGamesUseCase?.topRatedGamesFlow
+    val topRatedGames: StateFlow<List<GameUI>> = refreshGamesUseCase?.topRatedGamesFlow
+        ?.map { it.toUI() }
         ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
         ?: MutableStateFlow(emptyList())
 
-    val upcomingGames: StateFlow<List<Game>> = refreshGamesUseCase?.upcomingGamesFlow
+    val upcomingGames: StateFlow<List<GameUI>> = refreshGamesUseCase?.upcomingGamesFlow
+        ?.map { it.toUI() }
         ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
         ?: MutableStateFlow(emptyList())
 
-    val trendingGames: StateFlow<List<Game>> = refreshGamesUseCase?.trendingGamesFlow
+    val trendingGames: StateFlow<List<GameUI>> = refreshGamesUseCase?.trendingGamesFlow
+        ?.map { it.toUI() }
         ?.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
         ?: MutableStateFlow(emptyList())
 
-    val favorites: StateFlow<List<FavoriteItem>> = observeFavoritesUseCase()
+    val favorites: StateFlow<List<FavoriteItemUI>> = observeFavoritesUseCase()
+        .map { it.toUI() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     // Flows para el tab FOLLOWING - usando Room directamente
@@ -315,7 +356,7 @@ class HomeViewModel(
             }
         }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    val favoritesWithInfo: StateFlow<List<FavoriteItemWithInfo>> = combine(
+    val favoritesWithInfo: StateFlow<List<FavoriteItemWithInfoUI>> = combine(
         moviesWithReleaseInfo,
         seriesWithUnwatchedEpisodes,
         watchedMoviesWithInfo,
@@ -357,16 +398,11 @@ class HomeViewModel(
             )
         }
 
-        // Ordenamiento personalizado:
-        // 1. Items completados al final (isCompleted = true)
-        // 2. Disponibles para ver (isAvailable = true, isCompleted = false)
-        // 3. Próximamente ordenados por días (menos a más)
-        // 4. Sin fecha o fecha desconocida
-        (movieItems + seriesItems + watchedMovieItems + finishedSeriesItems).sortedWith(
+        // Ordenamiento personalizado con domain models
+        val sortedDomainItems = (movieItems + seriesItems + watchedMovieItems + finishedSeriesItems).sortedWith(
             compareBy<FavoriteItemWithInfo> { it.isCompleted }
-                .thenByDescending { if (!it.isCompleted) it.isAvailable else false }
+                .thenByDescending { item -> if (!item.isCompleted) item.isAvailable else false }
                 .thenBy { item ->
-                    // Si no está disponible y no está completado, ordenar por días
                     if (!item.isCompleted && !item.isAvailable) {
                         item.daysUntilAvailable ?: Int.MAX_VALUE
                     } else {
@@ -374,6 +410,9 @@ class HomeViewModel(
                     }
                 }
         )
+        
+        // Map to UI models
+        sortedDomainItems.map { it.toUI() }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val refreshing = MutableStateFlow(false)
@@ -517,8 +556,29 @@ class HomeViewModel(
         }
     }
 
-    fun toggleFavorite(item: FavoriteItem) {
-        viewModelScope.launch { toggleFavoriteUseCase(item) }
+    fun toggleFavorite(item: FavoriteItemUI) {
+        viewModelScope.launch {
+            try {
+                val domainItem = DomainFavoriteItem(
+                    id = item.id,
+                    type = when(item.type) {
+                        FavoriteTypeUI.MOVIE -> DomainFavoriteType.MOVIE
+                        FavoriteTypeUI.TV_SHOW -> DomainFavoriteType.TV_SHOW
+                        FavoriteTypeUI.GAME -> DomainFavoriteType.GAME
+                        FavoriteTypeUI.BOOK -> DomainFavoriteType.BOOK
+                    },
+                    title = item.title,
+                    posterUrl = item.posterUrl,
+                    addedAt = Instant.fromEpochMilliseconds(item.addedAt)
+                )
+                toggleFavoriteUseCase(domainItem)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Logger.e(tag = "HomeViewModel", message = "Error toggling favorite", throwable = e)
+                error.value = "Failed to toggle favorite: ${e.message}"
+            }
+        }
     }
 
     // clearError removed: UI will reset `error` directly (vm.error.value = null) to avoid unused warnings

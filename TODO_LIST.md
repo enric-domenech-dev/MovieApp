@@ -53,7 +53,9 @@ After completing each task, update:
 ### Phase Status:
 
 - [x] **Phase 0: Quick Wins** (8/8 completed) ✅ **COMPLETE**
-- [ ] **Phase 1: Architecture Fixes** (1/16 completed) - 🎯 **CURRENT** (Task 1.1.5 CRITICAL added)
+- [ ] **Phase 1: Architecture Fixes** (1/17 completed) - 🎯 **CURRENT** 
+  - **Next Task:** 1.1.5.3 - Update HomeViewModel to use UI models
+  - **Blockers:** Need to fix imports in HomeViewModel and update all header components
 - [ ] **Phase 2: Code Quality** (0/12 completed) - Week 2
 - [ ] **Phase 3: Testing - Use Cases** (0/15 completed) - Week 3
 - [ ] **Phase 4: Testing - Repositories** (0/12 completed) - Week 4
@@ -77,6 +79,26 @@ After completing each task, update:
 <!-- Update this after each session -->
 
 - **Session 1** (Dec 6, 2025): Created TODO_LIST.md and AUDIT_REPORT.md
+- **Session 2** (Dec 6, 2025): 
+  - ✅ Completed Phase 0 (8/8 tasks - 100%) 
+  - ✅ Task 0.1: Added Napier logging framework
+  - ✅ Task 0.2: Replaced all println() with Logger (67+ occurrences)
+  - ✅ Task 0.3: Extracted magic numbers to Constants.kt
+  - ✅ Task 0.4: Added error handling to use cases
+  - ✅ Task 0.5: Created base test classes
+  - ✅ Task 0.6: Fixed all fake implementations and tests
+  - ✅ Task 0.7: Setup Kover test coverage
+  - ✅ Task 0.8: Documented testing strategy in TESTING.md
+  - 🚀 Started Phase 1:
+    - ✅ Task 1.1.5.1: Created UI models (MovieUI, TvShowUI, etc.)
+    - ✅ Task 1.1.5.2: Created UI mappers with extension functions
+    - ⏳ Task 1.1.5.3: Started updating HomeViewModel (BLOCKED - imports need fixing)
+  - 📚 Documentation:
+    - ✅ Added critical import rules to COPILOT.md
+    - ✅ Added Clean Architecture flow documentation
+    - ✅ Documented NO qualified names rule
+  - **Time:** ~4 hours
+  - **Next:** Fix HomeViewModel imports, update all header components, continue with 1.1.5.3
 
 ---
 
@@ -391,7 +413,7 @@ After completing each task, update:
 
 **Priority:** P0 - CRITICAL  
 **Goal:** Fix architectural violations, reach 100/100 in Architecture  
-**Estimated Time:** 34-38 hours (added 6h for Task 1.1.5)
+**Estimated Time:** 40-44 hours (added 6h for Task 1.1.5, 6h for Task 1.16)
 
 ## Task 1.1: Create Missing Use Cases for ViewModels
 
@@ -430,6 +452,86 @@ After completing each task, update:
 - ✅ 5 new use cases created
 - ✅ All registered in DI
 - ✅ Each has kdoc documentation
+
+---
+
+## Task 1.1.5: Create UI Models and Mappers (CRITICAL)
+
+**Impact:** CRITICAL | **Effort:** 6 hours | **Owner:** `___________`
+
+**Problem:** UI layer is importing 50+ domain models directly, violating Clean Architecture.
+
+**Files affected:**
+- HomeViewModel.kt (8 domain model imports)
+- HomeView.kt (3 domain model imports)
+- SearchView.kt (2 domain model imports)
+- SeriesDetailView.kt (2 domain model imports)
+- MovieDetailView.kt (1 domain model import)
+- BookDetailView.kt (1 domain model import)
+- DetailView.kt (1 domain model import)
+- All ViewModels using domain models
+
+### Subtasks:
+
+- [x] 1.1.5.1 Create ui/models/ directory structure
+    - File: `ui/models/MovieUI.kt` ✅
+    - File: `ui/models/TvShowUI.kt` ✅
+    - File: `ui/models/BookUI.kt` ✅
+    - File: `ui/models/GameUI.kt` ✅
+    - File: `ui/models/FavoriteItemUI.kt` ✅
+
+- [x] 1.1.5.2 Create ui/mapper/ directory with extension functions
+    - File: `ui/mapper/MovieMapper.kt` ✅
+    - File: `ui/mapper/TvShowMapper.kt` ✅
+    - File: `ui/mapper/BookMapper.kt` ✅
+    - File: `ui/mapper/GameMapper.kt` ✅
+    - File: `ui/mapper/FavoriteMapper.kt` ✅
+
+- [ ] 1.1.5.3 Update HomeViewModel to use UI models
+    - [x] Remove all `import org.lanzadera.proyectos.domain.models.*`
+    - [x] Add UI model imports
+    - [ ] **FIX MISSING IMPORTS** (StateFlow, Flow, ViewModel, etc.)
+    - [ ] Map domain models to UI models in ViewModel
+    - [ ] Update all StateFlows to use UI models
+
+- [ ] 1.1.5.4 Update HomeView.kt to use UI models
+    - [ ] **FIX MISSING IMPORTS** (Modifier, LazyListState, etc.)
+    - [ ] Remove domain model imports
+    - [ ] Change function parameters to use UI models
+    - [ ] Update all header components to use UI models
+
+- [ ] 1.1.5.5 Update SearchView.kt to use UI models
+- [ ] 1.1.5.6 Update Detail screens to use UI models
+- [ ] 1.1.5.7 Update all other ViewModels and Views
+
+- [ ] 1.1.5.8 Verify no UI imports domain.models
+  ```bash
+  grep -r "import org.lanzadera.proyectos.domain.models" \
+    composeApp/src/commonMain/kotlin/org/lanzadera/proyectos/ui/
+  # Should return 0 results
+  ```
+
+- [ ] 1.1.5.9 Verify no UI imports domain.repository
+  ```bash
+  grep -r "import org.lanzadera.proyectos.domain.repository" \
+    composeApp/src/commonMain/kotlin/org/lanzadera/proyectos/ui/
+  # Should return 0 results
+  ```
+
+**Acceptance Criteria:**
+
+- ✅ All UI models created (MovieUI, TvShowUI, BookUI, GameUI, FavoriteItemUI)
+- ✅ All mappers created with extension functions
+- ✅ 0 domain.models imports in ui/ directory
+- ✅ 0 domain.repository imports in ui/ directory
+- ✅ All ViewModels map domain → UI
+- ✅ All Composables use UI models only
+- ✅ App compiles successfully
+- ✅ All screens work correctly
+
+**Current violations:**
+- 50 imports of domain.models in UI layer
+- 7 imports of domain.repository in UI layer
 
 ---
 
@@ -777,6 +879,89 @@ After completing each task, update:
 - ✅ 4 ADRs documented
 - ✅ Architecture diagrams created
 - ✅ Team reviewed
+
+---
+
+## Task 1.16: Refactor Navigation to Type-Safe with IDs
+
+**Impact:** HIGH | **Effort:** 6 hours | **Owner:** `___________`
+
+**Problem:** NavigationStore uses global mutable state with complex objects.
+
+**Current Issues:**
+- Not thread-safe
+- Potential memory leaks
+- Tight coupling
+- Difficult to test
+
+### Subtasks:
+
+- [ ] 1.16.1 Create sealed class for type-safe routes
+  ```kotlin
+  sealed class Screen {
+      @Serializable
+      data class MovieDetail(val movieId: Int) : Screen()
+      
+      @Serializable
+      data class BookDetail(val bookId: String) : Screen()
+      
+      @Serializable
+      data class TvShowDetail(val tvShowId: Int) : Screen()
+      
+      @Serializable
+      data class GameDetail(val gameId: Int) : Screen()
+  }
+  ```
+
+- [ ] 1.16.2 Update Navigation.kt to use type-safe routes
+  ```kotlin
+  composable<Screen.MovieDetail> { backStackEntry ->
+      val args = backStackEntry.toRoute<Screen.MovieDetail>()
+      val viewModel: MovieDetailViewModel = koinViewModel()
+      
+      LaunchedEffect(args.movieId) {
+          viewModel.loadMovie(args.movieId)
+      }
+      
+      val movie by viewModel.movie.collectAsState()
+      MovieDetailView(movie = movie)
+  }
+  ```
+
+- [ ] 1.16.3 Update all ViewModels to load data by ID
+  ```kotlin
+  class MovieDetailViewModel(
+      private val movieId: Int,
+      private val getMovieUseCase: GetMovieDetailsUseCase
+  ) : ViewModel() {
+      val movie: StateFlow<MovieUI?> = getMovieUseCase(movieId)
+          .map { it.toUI() }
+          .stateIn(...)
+  }
+  ```
+
+- [ ] 1.16.4 Update all navigation calls to pass IDs
+  ```kotlin
+  // Old: NavigationStore.selectedMovie = movie
+  //      navController.navigate(Routes.DETAIL)
+  
+  // New: navController.navigate(Screen.MovieDetail(movieId = movie.id))
+  ```
+
+- [ ] 1.16.5 Remove NavigationStore entirely
+- [ ] 1.16.6 Test all navigation flows
+- [ ] 1.16.7 Update COPILOT.md with new navigation pattern
+
+**Acceptance Criteria:**
+
+- ✅ Type-safe navigation with @Serializable routes
+- ✅ All detail screens load data by ID
+- ✅ NavigationStore removed
+- ✅ All navigation flows work correctly
+- ✅ No memory leaks from navigation
+
+**References:**
+- https://developer.android.com/guide/navigation/design/type-safety
 
 ---
 

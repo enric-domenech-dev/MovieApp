@@ -33,13 +33,13 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.delay
-import org.lanzadera.proyectos.domain.models.movie.Movie
+import org.lanzadera.proyectos.ui.models.MovieUI
 import org.lanzadera.proyectos.ui.components.MovieItem
 
 @Composable
 fun SectionDialog(
     title: String,
-    items: List<Movie>,
+    items: List<MovieUI>,
     nav: NavHostController,
     sectionIndex: Int,
     dialogVisible: Boolean,

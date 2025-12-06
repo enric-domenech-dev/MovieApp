@@ -33,13 +33,13 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.delay
-import org.lanzadera.proyectos.domain.models.tvshow.TvShow
+import org.lanzadera.proyectos.ui.models.TvShowUI
 import org.lanzadera.proyectos.ui.components.TvShowItem
 
 @Composable
 fun TvShowSectionDialog(
     title: String,
-    items: List<TvShow>,
+    items: List<TvShowUI>,
     nav: NavHostController,
     sectionIndex: Int,
     dialogVisible: Boolean,

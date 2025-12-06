@@ -17,7 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.lanzadera.proyectos.AppTheme
-import org.lanzadera.proyectos.domain.models.book.Book
+import org.lanzadera.proyectos.ui.models.BookUI
 import org.lanzadera.proyectos.ui.components.BookDetail
 import org.lanzadera.proyectos.ui.components.CustomTopAppBar
 import androidx.navigation.NavHostController
@@ -26,7 +26,7 @@ import androidx.navigation.NavHostController
 @Preview
 fun BookDetailView(
     nav: NavHostController,
-    book: Book,
+    book: BookUI?,
     selectedTheme: AppTheme = AppTheme.SYSTEM,
     darkTheme: Boolean = false
 ) {
@@ -39,7 +39,7 @@ fun BookDetailView(
         },
         topBar = {
             CustomTopAppBar(
-                title = book.title ?: "",
+                title = book?.title ?: "",
                 navigationIcon = {
                     IconButton(onClick = { nav.popBackStack() }) {
                         Icon(

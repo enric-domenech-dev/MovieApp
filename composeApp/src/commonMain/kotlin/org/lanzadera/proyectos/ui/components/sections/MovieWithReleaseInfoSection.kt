@@ -23,14 +23,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import org.lanzadera.proyectos.domain.models.movie.MovieWithReleaseInfo
+import org.lanzadera.proyectos.ui.models.MovieWithReleaseInfoUI
 import org.lanzadera.proyectos.ui.components.MovieHeaderWithReleaseInfo
 import org.lanzadera.proyectos.ui.screens.home.SectionMode
 
 @Composable
 fun MovieWithReleaseInfoSection(
     title: String,
-    items: List<MovieWithReleaseInfo>,
+    items: List<MovieWithReleaseInfoUI>,
     nav: NavHostController,
     sectionIndex: Int = 0,
     mode: SectionMode = SectionMode.HEADER,

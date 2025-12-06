@@ -59,7 +59,8 @@ import org.lanzadera.proyectos.domain.models.tvshow.AggregateCast
 import org.lanzadera.proyectos.domain.models.tvshow.AggregateCrew
 import org.lanzadera.proyectos.domain.models.tvshow.Episode
 import org.lanzadera.proyectos.domain.models.tvshow.Season
-import org.lanzadera.proyectos.domain.models.tvshow.TvShow
+import org.lanzadera.proyectos.ui.models.TvShowUI
+import org.lanzadera.proyectos.ui.models.TvShowWithNextEpisodeUI
 import org.lanzadera.proyectos.navigation.NavigationStore
 import org.lanzadera.proyectos.utils.Constants
 
@@ -130,7 +131,7 @@ fun TvShowItem(
 }
 
 @Composable
-fun TvShowHeader(modifier: Modifier = Modifier, nav: NavHostController, tvShow: TvShow) {
+fun TvShowHeader(modifier: Modifier = Modifier, nav: NavHostController, tvShow: TvShowUI) {
     Column(
         modifier = modifier
             .wrapContentHeight()
@@ -176,7 +177,7 @@ fun TvShowHeader(modifier: Modifier = Modifier, nav: NavHostController, tvShow: 
 }
 
 @Composable
-fun TvShowSubheader(modifier: Modifier = Modifier, nav: NavHostController, tvShow: TvShow, showMeta: Boolean) {
+fun TvShowSubheader(modifier: Modifier = Modifier, nav: NavHostController, tvShow: TvShowUI, showMeta: Boolean) {
     Column(
         modifier = modifier
             .wrapContentHeight()
@@ -1017,7 +1018,7 @@ fun CrewMemberCardModern(crewMember: AggregateCrew) {
 fun TvShowHeaderWithNextEpisode(
     modifier: Modifier = Modifier,
     nav: NavHostController,
-    tvShowWithNext: org.lanzadera.proyectos.domain.models.tvshow.TvShowWithNextEpisode
+    tvShowWithNext: TvShowWithNextEpisodeUI
 ) {
     val tvShow = tvShowWithNext.tvShow
     val nextEpisode = tvShowWithNext.nextEpisode
@@ -1070,7 +1071,7 @@ fun TvShowHeaderWithNextEpisode(
 fun TvShowHeaderFinished(
     modifier: Modifier = Modifier,
     nav: NavHostController,
-    tvShow: TvShow
+    tvShow: TvShowUI
 ) {
     Column(
         modifier = modifier

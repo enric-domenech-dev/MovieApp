@@ -23,14 +23,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import org.lanzadera.proyectos.domain.models.tvshow.TvShowWithNextEpisode
+import org.lanzadera.proyectos.ui.models.TvShowWithNextEpisodeUI
 import org.lanzadera.proyectos.ui.components.TvShowHeaderWithNextEpisode
 import org.lanzadera.proyectos.ui.screens.home.SectionMode
 
 @Composable
 fun TvShowWithNextEpisodeSection(
     title: String,
-    items: List<TvShowWithNextEpisode>,
+    items: List<TvShowWithNextEpisodeUI>,
     nav: NavHostController,
     sectionIndex: Int = 0,
     mode: SectionMode = SectionMode.HEADER,

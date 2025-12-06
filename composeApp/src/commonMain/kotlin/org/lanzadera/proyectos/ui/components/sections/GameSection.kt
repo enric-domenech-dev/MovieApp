@@ -23,7 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import org.lanzadera.proyectos.domain.models.game.Game
+import org.lanzadera.proyectos.ui.models.GameUI
 import org.lanzadera.proyectos.ui.components.GameHeader
 import org.lanzadera.proyectos.ui.components.GameSubheader
 import org.lanzadera.proyectos.ui.screens.home.SectionMode
@@ -31,7 +31,7 @@ import org.lanzadera.proyectos.ui.screens.home.SectionMode
 @Composable
 fun GameSection(
     title: String,
-    items: List<Game>,
+    items: List<GameUI>,
     nav: NavHostController,
     sectionIndex: Int = 0,
     mode: SectionMode = SectionMode.HEADER

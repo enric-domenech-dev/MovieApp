@@ -32,7 +32,7 @@ import coil3.compose.AsyncImage
 import movieapp.composeapp.generated.resources.Res
 import movieapp.composeapp.generated.resources.new_edge_logo
 import org.jetbrains.compose.resources.painterResource
-import org.lanzadera.proyectos.domain.models.book.Book
+import org.lanzadera.proyectos.ui.models.BookUI
 import org.lanzadera.proyectos.utils.Logger
 import org.lanzadera.proyectos.navigation.NavigationStore
 import org.lanzadera.proyectos.utils.Constants
@@ -40,7 +40,7 @@ import org.lanzadera.proyectos.utils.Constants
 @Composable
 fun BookItem(
     nav: NavHostController,
-    book: Book,
+    book: BookUI,
     modifier: Modifier = Modifier.wrapContentHeight(),
     showMeta: Boolean = true
 ) {
@@ -93,7 +93,7 @@ fun BookItem(
 }
 
 @Composable
-fun BookDetail(book: Book?) {
+fun BookDetail(book: BookUI?) {
     if (book == null) return
     Column {
         Column(
@@ -137,7 +137,7 @@ fun BookDetail(book: Book?) {
 }
 
 @Composable
-fun BookHeader(modifier: Modifier = Modifier, nav: NavHostController, book: Book) {
+fun BookHeader(modifier: Modifier = Modifier, nav: NavHostController, book: BookUI) {
     Column(
         modifier = modifier
             .wrapContentHeight()
@@ -182,7 +182,7 @@ fun BookHeader(modifier: Modifier = Modifier, nav: NavHostController, book: Book
 }
 
 @Composable
-fun BookSubheader(modifier: Modifier = Modifier, nav: NavHostController, book: Book, showMeta: Boolean) {
+fun BookSubheader(modifier: Modifier = Modifier, nav: NavHostController, book: BookUI, showMeta: Boolean) {
     Column(
         modifier = modifier
             .wrapContentHeight()

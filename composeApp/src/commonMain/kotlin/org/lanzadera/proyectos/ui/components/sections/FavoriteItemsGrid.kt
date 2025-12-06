@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import org.lanzadera.proyectos.domain.models.favorite.FavoriteItemWithInfo
+import org.lanzadera.proyectos.ui.models.FavoriteItemWithInfoUI
 import org.lanzadera.proyectos.ui.components.MovieHeader
 import org.lanzadera.proyectos.ui.components.MovieHeaderWithReleaseInfo
 import org.lanzadera.proyectos.ui.components.TvShowHeaderFinished
@@ -17,7 +17,7 @@ import org.lanzadera.proyectos.ui.components.TvShowHeaderWithNextEpisode
 
 @Composable
 fun FavoriteItemsGrid(
-    items: List<FavoriteItemWithInfo>,
+    items: List<FavoriteItemWithInfoUI>,
     nav: NavHostController,
     modifier: Modifier = Modifier
 ) {
@@ -38,28 +38,28 @@ fun FavoriteItemsGrid(
             key = { _, item -> item.id }
         ) { _, item ->
             when (item) {
-                is FavoriteItemWithInfo.MovieItem -> {
+                is FavoriteItemWithInfoUI.MovieItem -> {
                     MovieHeaderWithReleaseInfo(
                         nav = nav,
                         movieWithRelease = item.movieWithRelease
                     )
                 }
 
-                is FavoriteItemWithInfo.TvShowItem -> {
+                is FavoriteItemWithInfoUI.TvShowItem -> {
                     TvShowHeaderWithNextEpisode(
                         nav = nav,
                         tvShowWithNext = item.tvShowWithNext
                     )
                 }
 
-                is FavoriteItemWithInfo.WatchedMovieItem -> {
+                is FavoriteItemWithInfoUI.WatchedMovieItem -> {
                     MovieHeader(
                         nav = nav,
                         movie = item.movie
                     )
                 }
 
-                is FavoriteItemWithInfo.FinishedSeriesItem -> {
+                is FavoriteItemWithInfoUI.FinishedSeriesItem -> {
                     TvShowHeaderFinished(
                         nav = nav,
                         tvShow = item.tvShow

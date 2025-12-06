@@ -42,6 +42,7 @@ import org.lanzadera.proyectos.ui.screens.search.SearchViewModel
 import org.lanzadera.proyectos.ui.screens.settings.SettingView
 import org.lanzadera.proyectos.ui.screens.settings.SettingsViewModel
 import org.lanzadera.proyectos.ui.screens.splash.SplashView
+import org.lanzadera.proyectos.ui.mapper.toUI
 import org.lanzadera.proyectos.utils.BottomNavItem
 import org.lanzadera.proyectos.utils.Constants
 

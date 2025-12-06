@@ -27,7 +27,7 @@ import androidx.navigation.NavHostController
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
 import org.lanzadera.proyectos.AppTheme
-import org.lanzadera.proyectos.domain.models.movie.Movie
+import org.lanzadera.proyectos.ui.models.MovieUI
 import org.lanzadera.proyectos.navigation.NavigationStore
 import org.lanzadera.proyectos.ui.components.CustomTopAppBar
 import org.lanzadera.proyectos.ui.components.MovieDetail
@@ -37,7 +37,7 @@ import org.lanzadera.proyectos.utils.Strings
 @Preview
 fun DetailView(
     nav: NavHostController,
-    movie: Movie?,
+    movie: MovieUI?,
     vm: MovieDetailViewModel = koinInject(),
     selectedTheme: AppTheme = AppTheme.SYSTEM,
     darkTheme: Boolean = false

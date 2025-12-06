@@ -26,7 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import org.lanzadera.proyectos.domain.models.book.Book
+import org.lanzadera.proyectos.ui.models.BookUI
 import org.lanzadera.proyectos.ui.components.BookHeader
 import org.lanzadera.proyectos.ui.components.BookSubheader
 import org.lanzadera.proyectos.ui.components.dialogs.BookSectionDialog
@@ -35,7 +35,7 @@ import org.lanzadera.proyectos.ui.screens.home.SectionMode
 @Composable
 fun BookSection(
     title: String,
-    items: List<Book>,
+    items: List<BookUI>,
     nav: NavHostController,
     sectionIndex: Int = 0,
     mode: SectionMode = SectionMode.HEADER

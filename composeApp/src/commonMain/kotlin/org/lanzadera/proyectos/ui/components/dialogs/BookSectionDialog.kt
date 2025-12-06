@@ -33,13 +33,13 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.delay
-import org.lanzadera.proyectos.domain.models.book.Book
+import org.lanzadera.proyectos.ui.models.BookUI
 import org.lanzadera.proyectos.ui.components.BookItem
 
 @Composable
 fun BookSectionDialog(
     title: String,
-    items: List<Book>,
+    items: List<BookUI>,
     nav: NavHostController,
     sectionIndex: Int,
     dialogVisible: Boolean,

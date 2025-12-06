@@ -2,6 +2,33 @@
 
 This file provides guidance to Copilot when working with code in this repository.
 
+---
+
+## 🚀 SESSION INITIALIZATION PROTOCOL
+
+**⚡ ALWAYS START EVERY SESSION WITH THIS COMMAND:**
+
+```bash
+cat COPILOT.md TODO_LIST.md
+```
+
+**Why?** This ensures:
+1. ✅ You read the latest architecture rules and conventions
+2. ✅ You see the current TODO progress and next task
+3. ✅ You understand the project context from the start
+4. ✅ You avoid making mistakes already documented
+
+**📝 User should say at session start:**
+> "Let's continue - initialize session"
+
+**🤖 Copilot will then:**
+1. Read COPILOT.md and TODO_LIST.md
+2. Identify the next uncompleted task
+3. Confirm the task to work on
+4. Proceed with implementation
+
+---
+
 **📚 Required Reading (read these files at session start):**
 
 1. [COPILOT.md](./COPILOT.md) - Architecture, build commands, and project structure
@@ -116,6 +143,32 @@ fun MoviesScreen(movies: List<Movie>) { // ❌ Using domain model in UI
 3. UI should NEVER import domain.models or domain.repository
 4. Create UI models (DTOs) and mappers
 5. Compile after adding imports
+
+### ⚠️ CRITICAL RULE: Never Use Qualified Names in Code
+
+**❌ WRONG - Using qualified names:**
+```kotlin
+val item = org.lanzadera.proyectos.domain.models.FavoriteItem(...)
+val type = org.lanzadera.proyectos.ui.models.FavoriteType.MOVIE
+```
+
+**✅ CORRECT - Import first, then use directly:**
+```kotlin
+import org.lanzadera.proyectos.domain.models.FavoriteItem
+import org.lanzadera.proyectos.ui.models.FavoriteType
+
+val item = FavoriteItem(...)
+val type = FavoriteType.MOVIE
+```
+
+**When class names conflict, use type aliases:**
+```kotlin
+import org.lanzadera.proyectos.domain.models.FavoriteItem as DomainFavoriteItem
+import org.lanzadera.proyectos.ui.models.FavoriteItem as UIFavoriteItem
+
+val domainItem = DomainFavoriteItem(...)
+val uiItem = UIFavoriteItem(...)
+```
 
 ---
 

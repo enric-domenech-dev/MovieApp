@@ -52,7 +52,8 @@ import kotlinx.datetime.LocalDate
 import movieapp.composeapp.generated.resources.Res
 import movieapp.composeapp.generated.resources.new_edge_logo
 import org.jetbrains.compose.resources.painterResource
-import org.lanzadera.proyectos.domain.models.movie.Movie
+import org.lanzadera.proyectos.ui.models.MovieUI
+import org.lanzadera.proyectos.ui.models.MovieWithReleaseInfoUI
 import org.lanzadera.proyectos.navigation.NavigationStore
 import org.lanzadera.proyectos.utils.Constants
 
@@ -117,7 +118,7 @@ fun MovieItem(
 }
 
 @Composable
-fun MovieHeader(modifier: Modifier = Modifier, nav: NavHostController, movie: Movie) {
+fun MovieHeader(modifier: Modifier = Modifier, nav: NavHostController, movie: MovieUI) {
     Column(
         modifier = modifier
             .wrapContentHeight()
@@ -163,7 +164,7 @@ fun MovieHeader(modifier: Modifier = Modifier, nav: NavHostController, movie: Mo
 }
 
 @Composable
-fun MovieSubheader(modifier: Modifier = Modifier, nav: NavHostController, movie: Movie, showMeta: Boolean) {
+fun MovieSubheader(modifier: Modifier = Modifier, nav: NavHostController, movie: MovieUI, showMeta: Boolean) {
     Column(
         modifier = modifier
             .wrapContentHeight()
@@ -982,7 +983,7 @@ fun MovieCreditsTab(movie: Movie?, modifier: Modifier = Modifier) {
 fun MovieHeaderWithReleaseInfo(
     modifier: Modifier = Modifier,
     nav: NavHostController,
-    movieWithRelease: org.lanzadera.proyectos.domain.models.movie.MovieWithReleaseInfo
+    movieWithRelease: MovieWithReleaseInfoUI
 ) {
     val movie = movieWithRelease.movie
     val releaseInfo = movieWithRelease.releaseInfo

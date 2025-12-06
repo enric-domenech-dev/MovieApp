@@ -33,12 +33,12 @@ import coil3.compose.AsyncImage
 import movieapp.composeapp.generated.resources.Res
 import movieapp.composeapp.generated.resources.new_edge_logo
 import org.jetbrains.compose.resources.painterResource
-import org.lanzadera.proyectos.domain.models.game.Game
+import org.lanzadera.proyectos.ui.models.GameUI
 import org.lanzadera.proyectos.navigation.NavigationStore
 import org.lanzadera.proyectos.utils.Constants
 
 @Composable
-fun GameHeader(modifier: Modifier = Modifier, nav: NavHostController, game: Game) {
+fun GameHeader(modifier: Modifier = Modifier, nav: NavHostController, game: GameUI) {
     Column(
         modifier = modifier
             .wrapContentHeight()
@@ -79,7 +79,7 @@ fun GameHeader(modifier: Modifier = Modifier, nav: NavHostController, game: Game
 }
 
 @Composable
-fun GameSubheader(modifier: Modifier = Modifier, nav: NavHostController, game: Game, showMeta: Boolean) {
+fun GameSubheader(modifier: Modifier = Modifier, nav: NavHostController, game: GameUI, showMeta: Boolean) {
     Column(
         modifier = modifier
             .wrapContentHeight()
