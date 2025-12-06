@@ -65,6 +65,7 @@ import org.lanzadera.proyectos.domain.usecase.movies.GetMovieDetailsUseCase
 import org.lanzadera.proyectos.domain.usecase.movies.ObserveWatchedMoviesUseCase
 import org.lanzadera.proyectos.domain.usecase.movies.ToggleMovieWatchedUseCase
 import org.lanzadera.proyectos.domain.usecase.search.SearchMoviesUseCase
+import org.lanzadera.proyectos.domain.usecase.search.SearchTvShowsUseCase
 import org.lanzadera.proyectos.domain.usecase.tvshows.GetTvShowDetailsUseCase
 import org.lanzadera.proyectos.domain.usecase.tvshows.RefreshTvShowsUseCase
 import org.lanzadera.proyectos.ui.screens.detail.MovieDetailViewModel
@@ -241,6 +242,7 @@ val viewModelsModule = module {
     single { RefreshTvShowsUseCase(get()) }
     single { GetTvShowDetailsUseCase(get()) }
     single { SearchMoviesUseCase(get()) }
+    single { SearchTvShowsUseCase(get()) }
     single { RefreshGamesUseCase(get()) }
     single { GetGameDetailsUseCase(get()) }
     single { ObserveFavoritesUseCase(get()) }
@@ -273,7 +275,7 @@ val viewModelsModule = module {
     viewModel { HomeViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     viewModel { SeriesDetailViewModel(get(), get(), get(), get(), get()) }
     viewModel { MovieDetailViewModel(get(), get(), get(), get(), get()) }
-    viewModel { SearchViewModel(get()) }
+    viewModel { SearchViewModel(get(), get()) }
     viewModel { GameDetailViewModel(get()) }
 }
 

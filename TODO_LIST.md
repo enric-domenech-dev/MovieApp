@@ -48,14 +48,14 @@ After completing each task, update:
 
 ## 📊 PROGRESS TRACKING
 
-### Overall Progress: 12/136 tasks completed (8.82%)
+### Overall Progress: 13/136 tasks completed (9.56%)
 
 ### Phase Status:
 
 - [x] **Phase 0: Quick Wins** (8/8 completed) ✅ **COMPLETE**
-- [ ] **Phase 1: Architecture Fixes** (4/17 completed) - 🎯 **CURRENT** 
-  - **Next Task:** 1.4 - Refactor SearchViewModel
-  - **Recent:** ✅ Task 1.3 COMPLETE - MovieDetailViewModel uses only use cases
+- [ ] **Phase 1: Architecture Fixes** (5/17 completed) - 🎯 **CURRENT** 
+  - **Next Task:** 1.5 - Split HomeViewModel - Phase 1 (Analysis & Design)
+  - **Recent:** ✅ Task 1.4 COMPLETE - SearchViewModel uses only use cases
 - [ ] **Phase 2: Code Quality** (0/12 completed) - Week 2
 - [ ] **Phase 3: Testing - Use Cases** (0/15 completed) - Week 3
 - [ ] **Phase 4: Testing - Repositories** (0/12 completed) - Week 4
@@ -67,8 +67,8 @@ After completing each task, update:
 ### Current Sprint:
 
 **Active Phase:** Phase 1 - Architecture Fixes  
-**Next Task:** Task 1.4 - Refactor SearchViewModel  
-**Estimated Time Remaining in Phase:** ~31-34 hours
+**Next Task:** Task 1.5 - Split HomeViewModel - Phase 1 (Analysis & Design)  
+**Estimated Time Remaining in Phase:** ~28-31 hours
 
 ---
 
@@ -669,21 +669,25 @@ After completing each task, update:
 
 ---
 
-## Task 1.4: Refactor SearchViewModel
+## [x] Task 1.4: Refactor SearchViewModel ✅
 
-**Impact:** MEDIUM | **Effort:** 1.5 hours | **Owner:** `___________`
+**Impact:** MEDIUM | **Effort:** 1.5 hours | **Status:** ✅ COMPLETE
 
 ### Subtasks:
 
-- [ ] 1.4.1 Replace `searchRepository` with use cases
-- [ ] 1.4.2 Create `SearchMoviesUseCase`, `SearchTvShowsUseCase` if needed
-- [ ] 1.4.3 Update search logic
-- [ ] 1.4.4 Test search functionality
+- [x] 1.4.1 Create `SearchTvShowsUseCase` with Result type
+- [x] 1.4.2 Update `SearchMoviesUseCase` to use Result type
+- [x] 1.4.3 Replace `searchRepository` with use cases in SearchViewModel
+- [x] 1.4.4 Update search logic to handle Result types
+- [x] 1.4.5 Register SearchTvShowsUseCase in DI
+- [x] 1.4.6 Test search functionality
 
 **Acceptance Criteria:**
 
 - ✅ SearchViewModel only injects use cases
 - ✅ Search works for all content types
+- ✅ Proper Result type error handling
+- ✅ Build successful
 
 ---
 

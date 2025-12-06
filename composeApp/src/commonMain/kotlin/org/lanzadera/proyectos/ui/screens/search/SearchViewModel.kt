@@ -6,10 +6,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import org.lanzadera.proyectos.domain.repository.SearchRepository
+import org.lanzadera.proyectos.domain.models.Result
+import org.lanzadera.proyectos.domain.usecase.search.SearchMoviesUseCase
+import org.lanzadera.proyectos.domain.usecase.search.SearchTvShowsUseCase
 
 class SearchViewModel(
-    private val searchRepository: SearchRepository
+    private val searchMoviesUseCase: SearchMoviesUseCase,
+    private val searchTvShowsUseCase: SearchTvShowsUseCase
 ) : ViewModel() {
 
     private val _query = MutableStateFlow("")
@@ -39,34 +42,51 @@ class SearchViewModel(
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
-            try {
-                // Buscar películas y series en paralelo
-                val movies = searchRepository.searchMovies(currentQuery)
-                val tvShows = searchRepository.searchTvShows(currentQuery)
-
-                // Combinar resultados alternando películas y series
-                val combinedResults = mutableListOf<Any>()
-                val maxSize = maxOf(movies.size, tvShows.size)
-
-                for (i in 0 until maxSize) {
-                    if (i < movies.size) {
-                        combinedResults.add(movies[i])
-                    }
-                    if (i < tvShows.size) {
-                        combinedResults.add(tvShows[i])
-                    }
-                }
-
-                _results.value = combinedResults
-
-                if (combinedResults.isEmpty()) {
-                    _error.value = "No se encontraron resultados para '$currentQuery'"
-                }
-            } catch (e: Exception) {
-                _error.value = "Error al buscar: ${e.message}"
-            } finally {
+            
+            // Search movies and TV shows using use cases
+            val moviesResult = searchMoviesUseCase(currentQuery)
+            val tvShowsResult = searchTvShowsUseCase(currentQuery)
+            
+            // Check if either search failed
+            if (moviesResult is Result.Error && tvShowsResult is Result.Error) {
+                _error.value = "Error al buscar: ${moviesResult.message}"
                 _isLoading.value = false
+                return@launch
             }
+            
+            // Extract data from results
+            val movies = when (moviesResult) {
+                is Result.Success -> moviesResult.data
+                is Result.Error -> emptyList()
+                is Result.Loading -> emptyList()
+            }
+            
+            val tvShows = when (tvShowsResult) {
+                is Result.Success -> tvShowsResult.data
+                is Result.Error -> emptyList()
+                is Result.Loading -> emptyList()
+            }
+
+            // Combine results alternating movies and TV shows
+            val combinedResults = mutableListOf<Any>()
+            val maxSize = maxOf(movies.size, tvShows.size)
+
+            for (i in 0 until maxSize) {
+                if (i < movies.size) {
+                    combinedResults.add(movies[i])
+                }
+                if (i < tvShows.size) {
+                    combinedResults.add(tvShows[i])
+                }
+            }
+
+            _results.value = combinedResults
+
+            if (combinedResults.isEmpty()) {
+                _error.value = "No se encontraron resultados para '$currentQuery'"
+            }
+            
+            _isLoading.value = false
         }
     }
 
