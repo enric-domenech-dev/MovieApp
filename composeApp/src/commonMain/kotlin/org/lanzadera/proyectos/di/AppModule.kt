@@ -72,6 +72,11 @@ import org.lanzadera.proyectos.ui.screens.detail.MovieDetailViewModel
 import org.lanzadera.proyectos.ui.screens.detail.SeriesDetailViewModel
 import org.lanzadera.proyectos.ui.screens.games.GameDetailViewModel
 import org.lanzadera.proyectos.ui.screens.home.HomeViewModel
+import org.lanzadera.proyectos.ui.screens.home.tabs.BooksTabViewModel
+import org.lanzadera.proyectos.ui.screens.home.tabs.FavoritesTabViewModel
+import org.lanzadera.proyectos.ui.screens.home.tabs.FilmsTabViewModel
+import org.lanzadera.proyectos.ui.screens.home.tabs.GamesTabViewModel
+import org.lanzadera.proyectos.ui.screens.home.tabs.SeriesTabViewModel
 import org.lanzadera.proyectos.ui.screens.search.SearchViewModel
 import org.lanzadera.proyectos.ui.screens.splash.SplashViewModel
 
@@ -272,7 +277,18 @@ val viewModelsModule = module {
 
     // ViewModels
     viewModel { SplashViewModel(get()) }
-    viewModel { HomeViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    
+    // Home - Simplified coordinator
+    viewModel { HomeViewModel() }
+    
+    // Home Tabs - Each tab has its own ViewModel
+    viewModel { FavoritesTabViewModel(get(), get(), get(), get(), get()) }
+    viewModel { BooksTabViewModel(getOrNull()) }
+    viewModel { FilmsTabViewModel(get()) }
+    viewModel { SeriesTabViewModel(getOrNull()) }
+    viewModel { GamesTabViewModel(getOrNull()) }
+    
+    // Other screens
     viewModel { SeriesDetailViewModel(get(), get(), get(), get(), get()) }
     viewModel { MovieDetailViewModel(get(), get(), get(), get(), get()) }
     viewModel { SearchViewModel(get(), get()) }
