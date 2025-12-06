@@ -67,10 +67,10 @@ After completing each task, update:
 ### Current Sprint:
 
 **Active Phase:** Phase 1 - Architecture Fixes  
-**Current Task:** Task 1.6 - Split HomeViewModel (75% complete - Phase 1-3 done)  
-**Status:** 🔄 Phases 1-3 complete, Phase 4-6 pending  
-**Estimated Time Remaining in Task:** ~3-4 hours  
-**Estimated Time Remaining in Phase:** ~22-25 hours
+**Current Task:** Task 1.6 - Split HomeViewModel (85% complete - Phase 1-4 done)  
+**Status:** 🔄 Phases 1-4 complete, Phase 5-6 pending  
+**Estimated Time Remaining in Task:** ~2-2.5 hours  
+**Estimated Time Remaining in Phase:** ~20-22 hours
 
 ---
 
@@ -207,7 +207,7 @@ After completing each task, update:
    - **Time:** ~3 hours
    - **Next:** Task 1.6 - Implementation
 - **Session 8** (Dec 6, 2025):
-   - 🔄 **Task 1.6: 75% COMPLETE** - Phases 1-3 done
+   - 🔄 **Task 1.6: 85% COMPLETE** - Phases 1-4 done (11/21 subtasks)
    - ✅ **Phase 1: Created 5 Tab ViewModels** (4h):
      - FavoritesTabViewModel (318 lines, 5 deps, 8 flows)
      - BooksTabViewModel (156 lines, 1 dep, 9 flows)
@@ -221,19 +221,27 @@ After completing each task, update:
    - ✅ **Phase 3: Updated DI** (15min):
      - Registered all 6 ViewModels in AppModule.kt
      - Added imports (no qualified names)
+   - ✅ **Phase 4: Update HomeView** (1.5h):
+     - Updated HomeView to inject 6 ViewModels (homeVM + 5 tab VMs)
+     - Created 5 tab-specific composables (FavoritesTabContent, BooksTabContent, etc.)
+     - Implemented when() switch for tab navigation
+     - Fixed duplicate function declarations
+     - Fixed property names: refreshing → isRefreshing
+     - BUILD SUCCESSFUL ✅
    - 📊 **Metrics**:
      - Lines per file: ⬇️ 90%
      - StateFlows on startup: 60+ → 1 (⬇️ 98%)
      - Testability: ⬇️ 80% complexity
+     - HomeView.kt: 503 → 553 lines (organized with helper composables)
    - ⏳ **Remaining**:
-     - Phase 4: Update HomeView (1-2h)
      - Phase 5: Write tests (1.5h)
      - Phase 6: Docs (30min)
    - 📦 **Files**:
      - Created: 5 tab ViewModels
-     - Updated: HomeViewModel.kt, AppModule.kt
-   - **Time:** ~3 hours
-   - **Next:** Phase 4 - Update HomeView
+     - Updated: HomeViewModel.kt, AppModule.kt, HomeView.kt
+     - Removed: *.backup files
+   - **Time:** ~4.5 hours
+   - **Next:** Phase 5 - Write tests for ViewModels
 
 ---
 
@@ -822,23 +830,26 @@ After completing each task, update:
     - ✅ Registered all 5 tab ViewModels
     - ✅ Used getOrNull() for optional dependencies
 
-#### Phase 4: Update HomeView (1-2 hours) 🔄 IN PROGRESS
+#### Phase 4: Update HomeView (1-2 hours) ✅ COMPLETE
 
-- [ ] 1.6.8 Update `HomeView.kt` to inject all ViewModels
-    - [ ] Add 6 ViewModel parameters (homeVM + 5 tab VMs)
-    - [ ] Use koinViewModel() for each
+- [x] 1.6.8 Update `HomeView.kt` to inject all ViewModels
+    - [x] Add 6 ViewModel parameters (homeVM + 5 tab VMs)
+    - [x] Use koinViewModel() for each with default parameters
     
-- [ ] 1.6.9 Extract tab-specific composables
-    - [ ] FavoritesTabContent(favoritesVM)
-    - [ ] BooksTabContent(booksVM)
-    - [ ] FilmsTabContent(filmsVM)
-    - [ ] SeriesTabContent(seriesVM)
-    - [ ] GamesTabContent(gamesVM)
+- [x] 1.6.9 Extract tab-specific composables
+    - [x] FavoritesTabContent(favoritesVM)
+    - [x] BooksTabContent(booksVM)
+    - [x] FilmsTabContent(filmsVM)
+    - [x] SeriesTabContent(seriesVM)
+    - [x] GamesTabContent(gamesVM)
     
-- [ ] 1.6.10 Use when() to switch between tabs
-    - [ ] Render correct tab based on selectedTab
+- [x] 1.6.10 Use when() to switch between tabs
+    - [x] Render correct tab based on selectedTab
     
-- [ ] 1.6.11 Fix all compilation errors (~30 errors)
+- [x] 1.6.11 Fix all compilation errors
+    - [x] Fixed duplicate function declarations
+    - [x] Fixed refreshing → isRefreshing property names
+    - [x] BUILD SUCCESSFUL ✅
 
 #### Phase 5: Testing (1.5 hours) ⏳ TODO
 
@@ -856,8 +867,8 @@ After completing each task, update:
 - [ ] 1.6.20 Verify all tabs work correctly
 - [ ] 1.6.21 Final build and test
 
-**Progress:** 7/21 subtasks complete (33%)  
-**Estimated Remaining:** ~3-4 hours
+**Progress:** 11/21 subtasks complete (52%)  
+**Estimated Remaining:** ~2-2.5 hours
 
 **Acceptance Criteria:**
 
