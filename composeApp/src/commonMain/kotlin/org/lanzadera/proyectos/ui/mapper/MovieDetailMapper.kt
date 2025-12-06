@@ -1,6 +1,9 @@
 package org.lanzadera.proyectos.ui.mapper
 
 import org.lanzadera.proyectos.domain.models.movie.*
+import org.lanzadera.proyectos.domain.models.tvshow.AggregateCredits
+import org.lanzadera.proyectos.domain.models.tvshow.AggregateCast
+import org.lanzadera.proyectos.domain.models.tvshow.AggregateCrew
 import org.lanzadera.proyectos.ui.models.*
 
 /**
@@ -14,7 +17,7 @@ fun Movie.toDetailUI(): MovieDetailUI = MovieDetailUI(
     posterPath = posterPath,
     backdropPath = backdropPath,
     releaseDate = releaseDate,
-    voteAverage = voteAverage?.let { "%.1f".format(it) } ?: "0.0",
+    voteAverage = voteAverage,
     voteCount = voteCount,
     popularity = popularity,
     runtime = runtime,
@@ -37,64 +40,11 @@ fun Movie.toDetailUI(): MovieDetailUI = MovieDetailUI(
         ) 
     },
     productionCountries = productionCountries?.map { 
-        ProductionCountryUI(iso = it.iso31661 ?: "", name = it.name ?: "") 
+        ProductionCountryUI(iso = it.isoCode ?: "", name = it.name ?: "") 
     },
     spokenLanguages = spokenLanguages?.map { 
-        SpokenLanguageUI(iso = it.iso6391 ?: "", name = it.name ?: "", englishName = it.englishName) 
+        SpokenLanguageUI(iso = it.isoCode ?: "", name = it.name ?: "", englishName = it.englishName) 
     },
-    credits = credits?.let { 
-        CreditsUI(
-            cast = it.cast?.map { c -> 
-                CastUI(
-                    id = c.id ?: 0, 
-                    name = c.name ?: "", 
-                    character = c.character, 
-                    profilePath = c.profilePath, 
-                    order = c.order
-                ) 
-            },
-            crew = it.crew?.map { c -> 
-                CrewUI(
-                    id = c.id ?: 0, 
-                    name = c.name ?: "", 
-                    job = c.job, 
-                    department = c.department, 
-                    profilePath = c.profilePath
-                ) 
-            }
-        ) 
-    },
-    videos = videos?.let { 
-        VideosUI(
-            results = it.results?.map { v -> 
-                VideoUI(
-                    id = v.id ?: "", 
-                    key = v.key ?: "", 
-                    name = v.name ?: "", 
-                    site = v.site ?: "", 
-                    type = v.type ?: "", 
-                    official = v.official
-                ) 
-            }
-        ) 
-    },
-    images = images?.let { 
-        ImagesUI(
-            backdrops = it.backdrops?.map { img -> 
-                ImageUI(filePath = img.filePath ?: "", width = img.width, height = img.height) 
-            },
-            posters = it.posters?.map { img -> 
-                ImageUI(filePath = img.filePath ?: "", width = img.width, height = img.height) 
-            }
-        ) 
-    },
-    keywords = keywords?.let { 
-        KeywordsUI(
-            keywords = it.keywords?.map { k -> KeywordUI(id = k.id ?: 0, name = k.name ?: "") }
-        ) 
-    },
-    recommendations = recommendations?.map { it.toUI() },
-    similar = similar?.map { it.toUI() },
     belongsToCollection = belongsToCollection?.let { 
         CollectionUI(
             id = it.id ?: 0, 
@@ -102,5 +52,36 @@ fun Movie.toDetailUI(): MovieDetailUI = MovieDetailUI(
             posterPath = it.posterPath, 
             backdropPath = it.backdropPath
         ) 
+    },
+    aggregateCredits = aggregateCredits?.let {
+        AggregateCreditsUI(
+            cast = it.cast?.map { cast ->
+                AggregateCastUI(
+                    id = cast.id ?: 0,
+                    name = cast.name ?: "",
+                    profilePath = cast.profilePath,
+                    roles = cast.roles?.map { role ->
+                        CastRoleUI(
+                            character = role.character ?: "",
+                            episodeCount = role.episodeCount
+                        )
+                    },
+                    order = cast.order
+                )
+            },
+            crew = it.crew?.map { crew ->
+                AggregateCrewUI(
+                    id = crew.id ?: 0,
+                    name = crew.name ?: "",
+                    profilePath = crew.profilePath,
+                    jobs = crew.jobs?.map { job ->
+                        CrewJobUI(
+                            job = job.job ?: "",
+                            episodeCount = job.episodeCount
+                        )
+                    }
+                )
+            }
+        )
     }
 )

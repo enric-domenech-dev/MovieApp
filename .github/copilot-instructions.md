@@ -18,7 +18,7 @@ This is a **Kotlin Multiplatform Compose** application.
 
 ### At Session Start:
 
-1. Read TODO_LIST.md to see current progress
+1. Read COPILOT.md and TODO_LIST.md to see current progress
 2. Find the next uncompleted `[ ]` task in the active phase
 3. Review the task's context in AUDIT_REPORT.md if needed
 4. Check COPILOT.md for architecture patterns

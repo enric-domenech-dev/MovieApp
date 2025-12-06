@@ -55,6 +55,8 @@ import org.jetbrains.compose.resources.painterResource
 import org.lanzadera.proyectos.ui.models.MovieUI
 import org.lanzadera.proyectos.ui.models.MovieWithReleaseInfoUI
 import org.lanzadera.proyectos.ui.models.MovieDetailUI
+import org.lanzadera.proyectos.ui.models.AggregateCastUI
+import org.lanzadera.proyectos.ui.models.AggregateCrewUI
 import org.lanzadera.proyectos.navigation.NavigationStore
 import org.lanzadera.proyectos.utils.Constants
 
@@ -539,8 +541,8 @@ fun MovieDetail(movie: MovieDetailUI?, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun CircularAvgVotes(movie: Movie) {
-    val votePercentage = (movie.voteAverage.toDouble() * 10).toInt()
+fun CircularAvgVotes(movie: MovieDetailUI) {
+    val votePercentage = movie.voteAverage.toDoubleOrNull()?.let { (it * 10).toInt() } ?: 0
     if (votePercentage == 0) return
     val borderColor = when {
         votePercentage < 40 -> Color.Red
@@ -565,7 +567,7 @@ fun CircularAvgVotes(movie: Movie) {
 }
 
 @Composable
-fun MovieCastMemberCard(actor: org.lanzadera.proyectos.domain.models.tvshow.AggregateCast) {
+fun MovieCastMemberCard(actor: AggregateCastUI) {
     Column(
         modifier = Modifier
             .width(120.dp)
@@ -602,7 +604,7 @@ fun MovieCastMemberCard(actor: org.lanzadera.proyectos.domain.models.tvshow.Aggr
 
         // Nombre del actor
         Text(
-            text = actor.name ?: "Unknown",
+            text = actor.name,
             fontSize = 12.sp,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface,
@@ -629,7 +631,7 @@ fun MovieCastMemberCard(actor: org.lanzadera.proyectos.domain.models.tvshow.Aggr
 }
 
 @Composable
-fun MovieCrewMemberCard(crewMember: org.lanzadera.proyectos.domain.models.tvshow.AggregateCrew) {
+fun MovieCrewMemberCard(crewMember: AggregateCrewUI) {
     Column(
         modifier = Modifier
             .width(120.dp)
@@ -666,7 +668,7 @@ fun MovieCrewMemberCard(crewMember: org.lanzadera.proyectos.domain.models.tvshow
 
         // Nombre
         Text(
-            text = crewMember.name ?: "Unknown",
+            text = crewMember.name,
             fontSize = 12.sp,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface,
@@ -693,7 +695,7 @@ fun MovieCrewMemberCard(crewMember: org.lanzadera.proyectos.domain.models.tvshow
 }
 
 @Composable
-fun MovieInfoTabContent(movie: Movie?, modifier: Modifier = Modifier) {
+fun MovieInfoTabContent(movie: MovieDetailUI?, modifier: Modifier = Modifier) {
     if (movie == null) return
 
     LazyColumn(
@@ -706,14 +708,12 @@ fun MovieInfoTabContent(movie: Movie?, modifier: Modifier = Modifier) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Title
-                movie.title?.let {
-                    Text(
-                        text = it,
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                Text(
+                    text = movie.title,
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Bold
+                )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -907,7 +907,7 @@ fun MovieInfoTabContent(movie: Movie?, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun MovieCreditsTab(movie: Movie?, modifier: Modifier = Modifier) {
+fun MovieCreditsTab(movie: MovieDetailUI?, modifier: Modifier = Modifier) {
     if (movie == null) return
 
     LazyColumn(

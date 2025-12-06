@@ -96,7 +96,7 @@ class MovieDetailViewModel(
     }
 
     fun toggleWatched() {
-        val movieId = _movieDetail.value?.id?.toString() ?: return
+        val movieId = movieDetail.value?.id?.toString() ?: return
         val currentWatched = isWatched.value
         val movieIsReleased = isReleased.value
 

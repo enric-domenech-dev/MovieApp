@@ -22,8 +22,8 @@ data class MovieDetailUI(
     val runtime: Int?,
     val status: String?,
     val tagline: String?,
-    val budget: Long?,
-    val revenue: Long?,
+    val budget: Int?,
+    val revenue: Int?,
     val homepage: String?,
     val imdbId: String?,
     val originalLanguage: String?,
@@ -35,13 +35,8 @@ data class MovieDetailUI(
     val productionCompanies: List<ProductionCompanyUI>?,
     val productionCountries: List<ProductionCountryUI>?,
     val spokenLanguages: List<SpokenLanguageUI>?,
-    val credits: CreditsUI?,
-    val videos: VideosUI?,
-    val images: ImagesUI?,
-    val keywords: KeywordsUI?,
-    val recommendations: List<MovieUI>?,
-    val similar: List<MovieUI>?,
-    val belongsToCollection: CollectionUI?
+    val belongsToCollection: CollectionUI?,
+    val aggregateCredits: AggregateCreditsUI?
 ) {
     val posterUrl: String
         get() = posterPath?.let { "https://image.tmdb.org/t/p/w500$it" } ?: ""
@@ -63,10 +58,10 @@ data class MovieDetailUI(
         } ?: "Desconocido"
     
     val budgetFormatted: String
-        get() = budget?.let { formatMoney(it) } ?: "N/A"
+        get() = budget?.let { formatMoney(it.toLong()) } ?: "N/A"
     
     val revenueFormatted: String
-        get() = revenue?.let { formatMoney(it) } ?: "N/A"
+        get() = revenue?.let { formatMoney(it.toLong()) } ?: "N/A"
     
     val genresText: String
         get() = genres?.joinToString(", ") { it.name } ?: ""
@@ -204,4 +199,40 @@ data class CollectionUI(
     val name: String,
     val posterPath: String?,
     val backdropPath: String?
+)
+
+/**
+ * UI model for Aggregate Credits (used in TV shows and movies)
+ */
+data class AggregateCreditsUI(
+    val cast: List<AggregateCastUI>?,
+    val crew: List<AggregateCrewUI>?
+)
+
+data class AggregateCastUI(
+    val id: Int,
+    val name: String,
+    val profilePath: String?,
+    val roles: List<CastRoleUI>?,
+    val order: Int?
+) {
+    val profileUrl: String
+        get() = profilePath?.let { "https://image.tmdb.org/t/p/w185$it" } ?: ""
+}
+
+data class AggregateCrewUI(
+    val id: Int,
+    val name: String,
+    val profilePath: String?,
+    val jobs: List<CrewJobUI>?
+)
+
+data class CastRoleUI(
+    val character: String,
+    val episodeCount: Int?
+)
+
+data class CrewJobUI(
+    val job: String,
+    val episodeCount: Int?
 )
