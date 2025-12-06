@@ -78,11 +78,49 @@ composeApp/src/
 
 Credentials stored in `local.properties` (not in VCS):
 
+Credentials stored in `local.properties` (not in VCS):
 ```properties
 API_BEARER_TOKEN=your_tmdb_token
 IGDB_CLIENT_ID=your_client_id
 IGDB_CLIENT_SECRET=your_secret
 ```
+
+## Logging
+
+The project uses **Napier** for multiplatform logging.
+
+**DO NOT use `println()` in production code.**
+
+### Usage:
+
+```kotlin
+import org.lanzadera.proyectos.utils.Logger
+
+// Debug logs (development only)
+Logger.d("Fetching movies from API", tag = "MovieRepository")
+
+// Info logs
+Logger.i("Cache hit for movie list", tag = "MovieRepository")
+
+// Warning logs
+Logger.w("API rate limit approaching", tag = "MovieRepository")
+
+// Error logs with exception
+Logger.e("Failed to fetch movies", tag = "MovieRepository", throwable = exception)
+```
+
+### Log Levels:
+- `Logger.v()` - Verbose (lowest priority)
+- `Logger.d()` - Debug (for development)
+- `Logger.i()` - Info (general information)
+- `Logger.w()` - Warning (potential issues)
+- `Logger.e()` - Error (actual errors)
+
+### Platform Behavior:
+- **Android**: Uses `android.util.Log`
+- **iOS**: Uses `NSLog`
+- **Desktop**: Uses formatted console output
+- **Release builds**: Logs can be disabled via Napier configuration
 
 ## Testing
 

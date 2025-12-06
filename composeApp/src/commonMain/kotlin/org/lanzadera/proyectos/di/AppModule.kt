@@ -1,5 +1,7 @@
 package org.lanzadera.proyectos.di
 
+import io.github.aakira.napier.DebugAntilog
+import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.api.createClientPlugin
@@ -255,6 +257,9 @@ val viewModelsModule = module {
 val nativeModule: Module = module {}
 
 fun initKoin(config: KoinAppDeclaration? = null) {
+    // Initialize Napier logging
+    Napier.base(DebugAntilog())
+    
     startKoin {
         config?.invoke(this)
         modules(appModule, dataModule, viewModelsModule, nativeModule)

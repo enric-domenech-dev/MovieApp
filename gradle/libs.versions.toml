@@ -32,6 +32,7 @@ slf4jSimpleVersion = "2.0.13"
 truthVersion = "1.4.4"
 turbineVersion = "1.1.0"
 realm = "1.16.0"
+napier = "2.7.1"
 
 [libraries]
 coil = { module = "io.coil-kt.coil3:coil", version.ref = "coilComposeCore" }
@@ -79,6 +80,7 @@ slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4jSimpleVe
 truth = { module = "com.google.truth:truth", version.ref = "truthVersion" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbineVersion" }
 realm-library-base = { module = "io.realm.kotlin:library-base", version.ref = "realm" }
+napier = { module = "io.github.aakira:napier", version.ref = "napier" }
 
 [bundles]
 ktor-common = ["ktor-client-core", "ktor-client-json", "ktor-client-logging", "ktor-client-serialization", "ktor-client-content-negotiation", "ktor-serialization-kotlinx-json"]

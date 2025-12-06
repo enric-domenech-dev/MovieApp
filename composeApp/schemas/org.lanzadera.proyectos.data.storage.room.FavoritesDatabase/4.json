@@ -1,0 +1,345 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 4,
+    "identityHash": "65e7e6f79c215656dfe925fd4fef0c93",
+    "entities": [
+      {
+        "tableName": "favorites",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`key` TEXT NOT NULL, `id` TEXT NOT NULL, `type` TEXT NOT NULL, `title` TEXT NOT NULL, `posterUrl` TEXT, `overview` TEXT, `addedAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL, PRIMARY KEY(`key`))",
+        "fields": [
+          {
+            "fieldPath": "key",
+            "columnName": "key",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "posterUrl",
+            "columnName": "posterUrl",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "overview",
+            "columnName": "overview",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "addedAt",
+            "columnName": "addedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "key"
+          ]
+        }
+      },
+      {
+        "tableName": "watched_episodes",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `tvShowId` TEXT NOT NULL, `seasonNumber` INTEGER NOT NULL, `episodeNumber` INTEGER NOT NULL, `watchedAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tvShowId",
+            "columnName": "tvShowId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "seasonNumber",
+            "columnName": "seasonNumber",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "episodeNumber",
+            "columnName": "episodeNumber",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "watchedAt",
+            "columnName": "watchedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "watched_movies",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `movieId` TEXT NOT NULL, `watchedAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "movieId",
+            "columnName": "movieId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "watchedAt",
+            "columnName": "watchedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "favorite_tv_shows",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `originalName` TEXT, `overview` TEXT, `posterPath` TEXT, `backdropPath` TEXT, `firstAirDate` TEXT, `lastAirDate` TEXT, `numberOfSeasons` INTEGER, `numberOfEpisodes` INTEGER, `status` TEXT, `inProduction` INTEGER, `voteAverage` REAL, `voteCount` INTEGER, `popularity` REAL, `addedAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL, `seasonsJson` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "originalName",
+            "columnName": "originalName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "overview",
+            "columnName": "overview",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "posterPath",
+            "columnName": "posterPath",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "backdropPath",
+            "columnName": "backdropPath",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "firstAirDate",
+            "columnName": "firstAirDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastAirDate",
+            "columnName": "lastAirDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "numberOfSeasons",
+            "columnName": "numberOfSeasons",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "numberOfEpisodes",
+            "columnName": "numberOfEpisodes",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "inProduction",
+            "columnName": "inProduction",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "voteAverage",
+            "columnName": "voteAverage",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "voteCount",
+            "columnName": "voteCount",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "popularity",
+            "columnName": "popularity",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "addedAt",
+            "columnName": "addedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "seasonsJson",
+            "columnName": "seasonsJson",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "favorite_movies",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `originalTitle` TEXT, `overview` TEXT, `posterPath` TEXT, `backdropPath` TEXT, `releaseDate` TEXT, `runtime` INTEGER, `status` TEXT, `voteAverage` REAL, `voteCount` INTEGER, `popularity` REAL, `budget` INTEGER, `revenue` INTEGER, `addedAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "originalTitle",
+            "columnName": "originalTitle",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "overview",
+            "columnName": "overview",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "posterPath",
+            "columnName": "posterPath",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "backdropPath",
+            "columnName": "backdropPath",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "releaseDate",
+            "columnName": "releaseDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "runtime",
+            "columnName": "runtime",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "voteAverage",
+            "columnName": "voteAverage",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "voteCount",
+            "columnName": "voteCount",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "popularity",
+            "columnName": "popularity",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "budget",
+            "columnName": "budget",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "revenue",
+            "columnName": "revenue",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "addedAt",
+            "columnName": "addedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '65e7e6f79c215656dfe925fd4fef0c93')"
+    ]
+  }
+}

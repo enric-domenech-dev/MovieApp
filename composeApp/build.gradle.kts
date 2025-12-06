@@ -81,6 +81,9 @@ kotlin {
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
 
+            // Logging
+            implementation(libs.napier)
+
             implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.bundles.ktor.common)
