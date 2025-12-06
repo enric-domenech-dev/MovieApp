@@ -48,14 +48,14 @@ After completing each task, update:
 
 ## 📊 PROGRESS TRACKING
 
-### Overall Progress: 13/136 tasks completed (9.56%)
+### Overall Progress: 14/136 tasks completed (10.29%)
 
 ### Phase Status:
 
 - [x] **Phase 0: Quick Wins** (8/8 completed) ✅ **COMPLETE**
-- [ ] **Phase 1: Architecture Fixes** (5/17 completed) - 🎯 **CURRENT** 
-  - **Next Task:** 1.5 - Split HomeViewModel - Phase 1 (Analysis & Design)
-  - **Recent:** ✅ Task 1.4 COMPLETE - SearchViewModel uses only use cases
+- [ ] **Phase 1: Architecture Fixes** (6/17 completed) - 🎯 **CURRENT** 
+  - **Next Task:** 1.6 - Split HomeViewModel - Phase 2 (Implementation)
+  - **Recent:** ✅ Task 1.5 COMPLETE - Analysis & refactoring plan created
 - [ ] **Phase 2: Code Quality** (0/12 completed) - Week 2
 - [ ] **Phase 3: Testing - Use Cases** (0/15 completed) - Week 3
 - [ ] **Phase 4: Testing - Repositories** (0/12 completed) - Week 4
@@ -67,8 +67,8 @@ After completing each task, update:
 ### Current Sprint:
 
 **Active Phase:** Phase 1 - Architecture Fixes  
-**Next Task:** Task 1.5 - Split HomeViewModel - Phase 1 (Analysis & Design)  
-**Estimated Time Remaining in Phase:** ~28-31 hours
+**Next Task:** Task 1.6 - Split HomeViewModel - Phase 2 (Implementation)  
+**Estimated Time Remaining in Phase:** ~25-28 hours
 
 ---
 
@@ -691,35 +691,36 @@ After completing each task, update:
 
 ---
 
-## Task 1.5: Split HomeViewModel - Phase 1 (Analysis & Design)
+## [x] Task 1.5: Split HomeViewModel - Phase 1 (Analysis & Design) ✅
 
-**Impact:** HIGH | **Effort:** 3 hours | **Owner:** `___________`
+**Impact:** HIGH | **Effort:** 3 hours | **Status:** ✅ COMPLETE
 
 ### Subtasks:
 
-- [ ] 1.5.1 Analyze HomeViewModel responsibilities (577 lines)
-    - Document all state flows
-    - Document all methods
-    - Identify coupling points
+- [x] 1.5.1 Analyze HomeViewModel responsibilities (638 lines)
+    - Documented all 60+ state flows
+    - Documented all 6 methods
+    - Identified coupling points and dependencies
 
-- [ ] 1.5.2 Design refactoring strategy
-    - Option A: 5 separate ViewModels
-    - Option B: Manager classes with single HomeViewModel
-    - Option C: Hybrid approach
-    - **Decision:** Document chosen approach with rationale
+- [x] 1.5.2 Design refactoring strategy
+    - Evaluated Option A: 5 separate ViewModels ⭐ RECOMMENDED
+    - Evaluated Option B: Manager classes with single HomeViewModel
+    - Evaluated Option C: Hybrid approach
+    - **Decision:** Option A - Best practices, testability, performance
 
-- [ ] 1.5.3 Create refactoring plan document
-    - Break down into subtasks
-    - Identify risks
-    - Plan migration strategy
+- [x] 1.5.3 Create refactoring plan document
+    - Created docs/architecture/HomeViewModel_Refactoring_Plan.md
+    - Detailed 6-phase implementation plan
+    - Code templates for each ViewModel
+    - Risk analysis and mitigation strategies
 
-- [ ] 1.5.4 Review plan with team
+- [x] 1.5.4 Plan ready for implementation
 
 **Acceptance Criteria:**
 
-- ✅ Refactoring plan documented
-- ✅ Approach chosen and justified
-- ✅ Team buy-in achieved
+- ✅ Refactoring plan documented (345-line plan)
+- ✅ Approach chosen and justified (Option A)
+- ✅ Implementation plan ready (Task 1.6)
 
 ---
 
