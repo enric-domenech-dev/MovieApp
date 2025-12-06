@@ -132,4 +132,15 @@ data class NextEpisodeInfoUI(
     val airDate: String?,
     val isAired: Boolean,
     val daysUntilAir: Int?
-)
+) {
+    val episodeCode: String
+        get() = "S${seasonNumber?.toString()?.padStart(2, '0')}E${episodeNumber?.toString()?.padStart(2, '0')}"
+    
+    val displayText: String
+        get() = when {
+            isAired -> "Disponible"
+            daysUntilAir != null && daysUntilAir > 0 -> 
+                "En $daysUntilAir día${if (daysUntilAir > 1) "s" else ""}"
+            else -> "Próximamente"
+        }
+}

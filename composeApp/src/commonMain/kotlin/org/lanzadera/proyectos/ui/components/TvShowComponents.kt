@@ -61,13 +61,16 @@ import org.lanzadera.proyectos.domain.models.tvshow.Episode
 import org.lanzadera.proyectos.domain.models.tvshow.Season
 import org.lanzadera.proyectos.ui.models.TvShowUI
 import org.lanzadera.proyectos.ui.models.TvShowWithNextEpisodeUI
+import org.lanzadera.proyectos.ui.models.TvShowDetailUI
+import org.lanzadera.proyectos.ui.models.AggregateCastUI
+import org.lanzadera.proyectos.ui.models.AggregateCrewUI
 import org.lanzadera.proyectos.navigation.NavigationStore
 import org.lanzadera.proyectos.utils.Constants
 
 @Composable
 fun TvShowItem(
     nav: NavHostController,
-    tvShow: TvShow,
+    tvShow: TvShowUI,
     modifier: Modifier = Modifier.wrapContentHeight(),
     showMeta: Boolean = true
 ) {
@@ -75,9 +78,7 @@ fun TvShowItem(
         modifier = modifier
             .clickable {
                 NavigationStore.selectedTvShow = tvShow
-                tvShow.id?.let { tvShowId ->
-                    nav.navigate(Constants.Screen.SeriesDetail.createRoute(tvShowId))
-                }
+                nav.navigate(Constants.Screen.SeriesDetail.createRoute(tvShow.id))
             }
     ) {
         Box(
@@ -86,7 +87,7 @@ fun TvShowItem(
                 .clip(MaterialTheme.shapes.small)
         ) {
             AsyncImage(
-                model = "https://image.tmdb.org/t/p/w500${tvShow.posterPath}",
+                model = tvShow.posterUrl,
                 contentDescription = tvShow.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
@@ -96,16 +97,14 @@ fun TvShowItem(
 
         if (showMeta) {
             Spacer(modifier = Modifier.height(6.dp))
-            tvShow.name?.let {
-                Text(
-                    text = it,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 15.sp,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
+            Text(
+                text = tvShow.name,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 15.sp,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
 
             val formattedDate = remember(tvShow.firstAirDate) {
                 tvShow.firstAirDate?.let {
@@ -367,7 +366,7 @@ fun CrewMemberCard(crewMember: org.lanzadera.proyectos.domain.models.tvshow.Aggr
 @OptIn(ExperimentalLayoutApi::class)
 
 @Composable
-fun SeriesInfoTab(tvShow: TvShow?, modifier: Modifier = Modifier) {
+fun SeriesInfoTab(tvShow: TvShowDetailUI?, modifier: Modifier = Modifier) {
     if (tvShow == null) return
 
     LazyColumn(
@@ -538,7 +537,7 @@ private fun StatCard(label: String, value: String, modifier: Modifier = Modifier
 
 @Composable
 fun SeriesSeasonsTab(
-    tvShow: TvShow?,
+    tvShow: TvShowDetailUI?,
     watchedEpisodes: Set<String>,
     onEpisodeToggle: (Int, Int, Boolean) -> Unit,
     modifier: Modifier = Modifier
@@ -796,7 +795,7 @@ fun EpisodeListItem(episode: Episode, isWatched: Boolean, onToggle: (Boolean) ->
 }
 
 @Composable
-fun SeriesCreditsTab(tvShow: TvShow?, modifier: Modifier = Modifier) {
+fun SeriesCreditsTab(tvShow: TvShowDetailUI?, modifier: Modifier = Modifier) {
     if (tvShow == null) return
 
     LazyColumn(
@@ -881,7 +880,7 @@ fun SeriesCreditsTab(tvShow: TvShow?, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun CastMemberCardModern(actor: AggregateCast) {
+fun CastMemberCardModern(actor: AggregateCastUI) {
     Column(
         modifier = Modifier
             .width(110.dp)
@@ -948,7 +947,7 @@ fun CastMemberCardModern(actor: AggregateCast) {
 }
 
 @Composable
-fun CrewMemberCardModern(crewMember: AggregateCrew) {
+fun CrewMemberCardModern(crewMember: AggregateCrewUI) {
     Column(
         modifier = Modifier
             .width(110.dp)
