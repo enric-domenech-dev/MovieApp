@@ -53,12 +53,15 @@ import org.lanzadera.proyectos.domain.repository.WatchedMoviesRepository
 import org.lanzadera.proyectos.domain.usecase.books.RefreshBooksUseCase
 import org.lanzadera.proyectos.domain.usecase.episodes.ObserveWatchedEpisodesUseCase
 import org.lanzadera.proyectos.domain.usecase.episodes.ToggleEpisodeWatchedUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.GetFavoriteDetailsUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.ObserveFavoritesUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.SyncFavoritesUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.ToggleFavoriteUseCase
 import org.lanzadera.proyectos.domain.usecase.games.GetGameDetailsUseCase
 import org.lanzadera.proyectos.domain.usecase.games.RefreshGamesUseCase
 import org.lanzadera.proyectos.domain.usecase.load_initial_data.GetInitialDataUseCase
+import org.lanzadera.proyectos.domain.usecase.movies.GetMovieDetailsUseCase
+import org.lanzadera.proyectos.domain.usecase.movies.ObserveWatchedMoviesUseCase
 import org.lanzadera.proyectos.domain.usecase.movies.ToggleMovieWatchedUseCase
 import org.lanzadera.proyectos.domain.usecase.search.SearchMoviesUseCase
 import org.lanzadera.proyectos.domain.usecase.tvshows.GetTvShowDetailsUseCase
@@ -245,6 +248,9 @@ val viewModelsModule = module {
     single { ObserveWatchedEpisodesUseCase(get()) }
     single { ToggleEpisodeWatchedUseCase(get()) }
     single { ToggleMovieWatchedUseCase(get()) }
+    single { ObserveWatchedMoviesUseCase(get()) }
+    single { GetMovieDetailsUseCase(get()) }
+    single { GetFavoriteDetailsUseCase(get()) }
 
     // Repositories
     single<LoadInitialData> { LoadInitialDataImpl(get(), 5, get()) }
