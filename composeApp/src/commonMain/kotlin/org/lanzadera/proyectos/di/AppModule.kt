@@ -22,6 +22,7 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
 import org.lanzadera.proyectos.BuildConfig
+import org.lanzadera.proyectos.utils.Constants
 import org.lanzadera.proyectos.utils.Logger
 import org.lanzadera.proyectos.data.authentication.IGDBAuthManager
 import org.lanzadera.proyectos.data.datasource.FavoritesLocalDataSource
@@ -138,7 +139,11 @@ val dataModule = module {
     single {
         HttpClient {
             expectSuccess = true
-            install(HttpTimeout)
+            install(HttpTimeout) {
+                requestTimeoutMillis = Constants.Network.HTTP_TIMEOUT_MS
+                connectTimeoutMillis = Constants.Network.CONNECT_TIMEOUT_MS
+                socketTimeoutMillis = Constants.Network.SOCKET_TIMEOUT_MS
+            }
             install(ContentNegotiation) { json(get()) }
 //            install(Logging) { level = LogLevel.ALL }
             install(LoggingPlugin)
@@ -157,7 +162,11 @@ val dataModule = module {
     single(named("googleBooksClient")) {
         HttpClient {
             expectSuccess = true
-            install(HttpTimeout)
+            install(HttpTimeout) {
+                requestTimeoutMillis = Constants.Network.HTTP_TIMEOUT_MS
+                connectTimeoutMillis = Constants.Network.CONNECT_TIMEOUT_MS
+                socketTimeoutMillis = Constants.Network.SOCKET_TIMEOUT_MS
+            }
             install(ContentNegotiation) { json(get()) }
             install(LoggingPlugin)
             defaultRequest {
@@ -178,7 +187,11 @@ val dataModule = module {
     single(named("igdbClient")) {
         HttpClient {
             expectSuccess = false
-            install(HttpTimeout)
+            install(HttpTimeout) {
+                requestTimeoutMillis = Constants.Network.HTTP_TIMEOUT_MS
+                connectTimeoutMillis = Constants.Network.CONNECT_TIMEOUT_MS
+                socketTimeoutMillis = Constants.Network.SOCKET_TIMEOUT_MS
+            }
             install(ContentNegotiation) { json(get()) }
             install(LoggingPlugin)
             defaultRequest {

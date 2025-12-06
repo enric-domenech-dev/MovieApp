@@ -14,6 +14,7 @@ import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.Json
 import org.lanzadera.proyectos.domain.models.movie.Movie
 import org.lanzadera.proyectos.utils.Logger
+import org.lanzadera.proyectos.utils.Constants
 import org.lanzadera.proyectos.domain.models.movie.MovieResponse
 import org.lanzadera.proyectos.domain.repository.LoadInitialData
 
@@ -54,7 +55,7 @@ class LoadInitialDataImpl(
 
     // (Opcional) TTL por feed para evitar sobrecarga
     private val lastUpdated = mutableMapOf<MutableStateFlow<List<Movie>>, Long>()
-    private val TTL = 2 * 60 * 1000L // 2 min, ajusta a tu gusto
+    private val ttl = Constants.Cache.DEFAULT_TTL_MS
 
     private fun isValidMovie(m: Movie): Boolean =
         m.id != null &&
@@ -99,33 +100,33 @@ private suspend inline fun refreshFeed(
 
     // --- Core refresh ---
     override suspend fun refreshMovies(force: Boolean) =
-        refreshFeed(_movies, force, TTL, lastUpdated) { fetchNowPlayingMovies() }
+        refreshFeed(_movies, force, ttl, lastUpdated) { fetchNowPlayingMovies() }
 
     override suspend fun refreshTrendingMovies(force: Boolean) =
-        refreshFeed(_trending, force, TTL, lastUpdated) { fetchTrendingMoviesWeek() }
+        refreshFeed(_trending, force, ttl, lastUpdated) { fetchTrendingMoviesWeek() }
 
     // --- Additional refresh ---
     override suspend fun refreshPopularMovies(force: Boolean) =
-        refreshFeed(_popular, force, TTL, lastUpdated) { fetchPopularMovies() }
+        refreshFeed(_popular, force, ttl, lastUpdated) { fetchPopularMovies() }
 
     override suspend fun refreshTopRatedMovies(force: Boolean) =
-        refreshFeed(_topRated, force, TTL, lastUpdated) { fetchTopRatedMovies() }
+        refreshFeed(_topRated, force, ttl, lastUpdated) { fetchTopRatedMovies() }
 
     override suspend fun refreshUpcomingMovies(force: Boolean) =
-        refreshFeed(_upcoming, force, TTL, lastUpdated) { fetchUpcomingMovies() }
+        refreshFeed(_upcoming, force, ttl, lastUpdated) { fetchUpcomingMovies() }
 
     override suspend fun refreshDiscoverMovies(force: Boolean) {
-        refreshFeed(_discover, force, TTL, lastUpdated) { fetchTrendingMovies() }
+        refreshFeed(_discover, force, ttl, lastUpdated) { fetchTrendingMovies() }
     }
 
     override suspend fun refreshHeroMovies(force: Boolean) =
-        refreshFeed(_hero, force, TTL, lastUpdated) { fetchHeroMovies() }
+        refreshFeed(_hero, force, ttl, lastUpdated) { fetchHeroMovies() }
 
     override suspend fun refreshTrendingMoviesDaily(force: Boolean) =
-        refreshFeed(_trendingDaily, force, TTL, lastUpdated) { fetchTrendingMoviesDay() }
+        refreshFeed(_trendingDaily, force, ttl, lastUpdated) { fetchTrendingMoviesDay() }
 
     override suspend fun refreshInCinemasToday(force: Boolean) {
-        refreshFeed(_inCinemasToday, force, TTL, lastUpdated) { fetchInCinemasToday() }
+        refreshFeed(_inCinemasToday, force, ttl, lastUpdated) { fetchInCinemasToday() }
     }
 
 

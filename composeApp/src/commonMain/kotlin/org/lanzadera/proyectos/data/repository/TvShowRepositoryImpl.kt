@@ -11,6 +11,7 @@ import org.lanzadera.proyectos.domain.models.tvshow.Season
 import org.lanzadera.proyectos.domain.models.tvshow.TvShow
 import org.lanzadera.proyectos.domain.models.tvshow.TvShowResponse
 import org.lanzadera.proyectos.domain.repository.TvShowRepository
+import org.lanzadera.proyectos.utils.Constants
 import org.lanzadera.proyectos.utils.Logger
 
 class TvShowRepositoryImpl(
@@ -41,7 +42,7 @@ class TvShowRepositoryImpl(
     override val trendingTvShowsWeekFlow: StateFlow<List<TvShow>> = _trendingTvShowsWeek
 
     private val lastUpdated = mutableMapOf<MutableStateFlow<List<TvShow>>, Long>()
-    private val TTL = 2 * 60 * 1000L // 2 min
+    private val ttl = Constants.Cache.DEFAULT_TTL_MS
 
     private val tvShowDetailsCache = mutableMapOf<Int, TvShow>()
 
@@ -80,25 +81,25 @@ class TvShowRepositoryImpl(
     }
 
     override suspend fun refreshTvShows(force: Boolean) =
-        refreshFeed(_tvShows, force, TTL, lastUpdated) { fetchTrendingTvShowsWeek() }
+        refreshFeed(_tvShows, force, ttl, lastUpdated) { fetchTrendingTvShowsWeek() }
 
     override suspend fun refreshPopularTvShows(force: Boolean) =
-        refreshFeed(_popularTvShows, force, TTL, lastUpdated) { fetchPopularTvShows() }
+        refreshFeed(_popularTvShows, force, ttl, lastUpdated) { fetchPopularTvShows() }
 
     override suspend fun refreshTopRatedTvShows(force: Boolean) =
-        refreshFeed(_topRatedTvShows, force, TTL, lastUpdated) { fetchTopRatedTvShows() }
+        refreshFeed(_topRatedTvShows, force, ttl, lastUpdated) { fetchTopRatedTvShows() }
 
     override suspend fun refreshOnAirTvShows(force: Boolean) =
-        refreshFeed(_onAirTvShows, force, TTL, lastUpdated) { fetchOnAirTvShows() }
+        refreshFeed(_onAirTvShows, force, ttl, lastUpdated) { fetchOnAirTvShows() }
 
     override suspend fun refreshTrendingTvShows(force: Boolean) =
-        refreshFeed(_trendingTvShows, force, TTL, lastUpdated) { fetchTrendingTvShowsDay() }
+        refreshFeed(_trendingTvShows, force, ttl, lastUpdated) { fetchTrendingTvShowsDay() }
 
     override suspend fun refreshAiringTodayTvShows(force: Boolean) =
-        refreshFeed(_airingTodayTvShows, force, TTL, lastUpdated) { fetchAiringTodayTvShows() }
+        refreshFeed(_airingTodayTvShows, force, ttl, lastUpdated) { fetchAiringTodayTvShows() }
 
     override suspend fun refreshTrendingTvShowsWeek(force: Boolean) =
-        refreshFeed(_trendingTvShowsWeek, force, TTL, lastUpdated) { fetchTrendingTvShowsWeek() }
+        refreshFeed(_trendingTvShowsWeek, force, ttl, lastUpdated) { fetchTrendingTvShowsWeek() }
 
     override suspend fun getTvShowDetails(tvShowId: Int): TvShow? {
         // Intenta cache primero

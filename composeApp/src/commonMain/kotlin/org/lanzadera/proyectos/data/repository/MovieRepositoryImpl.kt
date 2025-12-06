@@ -10,6 +10,7 @@ import kotlinx.serialization.json.Json
 import org.lanzadera.proyectos.domain.models.movie.Movie
 import org.lanzadera.proyectos.domain.models.movie.MovieResponse
 import org.lanzadera.proyectos.domain.repository.MovieRepository
+import org.lanzadera.proyectos.utils.Constants
 import org.lanzadera.proyectos.utils.Logger
 
 class MovieRepositoryImpl(
@@ -34,7 +35,7 @@ class MovieRepositoryImpl(
     override val trendingMoviesFlow: StateFlow<List<Movie>> = _trendingMovies
 
     private val lastUpdated = mutableMapOf<MutableStateFlow<List<Movie>>, Long>()
-    private val TTL = 2 * 60 * 1000L // 2 min
+    private val ttl = Constants.Cache.DEFAULT_TTL_MS
 
     private val movieDetailsCache = mutableMapOf<Int, Movie>()
 
@@ -73,19 +74,19 @@ class MovieRepositoryImpl(
     }
 
     override suspend fun refreshMovies(force: Boolean) =
-        refreshFeed(_movies, force, TTL, lastUpdated) { fetchTrendingMoviesWeek() }
+        refreshFeed(_movies, force, ttl, lastUpdated) { fetchTrendingMoviesWeek() }
 
     override suspend fun refreshPopularMovies(force: Boolean) =
-        refreshFeed(_popularMovies, force, TTL, lastUpdated) { fetchPopularMovies() }
+        refreshFeed(_popularMovies, force, ttl, lastUpdated) { fetchPopularMovies() }
 
     override suspend fun refreshTopRatedMovies(force: Boolean) =
-        refreshFeed(_topRatedMovies, force, TTL, lastUpdated) { fetchTopRatedMovies() }
+        refreshFeed(_topRatedMovies, force, ttl, lastUpdated) { fetchTopRatedMovies() }
 
     override suspend fun refreshUpcomingMovies(force: Boolean) =
-        refreshFeed(_upcomingMovies, force, TTL, lastUpdated) { fetchUpcomingMovies() }
+        refreshFeed(_upcomingMovies, force, ttl, lastUpdated) { fetchUpcomingMovies() }
 
     override suspend fun refreshTrendingMovies(force: Boolean) =
-        refreshFeed(_trendingMovies, force, TTL, lastUpdated) { fetchTrendingMoviesDay() }
+        refreshFeed(_trendingMovies, force, ttl, lastUpdated) { fetchTrendingMoviesDay() }
 
     override suspend fun getMovieDetails(movieId: Int): Movie? {
         // Intenta cache primero

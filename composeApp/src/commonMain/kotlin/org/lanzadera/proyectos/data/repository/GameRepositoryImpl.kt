@@ -13,6 +13,7 @@ import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
 import org.lanzadera.proyectos.BuildConfig
 import org.lanzadera.proyectos.utils.Logger
+import org.lanzadera.proyectos.utils.Constants
 import org.lanzadera.proyectos.data.authentication.IGDBAuthManager
 import org.lanzadera.proyectos.domain.models.game.Game
 import org.lanzadera.proyectos.domain.repository.GameRepository
@@ -40,7 +41,7 @@ class GameRepositoryImpl(
     override val trendingGamesFlow: StateFlow<List<Game>> = _trendingGames
 
     private val lastUpdated = mutableMapOf<MutableStateFlow<List<Game>>, Long>()
-    private val TTL = 2 * 60 * 1000L // 2 min
+    private val ttl = Constants.Cache.DEFAULT_TTL_MS
 
     private val gameDetailsCache = mutableMapOf<Int, Game>()
 
@@ -54,7 +55,7 @@ class GameRepositoryImpl(
         val now = Clock.System.now().toEpochMilliseconds()
         val last = lastUpdated[state] ?: 0L
 
-        if ((now - last) < TTL && state.value.isNotEmpty()) {
+        if ((now - last) < ttl && state.value.isNotEmpty()) {
             return
         }
 
