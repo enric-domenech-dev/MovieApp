@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import kotlinx.datetime.LocalDate
 import org.lanzadera.proyectos.domain.models.WatchedEpisode
+import org.lanzadera.proyectos.utils.Logger
 import org.lanzadera.proyectos.domain.models.book.Book
 import org.lanzadera.proyectos.domain.models.favorite.FavoriteItem
 import org.lanzadera.proyectos.domain.models.favorite.FavoriteItemWithInfo
@@ -176,7 +177,7 @@ class HomeViewModel(
         favoriteDetailsRepository.observeFavoriteTvShows(),
         allWatchedEpisodes
     ) { favoriteTvShows, watched ->
-        println("SIGUIENDO: Total favorite shows from Room: ${favoriteTvShows.size}, Watched episodes: ${watched.size}")
+        Logger.d("SIGUIENDO: Total favorite shows from Room: ${favoriteTvShows.size}, Watched episodes: ${watched.size}", tag = "HomeViewModel")
 
         val today = DateUtils.getTodayInUserTimezone()
 
@@ -184,16 +185,16 @@ class HomeViewModel(
             val showId = show.id?.toString() ?: return@mapNotNull null
             val seasons = show.seasons ?: return@mapNotNull null
 
-            println("SIGUIENDO: Analizando ${show.name} (ID: $showId)")
+            Logger.d("SIGUIENDO: Analizando ${show.name} (ID: $showId)", tag = "HomeViewModel")
 
             // Encontrar el próximo episodio sin ver
             val nextEpisode = findNextUnwatchedEpisode(seasons, showId, watched, today)
 
             if (nextEpisode != null) {
-                println("SIGUIENDO:   - Próximo episodio: ${nextEpisode.episodeCode} - ${nextEpisode.displayText}")
+                Logger.d("SIGUIENDO:   - Próximo episodio: ${nextEpisode.episodeCode} - ${nextEpisode.displayText}", tag = "HomeViewModel")
                 TvShowWithNextEpisode(show, nextEpisode)
             } else {
-                println("SIGUIENDO:   - No hay más episodios por ver")
+                Logger.d("SIGUIENDO:   - No hay más episodios por ver", tag = "HomeViewModel")
                 null
             }
         }
@@ -396,11 +397,11 @@ class HomeViewModel(
 
         // Si selecciona FOLLOWING y aún no hay datos de series, cargarlas
         if (_selectedTab.value == HomeTab.FAVORITES) {
-            println("SYNCRO HomeViewModel: FOLLOWING tab selected, tvShows.size=${tvShows.value.size}")
+            Logger.d("FOLLOWING tab selected, tvShows.size=${tvShows.value.size}", tag = "HomeViewModel")
             viewModelScope.launch {
                 try {
                     if (refreshTvShowsUseCase != null && tvShows.value.isEmpty()) {
-                        println("SYNCRO HomeViewModel: launching refreshTvShowsUseCase for FOLLOWING tab")
+                        Logger.d("launching refreshTvShowsUseCase for FOLLOWING tab", tag = "HomeViewModel")
                         refreshing.value = true
                         supervisorScope {
                             awaitAll(
@@ -413,13 +414,13 @@ class HomeViewModel(
                                 async { refreshTvShowsUseCase.refreshTrendingTvShowsWeek(force = false) }
                             )
                         }
-                        println("SYNCRO HomeViewModel: refreshTvShowsUseCase finished for FOLLOWING, tvShows.size=${tvShows.value.size}")
+                        Logger.d("refreshTvShowsUseCase finished for FOLLOWING, tvShows.size=${tvShows.value.size}", tag = "HomeViewModel")
                     } else {
-                        println("SYNCRO HomeViewModel: no refresh needed for FOLLOWING or no use case")
+                        Logger.d("no refresh needed for FOLLOWING or no use case", tag = "HomeViewModel")
                     }
                 } catch (t: Throwable) {
                     error.value = t.message ?: "Error fetching tv shows"
-                    println("SYNCRO HomeViewModel: error refreshing tv shows for FOLLOWING: ${t.message}")
+                    Logger.d("error refreshing tv shows for FOLLOWING: ${t.message}", tag = "HomeViewModel")
                 } finally {
                     refreshing.value = false
                 }
@@ -428,11 +429,11 @@ class HomeViewModel(
 
         // Si selecciona BOOKS y aún no hay datos, lanzar refresco
         if (_selectedTab.value == HomeTab.BOOKS) {
-            println("SYNCRO HomeViewModel: BOOKS tab selected, books.size=${books.value.size}")
+            Logger.d("BOOKS tab selected, books.size=${books.value.size}", tag = "HomeViewModel")
             viewModelScope.launch {
                 try {
                     if (refreshBooksUseCase != null && books.value.isEmpty()) {
-                        println("SYNCRO HomeViewModel: launching refreshBooksUseCase for all categories")
+                        Logger.d("launching refreshBooksUseCase for all categories", tag = "HomeViewModel")
                         refreshing.value = true
                         supervisorScope {
                             awaitAll(
@@ -446,13 +447,13 @@ class HomeViewModel(
                                 async { refreshBooksUseCase.refreshSelfHelpBooks(force = false) }
                             )
                         }
-                        println("SYNCRO HomeViewModel: refreshBooksUseCase finished, books.size=${books.value.size}")
+                        Logger.d("refreshBooksUseCase finished, books.size=${books.value.size}", tag = "HomeViewModel")
                     } else {
-                        println("SYNCRO HomeViewModel: no refresh needed or no use case")
+                        Logger.d("no refresh needed or no use case", tag = "HomeViewModel")
                     }
                 } catch (t: Throwable) {
                     error.value = t.message ?: "Error fetching books"
-                    println("SYNCRO HomeViewModel: error refreshing books: ${t.message}")
+                    Logger.d("error refreshing books: ${t.message}", tag = "HomeViewModel")
                 } finally {
                     refreshing.value = false
                 }
@@ -461,11 +462,11 @@ class HomeViewModel(
 
         // Si selecciona SERIES y aún no hay datos, lanzar refresco
         if (_selectedTab.value == HomeTab.SERIES) {
-            println("SYNCRO HomeViewModel: SERIES tab selected, tvShows.size=${tvShows.value.size}")
+            Logger.d("SERIES tab selected, tvShows.size=${tvShows.value.size}", tag = "HomeViewModel")
             viewModelScope.launch {
                 try {
                     if (refreshTvShowsUseCase != null && tvShows.value.isEmpty()) {
-                        println("SYNCRO HomeViewModel: launching refreshTvShowsUseCase for all TV endpoints")
+                        Logger.d("launching refreshTvShowsUseCase for all TV endpoints", tag = "HomeViewModel")
                         refreshing.value = true
                         supervisorScope {
                             awaitAll(
@@ -478,13 +479,13 @@ class HomeViewModel(
                                 async { refreshTvShowsUseCase.refreshTrendingTvShowsWeek(force = false) }
                             )
                         }
-                        println("SYNCRO HomeViewModel: refreshTvShowsUseCase finished, tvShows.size=${tvShows.value.size}")
+                        Logger.d("refreshTvShowsUseCase finished, tvShows.size=${tvShows.value.size}", tag = "HomeViewModel")
                     } else {
-                        println("SYNCRO HomeViewModel: no refresh needed or no use case")
+                        Logger.d("no refresh needed or no use case", tag = "HomeViewModel")
                     }
                 } catch (t: Throwable) {
                     error.value = t.message ?: "Error fetching tv shows"
-                    println("SYNCRO HomeViewModel: error refreshing tv shows: ${t.message}")
+                    Logger.d("error refreshing tv shows: ${t.message}", tag = "HomeViewModel")
                 } finally {
                     refreshing.value = false
                 }
@@ -493,21 +494,21 @@ class HomeViewModel(
 
         // Si selecciona GAMES y aún no hay datos, lanzar refresco
         if (_selectedTab.value == HomeTab.GAMES) {
-            println("SYNCRO HomeViewModel: GAMES tab selected, games.size=${games.value.size}")
+            Logger.d("GAMES tab selected, games.size=${games.value.size}", tag = "HomeViewModel")
             viewModelScope.launch {
                 try {
                     if (refreshGamesUseCase != null && games.value.isEmpty()) {
-                        println("SYNCRO HomeViewModel: launching refreshGamesUseCase")
+                        Logger.d("launching refreshGamesUseCase", tag = "HomeViewModel")
                         refreshing.value = true
                         refreshGamesUseCase.invoke()
-                        println("SYNCRO HomeViewModel: refreshGamesUseCase finished, games.size=${games.value.size}")
+                        Logger.d("refreshGamesUseCase finished, games.size=${games.value.size}", tag = "HomeViewModel")
                     } else {
-                        println("SYNCRO HomeViewModel: no refresh needed or no game use case")
+                        Logger.d("no refresh needed or no game use case", tag = "HomeViewModel")
                     }
                 } catch (t: Throwable) {
                     if (t !is CancellationException) {
                         error.value = t.message ?: "Error fetching games"
-                        println("SYNCRO HomeViewModel: error refreshing games: ${t.message}")
+                        Logger.d("error refreshing games: ${t.message}", tag = "HomeViewModel")
                     }
                 } finally {
                     refreshing.value = false

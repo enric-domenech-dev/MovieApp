@@ -8,6 +8,7 @@ import org.lanzadera.proyectos.domain.repository.FavoritesRepository
 import org.lanzadera.proyectos.domain.repository.MovieRepository
 import org.lanzadera.proyectos.domain.repository.TvShowRepository
 import org.lanzadera.proyectos.domain.repository.WatchedEpisodesRepository
+import org.lanzadera.proyectos.utils.Logger
 
 class ToggleFavoriteUseCase(
     private val favoritesRepository: FavoritesRepository,
@@ -30,16 +31,16 @@ class ToggleFavoriteUseCase(
                     // Obtener detalles completos y guardar en Room
                     val tvShowId = item.id.toIntOrNull()
                     if (tvShowId != null) {
-                        println("ToggleFavorite: Guardando serie $tvShowId con detalles completos")
+                        Logger.d("Guardando serie $tvShowId con detalles completos", tag = "ToggleFavoriteUseCase")
                         val details = tvShowRepository.getTvShowDetails(tvShowId)
                         if (details != null) {
                             favoriteDetailsRepository.saveFavoriteTvShow(details)
-                            println("ToggleFavorite: Serie guardada - ${details.name}, episodios: ${details.numberOfEpisodes}")
+                            Logger.d("Serie guardada - ${details.name}, episodios: ${details.numberOfEpisodes}", tag = "ToggleFavoriteUseCase")
                         }
                     }
                 } else {
                     // Eliminar de Room y episodios vistos
-                    println("ToggleFavorite: Eliminando serie ${item.id} de favoritos")
+                    Logger.d("Eliminando serie ${item.id} de favoritos", tag = "ToggleFavoriteUseCase")
                     favoriteDetailsRepository.removeFavoriteTvShow(item.id)
                     watchedEpisodesRepository.deleteAllForTvShow(item.id)
                 }
@@ -50,15 +51,15 @@ class ToggleFavoriteUseCase(
                     // Obtener detalles completos y guardar en Room
                     val movieId = item.id.toIntOrNull()
                     if (movieId != null) {
-                        println("ToggleFavorite: Guardando película $movieId con detalles completos")
+                        Logger.d("Guardando película $movieId con detalles completos", tag = "ToggleFavoriteUseCase")
                         val details = movieRepository.getMovieDetails(movieId)
                         if (details != null) {
                             favoriteDetailsRepository.saveFavoriteMovie(details)
-                            println("ToggleFavorite: Película guardada - ${details.title}, fecha: ${details.releaseDate}")
+                            Logger.d("Película guardada - ${details.title}, fecha: ${details.releaseDate}", tag = "ToggleFavoriteUseCase")
                         }
                     }
                 } else {
-                    println("ToggleFavorite: Eliminando película ${item.id} de favoritos")
+                    Logger.d("Eliminando película ${item.id} de favoritos", tag = "ToggleFavoriteUseCase")
                     favoriteDetailsRepository.removeFavoriteMovie(item.id)
                 }
             }

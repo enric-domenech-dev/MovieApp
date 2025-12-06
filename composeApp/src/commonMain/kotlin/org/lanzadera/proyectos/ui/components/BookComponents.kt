@@ -33,6 +33,7 @@ import movieapp.composeapp.generated.resources.Res
 import movieapp.composeapp.generated.resources.new_edge_logo
 import org.jetbrains.compose.resources.painterResource
 import org.lanzadera.proyectos.domain.models.book.Book
+import org.lanzadera.proyectos.utils.Logger
 import org.lanzadera.proyectos.navigation.NavigationStore
 import org.lanzadera.proyectos.utils.Constants
 
@@ -49,7 +50,7 @@ fun BookItem(
                 // clear any selected movie and set the selected book, then navigate
                 NavigationStore.selectedMovie = null
                 NavigationStore.selectedBook = book
-                println("SYNCRO BookItem: clicking book, thumbnail=${book.thumbnail}")
+                Logger.d("clicking book, thumbnail=${book.thumbnail}", tag = "BookComponents")
                 nav.navigate(Constants.Screen.Detail.route)
             }
     ) {

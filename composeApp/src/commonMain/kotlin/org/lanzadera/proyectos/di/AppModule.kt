@@ -22,6 +22,7 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
 import org.lanzadera.proyectos.BuildConfig
+import org.lanzadera.proyectos.utils.Logger
 import org.lanzadera.proyectos.data.authentication.IGDBAuthManager
 import org.lanzadera.proyectos.data.datasource.FavoritesLocalDataSource
 import org.lanzadera.proyectos.data.datasource.WatchedEpisodesDataSource
@@ -80,8 +81,8 @@ val LoggingPlugin = createClientPlugin("LoggingPlugin") {
     onRequest { request, _ ->
         val method = request.method.value
         val url = request.url
-        println(
-            "--> SYNCRO REQUEST $method $url \n " +
+        Logger.d(
+            "--> REQUEST $method $url \n " +
                     "---> HEADERS: ${
                         json.encodeToString(
                             MapSerializer(String.serializer(), ListSerializer(String.serializer())),
@@ -89,7 +90,8 @@ val LoggingPlugin = createClientPlugin("LoggingPlugin") {
                         )
                     } \n ---> BODY: ${
                         json.encodeToString(String.serializer(), request.body.toString())
-                    }"
+                    }",
+            tag = "HTTP"
         )
     }
     onResponse { response ->
@@ -102,15 +104,15 @@ val LoggingPlugin = createClientPlugin("LoggingPlugin") {
         val endTime = response.responseTime.timestamp
         val elapsed = endTime - startTime
         val body = response.bodyAsText()
-        println("<-- END REQUEST ${method.value} $url (${elapsed}ms)")
-        println("<-- SYNCRO RESPONSE CODE ${response.status}")
+        Logger.d("<-- END REQUEST ${method.value} $url (${elapsed}ms)", tag = "HTTP")
+        Logger.d("<-- RESPONSE CODE ${response.status}", tag = "HTTP")
         runCatching {
             if (ct.contains("application/json", ignoreCase = true))
-                println("<-- RESPONSE BODY (json): ${json.encodeToString(JsonElement.serializer(), Json.parseToJsonElement(body))}")
+                Logger.d("<-- RESPONSE BODY (json): ${json.encodeToString(JsonElement.serializer(), Json.parseToJsonElement(body))}", tag = "HTTP")
             else
-                println("<-- RESPONSE BODY (text): $body")
+                Logger.d("<-- RESPONSE BODY (text): $body", tag = "HTTP")
         }.getOrElse {
-            println("<-- RESPONSE BODY (raw): $body") // no bloquees la llamada por el logger
+            Logger.d("<-- RESPONSE BODY (raw): $body", tag = "HTTP")
         }
     }
 }

@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.lanzadera.proyectos.domain.models.user.User
+import org.lanzadera.proyectos.utils.Logger
 
 class LoginViewModel : ViewModel() {
 
@@ -34,10 +35,10 @@ class LoginViewModel : ViewModel() {
                 val response = client.get("https://6764320b52b2a7619f5bc6d6.mockapi.io/garmindata")
                 val body = response.bodyAsText()
 
-                println("--> ${response.request.method.value}  ${response.request.url} ")
-                println(body)
-                println("<-- END ${response.request.method.value}  ${response.request.url}")
-                println("<-- RESPONSE CODE ${response.status}")
+                Logger.d("--> ${response.request.method.value}  ${response.request.url} ", tag = "LoginViewModel")
+                Logger.d(body, tag = "LoginViewModel")
+                Logger.d("<-- END ${response.request.method.value}  ${response.request.url}", tag = "LoginViewModel")
+                Logger.d("<-- RESPONSE CODE ${response.status}", tag = "LoginViewModel")
 
                 val users: List<User> = Json.decodeFromString(body)
 
@@ -46,12 +47,12 @@ class LoginViewModel : ViewModel() {
                 if (user != null) {
                     _userState.value = user
                     _isLoginSuccessful.value = true
-                    println("--> Login exitoso!")
-                    println("Email: $email")
-                    println("Password: $password")
+                    Logger.d("--> Login exitoso!", tag = "LoginViewModel")
+                    Logger.d("Email: $email", tag = "LoginViewModel")
+                    Logger.d("Password: $password", tag = "LoginViewModel")
                 } else {
                     _isLoginSuccessful.value = false
-                    println("Login fallido: Usuario no encontrado o credenciales inválidas.")
+                    Logger.d("Login fallido: Usuario no encontrado o credenciales inválidas.", tag = "LoginViewModel")
                 }
             } catch (e: Exception) {
                 _isLoginSuccessful.value = false // Maneja errores de red o de lógica

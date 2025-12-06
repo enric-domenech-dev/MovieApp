@@ -10,6 +10,7 @@ import kotlinx.serialization.json.Json
 import org.lanzadera.proyectos.domain.models.movie.Movie
 import org.lanzadera.proyectos.domain.models.movie.MovieResponse
 import org.lanzadera.proyectos.domain.repository.MovieRepository
+import org.lanzadera.proyectos.utils.Logger
 
 class MovieRepositoryImpl(
     private val client: HttpClient,
@@ -59,16 +60,16 @@ class MovieRepositoryImpl(
         val last = lastUpdated[state] ?: 0L
         val freshEnough = ttlMillis > 0 && (now - last) < ttlMillis
 
-        println("SYNCRO MovieRepositoryImpl: force=$force, state.size=${state.value.size}, freshEnough=$freshEnough")
+        Logger.d("force=$force, state.size=${state.value.size}, freshEnough=$freshEnough", tag = "MovieRepository")
         if (!force && (state.value.isNotEmpty() || freshEnough)) {
-            println("SYNCRO MovieRepositoryImpl: skipping fetch, cache is fresh")
+            Logger.d("skipping fetch, cache is fresh", tag = "MovieRepository")
             return
         }
-        println("SYNCRO MovieRepositoryImpl: fetching new data")
+        Logger.d("fetching new data", tag = "MovieRepository")
         val data = fetch()
         state.value = data
         lastUpdated[state] = now
-        println("SYNCRO MovieRepositoryImpl: updated state with ${data.size} movies")
+        Logger.d("updated state with ${data.size} movies", tag = "MovieRepository")
     }
 
     override suspend fun refreshMovies(force: Boolean) =
@@ -103,7 +104,7 @@ class MovieRepositoryImpl(
             movieDetailsCache[movieId] = movie
             movie
         } catch (t: Throwable) {
-            println("SYNCRO MovieRepositoryImpl: error fetching movie details: ${t.message}")
+            Logger.e("error fetching movie details: ${t.message}", tag = "MovieRepository", throwable = t)
             null
         }
     }
@@ -144,9 +145,9 @@ class MovieRepositoryImpl(
 
             if (valid.isEmpty()) break
             acc += valid
-            println("SYNCRO fetchPaged Movie: page $page, downloaded ${valid.size} movies, total so far: ${acc.size}")
+            Logger.d("page $page, downloaded ${valid.size} movies, total so far: ${acc.size}", tag = "MovieRepository")
         }
-        println("SYNCRO fetchPaged Movie: finished, total movies downloaded: ${acc.size}")
+        Logger.d("finished, total movies downloaded: ${acc.size}", tag = "MovieRepository")
         return acc
     }
 }

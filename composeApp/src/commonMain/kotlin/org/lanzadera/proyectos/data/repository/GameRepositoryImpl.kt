@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
 import org.lanzadera.proyectos.BuildConfig
+import org.lanzadera.proyectos.utils.Logger
 import org.lanzadera.proyectos.data.authentication.IGDBAuthManager
 import org.lanzadera.proyectos.domain.models.game.Game
 import org.lanzadera.proyectos.domain.repository.GameRepository
@@ -61,7 +62,7 @@ class GameRepositoryImpl(
             val accessToken = authManager.getAccessToken()
             val clientId = BuildConfig.IGDB_CLIENT_ID
 
-            println("SYNCRO: Sending request with Authorization: Bearer ${accessToken.take(20)}...")
+            Logger.d("Sending request with Authorization: Bearer ${accessToken.take(20)}...", tag = "GameRepository")
 
             val response = client.post("https://api.igdb.com/v4/games") {
                 headers {
@@ -72,7 +73,7 @@ class GameRepositoryImpl(
                 setBody(query)
             }
 
-            println("SYNCRO: Response status: ${response.status}")
+            Logger.d("Response status: ${response.status}", tag = "GameRepository")
 
             val games = json.decodeFromString<List<Game>>(response.bodyAsText())
             val validGames = games.filter { isValidGame(it) }
@@ -80,7 +81,7 @@ class GameRepositoryImpl(
             state.value = validGames
             lastUpdated[state] = now
         } catch (e: Exception) {
-            println("SYNCRO GameRepository: Error - ${e.message}")
+            Logger.d("Error - ${e.message}", tag = "GameRepository")
             e.printStackTrace()
         }
     }

@@ -13,6 +13,7 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.Json
 import org.lanzadera.proyectos.domain.models.movie.Movie
+import org.lanzadera.proyectos.utils.Logger
 import org.lanzadera.proyectos.domain.models.movie.MovieResponse
 import org.lanzadera.proyectos.domain.repository.LoadInitialData
 
@@ -83,16 +84,16 @@ private suspend inline fun refreshFeed(
     val last = lastUpdated[state] ?: 0L
     val freshEnough = ttlMillis > 0 && (now - last) < ttlMillis
 
-    println("SYNCRO refreshFeed: force=$force, state.size=${state.value.size}, freshEnough=$freshEnough, ttlMillis=$ttlMillis, last=$last, now=$now")
+    Logger.d("force=$force, state.size=${state.value.size}, freshEnough=$freshEnough, ttlMillis=$ttlMillis, last=$last, now=$now", tag = "LoadInitialData")
     if (!force && (state.value.isNotEmpty() || freshEnough)) {
-        println("SYNCRO refreshFeed: skipping fetch, cache is fresh or not forced")
+        Logger.d("skipping fetch, cache is fresh or not forced", tag = "LoadInitialData")
         return
     }
-    println("SYNCRO refreshFeed: fetching new data")
+    Logger.d("fetching new data", tag = "LoadInitialData")
     val data = fetch()
     state.value = data                          // emitir ANTES de devolver
     lastUpdated[state] = now
-    println("SYNCRO refreshFeed: updated state with ${data.size} movies")
+    Logger.d("updated state with ${data.size} movies", tag = "LoadInitialData")
 }
 
 
@@ -214,10 +215,10 @@ private suspend inline fun refreshFeed(
 
             if (valid.isEmpty()) break
             acc += valid
-            println("SYNCRO fetchPaged: page $page, downloaded ${valid.size} movies, total so far: ${acc.size}")
+            Logger.d("page $page, downloaded ${valid.size} movies, total so far: ${acc.size}", tag = "LoadInitialData")
 
         }
-        println("SYNCRO fetchPaged: finished, total movies downloaded: ${acc.size}")
+        Logger.d("finished, total movies downloaded: ${acc.size}", tag = "LoadInitialData")
         return acc
     }
 }

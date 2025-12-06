@@ -11,6 +11,7 @@ import org.lanzadera.proyectos.domain.models.tvshow.Season
 import org.lanzadera.proyectos.domain.models.tvshow.TvShow
 import org.lanzadera.proyectos.domain.models.tvshow.TvShowResponse
 import org.lanzadera.proyectos.domain.repository.TvShowRepository
+import org.lanzadera.proyectos.utils.Logger
 
 class TvShowRepositoryImpl(
     private val client: HttpClient,
@@ -66,16 +67,16 @@ class TvShowRepositoryImpl(
         val last = lastUpdated[state] ?: 0L
         val freshEnough = ttlMillis > 0 && (now - last) < ttlMillis
 
-        println("SYNCRO TvShowRepositoryImpl: force=$force, state.size=${state.value.size}, freshEnough=$freshEnough")
+        Logger.d("force=$force, state.size=${state.value.size}, freshEnough=$freshEnough")
         if (!force && (state.value.isNotEmpty() || freshEnough)) {
-            println("SYNCRO TvShowRepositoryImpl: skipping fetch, cache is fresh")
+            Logger.d("skipping fetch, cache is fresh")
             return
         }
-        println("SYNCRO TvShowRepositoryImpl: fetching new data")
+        Logger.d("fetching new data")
         val data = fetch()
         state.value = data
         lastUpdated[state] = now
-        println("SYNCRO TvShowRepositoryImpl: updated state with ${data.size} tv shows")
+        Logger.d("updated state with ${data.size} tv shows")
     }
 
     override suspend fun refreshTvShows(force: Boolean) =
@@ -126,7 +127,7 @@ class TvShowRepositoryImpl(
                         val seasonWithEpisodes: Season = json.decodeFromString(seasonText)
                         seasonWithEpisodes
                     } catch (e: Exception) {
-                        println("SYNCRO TvShowRepositoryImpl: error fetching season ${season.seasonNumber}: ${e.message}")
+                        Logger.d("error fetching season ${season.seasonNumber}: ${e.message}")
                         season // Devuelve la temporada sin episodios si falla
                     }
                 }
@@ -135,7 +136,7 @@ class TvShowRepositoryImpl(
             tvShowDetailsCache[tvShowId] = tvShow
             tvShow
         } catch (t: Throwable) {
-            println("SYNCRO TvShowRepositoryImpl: error fetching tv show details: ${t.message}")
+            Logger.d("error fetching tv show details: ${t.message}")
             null
         }
     }
@@ -182,9 +183,9 @@ class TvShowRepositoryImpl(
 
             if (valid.isEmpty()) break
             acc += valid
-            println("SYNCRO fetchPaged TvShow: page $page, downloaded ${valid.size} tv shows, total so far: ${acc.size}")
+            Logger.d("page $page, downloaded ${valid.size} tv shows, total so far: ${acc.size}")
         }
-        println("SYNCRO fetchPaged TvShow: finished, total tv shows downloaded: ${acc.size}")
+        Logger.d("finished, total tv shows downloaded: ${acc.size}")
         return acc
     }
 }

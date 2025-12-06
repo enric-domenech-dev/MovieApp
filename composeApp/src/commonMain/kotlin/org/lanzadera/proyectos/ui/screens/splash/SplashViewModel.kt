@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import org.lanzadera.proyectos.domain.repository.LoadInitialData
+import org.lanzadera.proyectos.utils.Logger
 
 class SplashViewModel(
     private val loadInitialDataRepository: LoadInitialData
@@ -37,7 +38,7 @@ class SplashViewModel(
                 _isLoadingComplete.value = true
             } catch (e: Exception) {
                 // Si hay error, marcamos como completo igual para no bloquear la UI
-                println("SYNCRO SplashViewModel: Error loading initial data: ${e.message}")
+                Logger.d("Error loading initial data: ${e.message}", tag = "SplashViewModel")
                 _isLoadingComplete.value = true
             }
         }

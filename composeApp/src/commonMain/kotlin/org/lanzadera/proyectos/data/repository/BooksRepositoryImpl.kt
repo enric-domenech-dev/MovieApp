@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.json.Json
 import org.lanzadera.proyectos.domain.models.book.Book
+import org.lanzadera.proyectos.utils.Logger
 import org.lanzadera.proyectos.domain.models.book.GoogleBooksResponse
 import org.lanzadera.proyectos.domain.repository.BooksRepository
 
@@ -130,9 +131,9 @@ class BooksRepositoryImpl(
             val dto: GoogleBooksResponse = json.decodeFromString(text)
             val mapped = dto.items?.map { mapVolumeToBook(it) } ?: emptyList()
             stateFlow.value = mapped
-            println("SYNCRO BooksRepositoryImpl: $methodName fetched ${mapped.size} books")
+            Logger.d("$methodName fetched ${mapped.size} books", tag = "BooksRepository")
         } catch (t: Throwable) {
-            println("SYNCRO BooksRepositoryImpl: $methodName error: ${t.message}")
+            Logger.d("$methodName error: ${t.message}", tag = "BooksRepository")
             throw t
         }
     }
