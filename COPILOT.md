@@ -9,6 +9,116 @@ This file provides guidance to Copilot when working with code in this repository
 3. [AUDIT_REPORT.md](./AUDIT_REPORT.md) - Comprehensive code audit with identified issues
 4. [TODO_LIST.md](./TODO_LIST.md) - Detailed task list to reach 100/100 score
 
+---
+
+## ⚠️ CRITICAL RULES - READ FIRST
+
+### 1. ALWAYS Add Imports When Using New Classes
+
+**RULE:** Whenever you use a new class, interface, or function in a file, you MUST:
+1. Add the corresponding import at the top of the file
+2. Verify the import respects Clean Architecture dependency rules
+3. Ensure the import compiles successfully
+
+**Clean Architecture Import Rules:**
+
+✅ **ALLOWED:**
+```kotlin
+// domain/ can import ONLY:
+import kotlinx.coroutines.*           // ✅ Kotlin stdlib
+import kotlinx.datetime.*             // ✅ Kotlin libraries
+// NO OTHER IMPORTS in domain/models or domain/repository
+
+// domain/usecase can import:
+import org.lanzadera.proyectos.domain.models.*      // ✅ Domain models
+import org.lanzadera.proyectos.domain.repository.*  // ✅ Domain interfaces
+
+// data/ can import:
+import org.lanzadera.proyectos.domain.*  // ✅ Domain layer (interfaces & models)
+import io.ktor.client.*                   // ✅ Framework libs
+import androidx.room.*                    // ✅ Platform libs
+
+// ui/ can import ONLY:
+import androidx.compose.*                 // ✅ UI framework
+import org.koin.*                         // ✅ DI framework
+// UI should use ViewModels which use UseCases
+// UI should have its own UI models (data classes)
+```
+
+❌ **FORBIDDEN:**
+```kotlin
+// domain/ CANNOT import:
+import org.lanzadera.proyectos.data.*   // ❌ Domain can't depend on data
+import org.lanzadera.proyectos.ui.*     // ❌ Domain can't depend on UI
+import io.ktor.client.*                  // ❌ Domain can't depend on frameworks
+import androidx.room.*                   // ❌ Domain can't depend on platform
+
+// data/ CANNOT import:
+import org.lanzadera.proyectos.ui.*     // ❌ Data can't depend on UI
+
+// ui/ CANNOT import:
+import org.lanzadera.proyectos.domain.models.*  // ❌ UI should NOT use domain models directly
+import org.lanzadera.proyectos.domain.repository.*  // ❌ UI should NOT use repositories
+import org.lanzadera.proyectos.data.*   // ❌ UI can't depend on data layer
+```
+
+**Correct Flow:**
+```
+Domain Model → Mapper → UI Model
+     ↓
+  UseCase (returns domain model)
+     ↓
+  ViewModel (maps to UI model)
+     ↓
+  Composable (uses UI model)
+```
+
+**Example - CORRECT Way:**
+```kotlin
+// domain/models/Movie.kt
+data class Movie(val id: Int, val title: String, ...) // Domain model
+
+// ui/models/MovieUI.kt
+data class MovieUI(val id: Int, val title: String, ...) // UI model
+
+// ui/mapper/MovieMapper.kt
+fun Movie.toUI() = MovieUI(id = id, title = title, ...)
+
+// ui/viewmodel/MoviesViewModel.kt
+class MoviesViewModel(private val useCase: GetMoviesUseCase) {
+    val movies: StateFlow<List<MovieUI>> = useCase()
+        .map { domainMovies -> domainMovies.map { it.toUI() } }
+        .stateIn(...)
+}
+
+// ui/screens/MoviesScreen.kt
+@Composable
+fun MoviesScreen(viewModel: MoviesViewModel) {
+    val movies = viewModel.movies.collectAsState()
+    // Use MovieUI, not Movie
+}
+```
+
+**Example - WRONG Way:**
+```kotlin
+// ui/screens/MoviesScreen.kt - ❌ WRONG
+import org.lanzadera.proyectos.domain.models.Movie // ❌ NO!
+
+@Composable
+fun MoviesScreen(movies: List<Movie>) { // ❌ Using domain model in UI
+    // This breaks Clean Architecture!
+}
+```
+
+**How to Check:**
+1. Check which layer the file is in (domain/, data/, ui/)
+2. Verify dependency direction: UI → ViewModel → UseCase → Repository → DataSource
+3. UI should NEVER import domain.models or domain.repository
+4. Create UI models (DTOs) and mappers
+5. Compile after adding imports
+
+---
+
 ## Build & Run Commands
 
 ```bash
@@ -27,34 +137,16 @@ This file provides guidance to Copilot when working with code in this repository
 ./gradlew build                  # Build all variants
 ```
 
-## Project Architecture
+## Project Context
 
-**Kotlin Multiplatform Compose** app targeting Android (primary), iOS, and Desktop. Follows Clean Architecture with MVVM
-in the presentation layer.
+This is a **Kotlin Multiplatform Compose** application.
 
-### Source Structure
-
-```
-composeApp/src/
-├── commonMain/kotlin/org/lanzadera/proyectos/
-│   ├── di/AppModule.kt              # Koin DI configuration (single entry point)
-│   ├── navigation/Navigation.kt     # NavHost with type-safe routes
-│   ├── domain/
-│   │   ├── models/                  # Domain entities (Movie, TvShow, Book, Game, FavoriteItem)
-│   │   ├── repository/              # Abstract repository interfaces
-│   │   └── usecase/                 # Business logic operations
-│   ├── data/
-│   │   ├── repository/              # Repository implementations
-│   │   ├── datasource/              # Local/remote data sources + Provider functions
-│   │   └── mapper/                  # Entity <-> Domain mappers
-│   └── ui/
-│       ├── screens/                 # Feature screens with ViewModels
-│       └── components/              # Reusable Composables
-├── androidMain/                     # Android-specific (Room database, providers)
-└── commonTest/                      # Shared tests with Turbine + Truth
-```
-
-### Key Patterns
+**Current Project Health:**
+- Overall Score: 72/100
+- Architecture & Design: 75/100
+- Code Quality: 65/100
+- Testing & Coverage: 45/100 (~5% coverage)
+- Best Practices: 80/100
 
 - **Repository Pattern**: Domain defines interfaces, Data implements them
 - **Use Cases**: Single-responsibility operations (e.g., `ToggleFavoriteUseCase`, `ObserveFavoritesUseCase`)
