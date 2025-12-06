@@ -16,6 +16,8 @@ class FakeFavoriteDetailsRepository : FavoriteDetailsRepository {
     
     override fun observeFavoriteMovies(): Flow<List<Movie>> = _favoriteMovies
     
+    override fun observeUpcomingFavoriteMovies(today: String): Flow<List<Movie>> = _favoriteMovies
+    
     override fun observeFavoriteTvShows(): Flow<List<TvShow>> = _favoriteTvShows
     
     override suspend fun saveFavoriteMovie(movie: Movie) {

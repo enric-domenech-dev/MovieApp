@@ -2,34 +2,38 @@ package org.lanzadera.proyectos.fakes
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import org.lanzadera.proyectos.domain.models.WatchedMovie
 import org.lanzadera.proyectos.domain.repository.WatchedMoviesRepository
 
 class FakeWatchedMoviesRepository : WatchedMoviesRepository {
     
-    private val _watchedMovies = MutableStateFlow<Set<String>>(emptySet())
+    private val _watchedMovies = MutableStateFlow<List<WatchedMovie>>(emptyList())
     
     var shouldFail = false
     var failureException = Exception("Test failure")
     
-    override fun observeWatchedMovies(): Flow<Set<String>> = _watchedMovies
+    override fun observeAllWatchedMovies(): Flow<List<WatchedMovie>> = _watchedMovies
     
     override suspend fun toggleMovieWatched(movieId: String, isWatched: Boolean) {
         if (shouldFail) throw failureException
         
-        val current = _watchedMovies.value.toMutableSet()
+        val current = _watchedMovies.value.toMutableList()
         if (isWatched) {
-            current.add(movieId)
+            if (!current.any { it.movieId == movieId }) {
+                current.add(WatchedMovie(movieId = movieId))
+            }
         } else {
-            current.remove(movieId)
+            current.removeAll { it.movieId == movieId }
         }
         _watchedMovies.value = current
     }
     
-    fun isMovieWatched(movieId: String): Boolean {
-        return _watchedMovies.value.contains(movieId)
+    override suspend fun isMovieWatched(movieId: String): Boolean {
+        if (shouldFail) throw failureException
+        return _watchedMovies.value.any { it.movieId == movieId }
     }
     
     fun setWatchedMovies(movieIds: Set<String>) {
-        _watchedMovies.value = movieIds
+        _watchedMovies.value = movieIds.map { WatchedMovie(movieId = it) }
     }
 }

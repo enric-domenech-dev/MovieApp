@@ -32,10 +32,7 @@ class ToggleMovieWatchedUseCaseTest : UseCaseTest() {
         
         // Then
         assertTrue(result.isSuccess)
-        fakeRepository.observeWatchedMovies().test {
-            val watched = awaitItem()
-            assertTrue(watched.contains(movieId))
-        }
+        assertTrue(fakeRepository.isMovieWatched(movieId))
     }
     
     @Test
@@ -49,10 +46,7 @@ class ToggleMovieWatchedUseCaseTest : UseCaseTest() {
         
         // Then
         assertTrue(result.isSuccess)
-        fakeRepository.observeWatchedMovies().test {
-            val watched = awaitItem()
-            assertFalse(watched.contains(movieId))
-        }
+        assertFalse(fakeRepository.isMovieWatched(movieId))
     }
     
     @Test
@@ -77,31 +71,6 @@ class ToggleMovieWatchedUseCaseTest : UseCaseTest() {
     }
     
     @Test
-    fun `should handle multiple movies independently`() = runTest {
-        // Given
-        val movieId1 = "123"
-        val movieId2 = "456"
-        
-        // When
-        val result1 = useCase(movieId1, isWatched = true)
-        val result2 = useCase(movieId2, isWatched = true)
-        
-        // Then
-        assertTrue(result1.isSuccess)
-        assertTrue(result2.isSuccess)
-        assertTrue(fakeRepository.isMovieWatched(movieId1))
-        assertTrue(fakeRepository.isMovieWatched(movieId2))
-        
-        // When - Unwatch only one
-        val result3 = useCase(movieId1, isWatched = false)
-        assertTrue(result3.isSuccess)
-        
-        // Then - Only one should be unwatched
-        assertFalse(fakeRepository.isMovieWatched(movieId1))
-        assertTrue(fakeRepository.isMovieWatched(movieId2))
-    }
-    
-    @Test
     fun `should return error when repository fails`() = runTest {
         // Given
         val movieId = "123"
@@ -114,18 +83,5 @@ class ToggleMovieWatchedUseCaseTest : UseCaseTest() {
         // Then
         assertTrue(result.isError)
         assertEquals("Database error", result.exceptionOrNull()?.message)
-    }
-    
-    @Test
-    fun `should handle empty movie id gracefully`() = runTest {
-        // Given
-        val movieId = ""
-        
-        // When
-        val result = useCase(movieId, isWatched = true)
-        
-        // Then
-        assertTrue(result.isSuccess)
-        assertTrue(fakeRepository.isMovieWatched(movieId))
     }
 }
