@@ -48,14 +48,14 @@ After completing each task, update:
 
 ## 📊 PROGRESS TRACKING
 
-### Overall Progress: 11/136 tasks completed (8.09%)
+### Overall Progress: 12/136 tasks completed (8.82%)
 
 ### Phase Status:
 
 - [x] **Phase 0: Quick Wins** (8/8 completed) ✅ **COMPLETE**
-- [ ] **Phase 1: Architecture Fixes** (3/17 completed) - 🎯 **CURRENT** 
-  - **Next Task:** 1.3 - Refactor MovieDetailViewModel
-  - **Recent:** ✅ Task 1.2 COMPLETE - HomeViewModel uses only use cases
+- [ ] **Phase 1: Architecture Fixes** (4/17 completed) - 🎯 **CURRENT** 
+  - **Next Task:** 1.4 - Refactor SearchViewModel
+  - **Recent:** ✅ Task 1.3 COMPLETE - MovieDetailViewModel uses only use cases
 - [ ] **Phase 2: Code Quality** (0/12 completed) - Week 2
 - [ ] **Phase 3: Testing - Use Cases** (0/15 completed) - Week 3
 - [ ] **Phase 4: Testing - Repositories** (0/12 completed) - Week 4
@@ -67,8 +67,8 @@ After completing each task, update:
 ### Current Sprint:
 
 **Active Phase:** Phase 1 - Architecture Fixes  
-**Next Task:** Task 1.3 - Refactor MovieDetailViewModel  
-**Estimated Time Remaining in Phase:** ~33-36 hours
+**Next Task:** Task 1.4 - Refactor SearchViewModel  
+**Estimated Time Remaining in Phase:** ~31-34 hours
 
 ---
 
@@ -170,6 +170,21 @@ After completing each task, update:
     - Updated: HomeViewModel.kt, AppModule.kt, COPILOT.md
   - **Time:** ~2 hours
   - **Next:** Task 1.3 - Refactor MovieDetailViewModel
+ - **Session 6** (Dec 6, 2025):
+   - 🎉 **Task 1.3: COMPLETE** - MovieDetailViewModel refactored to use only use cases
+   - ✅ **Architecture improvements**:
+     - Removed 2 repository injections from MovieDetailViewModel
+     - Replaced with use cases: GetMovieDetailsUseCase, ObserveWatchedMoviesUseCase
+     - MovieDetailViewModel now follows Clean Architecture - only injects use cases
+     - Added proper Result type handling in loadMovieDetails()
+   - 📊 **Results**:
+     - Android build: BUILD SUCCESSFUL ✅
+     - 0 repository references in MovieDetailViewModel ✅
+     - Proper error handling for Result types ✅
+   - 📦 **Files**:
+     - Updated: MovieDetailViewModel.kt
+   - **Time:** ~30 minutes
+   - **Next:** Task 1.4 - Refactor SearchViewModel
 
 ---
 
@@ -609,22 +624,22 @@ After completing each task, update:
 
 ---
 
-## Task 1.2: Refactor HomeViewModel - Remove Repository Injections
+## [x] Task 1.2: Refactor HomeViewModel - Remove Repository Injections ✅
 
-**Impact:** HIGH | **Effort:** 3 hours | **Owner:** `___________`
+**Impact:** HIGH | **Effort:** 2 hours | **Status:** ✅ COMPLETE
 
 ### Subtasks:
 
-- [ ] 1.2.1 Replace `watchedEpisodesRepository` with `ObserveWatchedEpisodesUseCase`
+- [x] 1.2.1 Replace `watchedEpisodesRepository` with `ObserveAllWatchedEpisodesUseCase`
     - Remove: `private val watchedEpisodesRepository: WatchedEpisodesRepository`
-    - Add: `private val observeWatchedEpisodesUseCase: ObserveWatchedEpisodesUseCase`
+    - Add: `private val observeAllWatchedEpisodesUseCase: ObserveAllWatchedEpisodesUseCase`
     - Update all usages
 
-- [ ] 1.2.2 Replace `favoriteDetailsRepository` with `GetFavoriteDetailsUseCase`
-- [ ] 1.2.3 Replace `watchedMoviesRepository` with `ObserveWatchedMoviesUseCase`
-- [ ] 1.2.4 Update all method calls to use use cases
-- [ ] 1.2.5 Update DI configuration
-- [ ] 1.2.6 Verify app compiles and runs
+- [x] 1.2.2 Replace `favoriteDetailsRepository` with `GetFavoriteDetailsUseCase`
+- [x] 1.2.3 Replace `watchedMoviesRepository` with `ObserveWatchedMoviesUseCase`
+- [x] 1.2.4 Update all method calls to use use cases
+- [x] 1.2.5 Update DI configuration
+- [x] 1.2.6 Verify app compiles and runs
 
 **Acceptance Criteria:**
 
@@ -634,22 +649,23 @@ After completing each task, update:
 
 ---
 
-## Task 1.3: Refactor MovieDetailViewModel
+## [x] Task 1.3: Refactor MovieDetailViewModel ✅
 
-**Impact:** HIGH | **Effort:** 2 hours | **Owner:** `___________`
+**Impact:** HIGH | **Effort:** 2 hours | **Status:** ✅ COMPLETE
 
 ### Subtasks:
 
-- [ ] 1.3.1 Replace `movieRepository` with `GetMovieDetailsUseCase`
-- [ ] 1.3.2 Replace `watchedMoviesRepository` with use case
-- [ ] 1.3.3 Update method implementations
-- [ ] 1.3.4 Test movie detail screen functionality
+- [x] 1.3.1 Replace `movieRepository` with `GetMovieDetailsUseCase`
+- [x] 1.3.2 Replace `watchedMoviesRepository` with `ObserveWatchedMoviesUseCase`
+- [x] 1.3.3 Update method implementations with Result handling
+- [x] 1.3.4 Test movie detail screen functionality
 
 **Acceptance Criteria:**
 
 - ✅ MovieDetailViewModel only injects use cases
 - ✅ Movie details load correctly
 - ✅ Watch toggle works
+- ✅ Build successful
 
 ---
 

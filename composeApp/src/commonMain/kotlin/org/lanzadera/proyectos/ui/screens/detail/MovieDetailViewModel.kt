@@ -9,23 +9,24 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.lanzadera.proyectos.domain.models.Result
 import org.lanzadera.proyectos.domain.models.favorite.FavoriteItem
 import org.lanzadera.proyectos.domain.models.favorite.FavoriteType
 import org.lanzadera.proyectos.domain.models.movie.Movie
-import org.lanzadera.proyectos.domain.repository.MovieRepository
-import org.lanzadera.proyectos.domain.repository.WatchedMoviesRepository
 import org.lanzadera.proyectos.domain.usecase.favorites.ObserveFavoritesUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.ToggleFavoriteUseCase
+import org.lanzadera.proyectos.domain.usecase.movies.GetMovieDetailsUseCase
+import org.lanzadera.proyectos.domain.usecase.movies.ObserveWatchedMoviesUseCase
 import org.lanzadera.proyectos.domain.usecase.movies.ToggleMovieWatchedUseCase
 import org.lanzadera.proyectos.ui.mapper.toDetailUI
 import org.lanzadera.proyectos.ui.models.MovieDetailUI
 import org.lanzadera.proyectos.utils.DateUtils
 
 class MovieDetailViewModel(
-    private val movieRepository: MovieRepository,
+    private val getMovieDetailsUseCase: GetMovieDetailsUseCase,
     observeFavoritesUseCase: ObserveFavoritesUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
-    private val watchedMoviesRepository: WatchedMoviesRepository,
+    private val observeWatchedMoviesUseCase: ObserveWatchedMoviesUseCase,
     private val toggleMovieWatchedUseCase: ToggleMovieWatchedUseCase
 ) : ViewModel() {
 
@@ -46,7 +47,7 @@ class MovieDetailViewModel(
     val favorites = observeFavoritesUseCase()
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    val watchedMovies = watchedMoviesRepository.observeAllWatchedMovies()
+    val watchedMovies = observeWatchedMoviesUseCase()
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val isWatched: StateFlow<Boolean> = watchedMovies.map { watched ->
@@ -64,10 +65,19 @@ class MovieDetailViewModel(
             try {
                 _isLoading.value = true
                 _error.value = null
-                val details = movieRepository.getMovieDetails(movieId)
-                _movieDetailDomain.value = details
-                if (details == null) {
-                    _error.value = "No se pudieron cargar los detalles de la película"
+                when (val result = getMovieDetailsUseCase(movieId)) {
+                    is Result.Success -> {
+                        _movieDetailDomain.value = result.data
+                        if (result.data == null) {
+                            _error.value = "No se pudieron cargar los detalles de la película"
+                        }
+                    }
+                    is Result.Error -> {
+                        _error.value = result.message ?: "Error desconocido"
+                    }
+                    is Result.Loading -> {
+                        // Already handled by _isLoading
+                    }
                 }
             } catch (e: Exception) {
                 _error.value = "Error: ${e.message}"
