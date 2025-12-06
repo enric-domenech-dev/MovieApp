@@ -52,7 +52,20 @@ fun TvShow.toDetailUI(): TvShowDetailUI = TvShowDetailUI(
             episodeCount = season.episodeCount,
             posterPath = season.posterPath,
             airDate = season.airDate,
-            overview = season.overview
+            overview = season.overview,
+            episodes = season.episodes?.map { episode ->
+                EpisodeUI(
+                    id = episode.id ?: 0,
+                    name = episode.name ?: "",
+                    episodeNumber = episode.episodeNumber,
+                    seasonNumber = episode.seasonNumber,
+                    airDate = episode.airDate,
+                    overview = episode.overview,
+                    stillPath = episode.stillPath,
+                    voteAverage = episode.voteAverage,
+                    voteCount = episode.voteCount
+                )
+            }
         )
     },
     networks = networks?.map { network ->

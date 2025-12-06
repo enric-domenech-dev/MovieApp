@@ -62,6 +62,8 @@ import org.lanzadera.proyectos.domain.models.tvshow.Season
 import org.lanzadera.proyectos.ui.models.TvShowUI
 import org.lanzadera.proyectos.ui.models.TvShowWithNextEpisodeUI
 import org.lanzadera.proyectos.ui.models.TvShowDetailUI
+import org.lanzadera.proyectos.ui.models.SeasonUI
+import org.lanzadera.proyectos.ui.models.EpisodeUI
 import org.lanzadera.proyectos.ui.models.AggregateCastUI
 import org.lanzadera.proyectos.ui.models.AggregateCrewUI
 import org.lanzadera.proyectos.navigation.NavigationStore
@@ -628,7 +630,7 @@ fun SeriesSeasonsTab(
 
 @Composable
 fun SeasonListItem(
-    season: Season,
+    season: SeasonUI,
     watchedEpisodes: Set<String>,
     onEpisodeToggle: (Int, Int, Boolean) -> Unit
 ) {
@@ -650,7 +652,7 @@ fun SeasonListItem(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = season.name ?: "Temporada ${season.seasonNumber}",
+                        text = season.name,
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.SemiBold
@@ -705,7 +707,7 @@ fun SeasonListItem(
 }
 
 @Composable
-fun EpisodeListItem(episode: Episode, isWatched: Boolean, onToggle: (Boolean) -> Unit) {
+fun EpisodeListItem(episode: EpisodeUI, isWatched: Boolean, onToggle: (Boolean) -> Unit) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -736,7 +738,7 @@ fun EpisodeListItem(episode: Episode, isWatched: Boolean, onToggle: (Boolean) ->
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 Text(
-                    text = "Ep. ${episode.episodeNumber} - ${episode.name ?: "Desconocido"}",
+                    text = "Ep. ${episode.episodeNumber} - ${episode.name}",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.SemiBold,

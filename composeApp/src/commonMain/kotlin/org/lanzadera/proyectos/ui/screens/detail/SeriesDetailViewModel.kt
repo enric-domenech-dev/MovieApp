@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.lanzadera.proyectos.domain.models.WatchedEpisode
@@ -17,6 +18,8 @@ import org.lanzadera.proyectos.domain.usecase.episodes.ToggleEpisodeWatchedUseCa
 import org.lanzadera.proyectos.domain.usecase.favorites.ObserveFavoritesUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.ToggleFavoriteUseCase
 import org.lanzadera.proyectos.domain.usecase.tvshows.RefreshTvShowsUseCase
+import org.lanzadera.proyectos.ui.mapper.toDetailUI
+import org.lanzadera.proyectos.ui.models.TvShowDetailUI
 
 class SeriesDetailViewModel(
     private val refreshTvShowsUseCase: RefreshTvShowsUseCase,
@@ -26,8 +29,13 @@ class SeriesDetailViewModel(
     private val toggleEpisodeWatchedUseCase: ToggleEpisodeWatchedUseCase
 ) : ViewModel() {
 
-    private val _tvShowDetail = MutableStateFlow<TvShow?>(null)
-    val tvShowDetail: StateFlow<TvShow?> = _tvShowDetail.asStateFlow()
+    // Internal domain model state
+    private val _tvShowDetailDomain = MutableStateFlow<TvShow?>(null)
+    
+    // Public UI model state - mapped from domain
+    val tvShowDetail: StateFlow<TvShowDetailUI?> = _tvShowDetailDomain
+        .map { it?.toDetailUI() }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -47,7 +55,7 @@ class SeriesDetailViewModel(
                 _isLoading.value = true
                 _error.value = null
                 val details = refreshTvShowsUseCase.getTvShowDetails(tvShowId)
-                _tvShowDetail.value = details
+                _tvShowDetailDomain.value = details
                 if (details == null) {
                     _error.value = "No se pudieron cargar los detalles de la serie"
                 } else {
@@ -67,14 +75,14 @@ class SeriesDetailViewModel(
     }
 
     fun setTvShowDetail(tvShow: TvShow) {
-        _tvShowDetail.value = tvShow
+        _tvShowDetailDomain.value = tvShow
         tvShow.id?.let {
             loadTvShowDetails(it)
         }
     }
 
     fun toggleFavorite() {
-        val tvShow = _tvShowDetail.value ?: return
+        val tvShow = _tvShowDetailDomain.value ?: return
         val item = FavoriteItem(
             id = tvShow.id?.toString() ?: return,
             type = FavoriteType.TV_SHOW,
@@ -86,8 +94,8 @@ class SeriesDetailViewModel(
     }
 
     fun toggleEpisodeWatched(seasonNumber: Int, episodeNumber: Int, isWatched: Boolean) {
-        val tvShowId = _tvShowDetail.value?.id?.toString() ?: return
-        val tvShow = _tvShowDetail.value ?: return
+        val tvShowId = _tvShowDetailDomain.value?.id?.toString() ?: return
+        val tvShow = _tvShowDetailDomain.value ?: return
 
         viewModelScope.launch {
             if (isWatched) {

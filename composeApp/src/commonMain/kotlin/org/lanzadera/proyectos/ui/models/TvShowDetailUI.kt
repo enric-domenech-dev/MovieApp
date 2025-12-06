@@ -79,7 +79,8 @@ data class SeasonUI(
     val episodeCount: Int?,
     val posterPath: String?,
     val airDate: String?,
-    val overview: String?
+    val overview: String?,
+    val episodes: List<EpisodeUI>?
 ) {
     val posterUrl: String
         get() = posterPath?.let { "https://image.tmdb.org/t/p/w500$it" } ?: ""
