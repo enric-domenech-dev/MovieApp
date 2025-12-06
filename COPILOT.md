@@ -216,6 +216,101 @@ class ObserveAllWatchedEpisodesUseCase(
 - Clearer naming and intent
 - Better maintainability
 
+### 3. ViewModel-Per-Tab Pattern for Complex Screens
+
+**RULE:** When a screen has multiple tabs with independent data and logic, create separate ViewModels for each tab.
+
+**❌ WRONG - Single God ViewModel:**
+```kotlin
+// HomeViewModel.kt - 638 lines, 9 dependencies, 60+ StateFlows
+class HomeViewModel(
+    private val moviesRepo: MovieRepository,
+    private val tvShowsRepo: TvShowRepository,
+    private val booksRepo: BooksRepository,
+    private val gamesRepo: GameRepository,
+    private val favoritesRepo: FavoritesRepository,
+    // ... 4 more repos
+) : ViewModel() {
+    // 60+ StateFlows for all tabs
+    val popularMovies: StateFlow<List<MovieUI>>
+    val trendingBooks: StateFlow<List<BookUI>>
+    val favoriteTvShows: StateFlow<List<TvShowUI>>
+    // ... 57 more StateFlows
+}
+```
+
+**✅ CORRECT - ViewModel per tab:**
+```kotlin
+// HomeViewModel.kt - 58 lines, 0 dependencies, 1 StateFlow
+class HomeViewModel : ViewModel() {
+    private val _selectedTab = MutableStateFlow(HomeTab.FAVORITES)
+    val selectedTab: StateFlow<HomeTab> = _selectedTab.asStateFlow()
+    
+    fun selectTab(tab: HomeTab) {
+        _selectedTab.value = tab
+    }
+}
+
+// FavoritesTabViewModel.kt - 318 lines, 5 dependencies, 8 StateFlows
+class FavoritesTabViewModel(
+    private val observeFavoritesUseCase: ObserveFavoritesUseCase,
+    private val getFavoriteDetailsUseCase: GetFavoriteDetailsUseCase,
+    // ... only favorites-related deps
+) : ViewModel() {
+    val favorites: StateFlow<List<FavoriteItemUI>>
+    val moviesWithReleaseInfo: StateFlow<List<Pair<MovieUI, ReleaseInfoUI?>>>
+    // ... only favorites-related state
+}
+
+// FilmsTabViewModel.kt - 62 lines, 1 dependency, 9 StateFlows
+class FilmsTabViewModel(
+    private val getInitialDataUseCase: GetInitialDataUseCase
+) : ViewModel() {
+    val popularMovies: StateFlow<List<MovieUI>>
+    val trendingMovies: StateFlow<List<MovieUI>>
+    // ... only films-related state
+}
+
+// BooksTabViewModel.kt, SeriesTabViewModel.kt, GamesTabViewModel.kt
+// Similar pattern - one ViewModel per tab
+```
+
+**Update HomeView to inject all ViewModels:**
+```kotlin
+@Composable
+fun HomeView(
+    homeViewModel: HomeViewModel = koinViewModel(),
+    favoritesViewModel: FavoritesTabViewModel = koinViewModel(),
+    filmsViewModel: FilmsTabViewModel = koinViewModel(),
+    seriesViewModel: SeriesTabViewModel = koinViewModel(),
+    booksViewModel: BooksTabViewModel = koinViewModel(),
+    gamesViewModel: GamesTabViewModel = koinViewModel()
+) {
+    val selectedTab by homeViewModel.selectedTab.collectAsState()
+    
+    when (selectedTab) {
+        HomeTab.FAVORITES -> FavoritesTabContent(favoritesViewModel)
+        HomeTab.FILMS -> FilmsTabContent(filmsViewModel)
+        HomeTab.SERIES -> SeriesTabContent(seriesViewModel)
+        HomeTab.BOOKS -> BooksTabContent(booksViewModel)
+        HomeTab.GAMES -> GamesTabContent(gamesViewModel)
+    }
+}
+```
+
+**Benefits:**
+- **Performance**: Only active tab ViewModel initializes (lazy loading with `SharingStarted.Lazily`)
+- **Testability**: Each ViewModel has 1-5 dependencies vs 9
+- **Maintainability**: 62-318 lines per file vs 638 lines
+- **Single Responsibility**: Each ViewModel handles one tab's logic
+- **Memory**: 83% fewer StateFlows on app startup (1 vs 60+)
+
+**When to apply:**
+- Screen has 3+ tabs with independent data sources
+- ViewModel > 400 lines
+- ViewModel has 5+ dependencies
+- Different tabs load data at different times
+
 ---
 
 ## Build & Run Commands
