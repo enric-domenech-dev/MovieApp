@@ -25,7 +25,7 @@ import androidx.navigation.NavHostController
 @Composable
 @Preview
 fun BookDetailView(
-    nav: NavHostController,
+    onNavigateBack: () -> Unit,
     bookId: String,
     book: BookUI? = null, // TODO: Load book by ID from repository when available
     selectedTheme: AppTheme = AppTheme.SYSTEM,
@@ -42,7 +42,7 @@ fun BookDetailView(
             CustomTopAppBar(
                 title = book?.title ?: "",
                 navigationIcon = {
-                    IconButton(onClick = { nav.popBackStack() }) {
+                    IconButton(onClick = { onNavigateBack() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                             contentDescription = "Go Back",
@@ -51,7 +51,7 @@ fun BookDetailView(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { nav.popBackStack() }) {
+                    IconButton(onClick = { onNavigateBack() }) {
                         Icon(imageVector = Icons.Outlined.Info, contentDescription = "Info")
                     }
                 },

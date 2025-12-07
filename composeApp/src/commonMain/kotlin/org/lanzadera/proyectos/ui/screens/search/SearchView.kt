@@ -45,7 +45,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import movieapp.composeapp.generated.resources.Res
 import movieapp.composeapp.generated.resources.new_edge_logo
@@ -59,7 +58,8 @@ import org.lanzadera.proyectos.utils.Strings
 @Composable
 fun SearchView(
     vm: SearchViewModel,
-    navController: NavHostController
+    onNavigateToMovieDetail: (movieId: Int) -> Unit,
+    onNavigateToTvShowDetail: (tvShowId: Int) -> Unit
 ) {
     val query by vm.query.collectAsState()
     val results by vm.results.collectAsState()
@@ -138,7 +138,7 @@ fun SearchView(
                                     movie = item,
                                     onClick = {
                                         item.id?.let { movieId ->
-                                            navController.navigate(Screen.MovieDetail(movieId))
+                                            onNavigateToMovieDetail(movieId)
                                         }
                                     }
                                 )
@@ -147,7 +147,7 @@ fun SearchView(
                                     tvShow = item,
                                     onClick = {
                                         item.id?.let { tvShowId ->
-                                            navController.navigate(Screen.TvShowDetail(tvShowId))
+                                            onNavigateToTvShowDetail(tvShowId)
                                         }
                                     }
                                 )

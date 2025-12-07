@@ -92,36 +92,84 @@ fun Navigation(
             )
         }
     ) {
-        DrawerAppBar(navViewModel = navHost, drawerState = drawerState, drawerEnabled = drawerEnabled) {
+        DrawerAppBar(
+            drawerState = drawerState,
+            drawerEnabled = drawerEnabled,
+            onNavigateToSearch = { navHost.navigate(Screen.Search) },
+            onNavigateToSettings = { navHost.navigate(Screen.Settings) },
+            onNavigateToLogin = { navHost.navigate(Screen.Login) }
+        ) {
             NavHost(navController = navHost, startDestination = Screen.SplashScreen) {
                 composable<Screen.SplashScreen> {
-                    SplashView(nav = navHost, darkTheme = darkTheme, selectedTheme = selectedTheme)
+                    SplashView(
+                        onNavigateToHome = {
+                            navHost.navigate(Screen.Home) {
+                                popUpTo<Screen.SplashScreen> { inclusive = true }
+                            }
+                        },
+                        darkTheme = darkTheme,
+                        selectedTheme = selectedTheme
+                    )
                 }
                 composable<Screen.Home> {
                     val homeViewModel: HomeViewModel = koinViewModel()
-                    HomeView(nav = navHost, vm = homeViewModel)
+                    HomeView(
+                        vm = homeViewModel,
+                        onNavigateToMovieDetail = { movieId ->
+                            navHost.navigate(Screen.MovieDetail(movieId))
+                        },
+                        onNavigateToTvShowDetail = { tvShowId ->
+                            navHost.navigate(Screen.TvShowDetail(tvShowId))
+                        },
+                        onNavigateToGameDetail = { gameId ->
+                            navHost.navigate(Screen.GameDetail(gameId))
+                        },
+                        onNavigateToBookDetail = { bookId ->
+                            navHost.navigate(Screen.BookDetail(bookId))
+                        }
+                    )
                 }
                 composable<Screen.Login> {
                     LoginView(
-                        nav = navHost, vm = LoginViewModel(),
-                        selectedTheme = selectedTheme, darkTheme = darkTheme
+                        vm = LoginViewModel(),
+                        selectedTheme = selectedTheme,
+                        darkTheme = darkTheme,
+                        onNavigateToHome = {
+                            navHost.navigate(Screen.Home)
+                        },
+                        onNavigateBack = {
+                            navHost.popBackStack()
+                        }
                     )
                 }
                 composable<Screen.Search> {
                     SearchView(
                         vm = koinViewModel<SearchViewModel>(),
-                        navController = navHost
+                        onNavigateToMovieDetail = { movieId ->
+                            navHost.navigate(Screen.MovieDetail(movieId))
+                        },
+                        onNavigateToTvShowDetail = { tvShowId ->
+                            navHost.navigate(Screen.TvShowDetail(tvShowId))
+                        }
                     )
                 }
                 composable<Screen.MovieDetail> { backStackEntry ->
                     val args = backStackEntry.toRoute<Screen.MovieDetail>()
                     val viewModel: MovieDetailViewModel = koinViewModel()
-                    MovieDetailView(nav = navHost, viewModel = viewModel, movieId = args.movieId)
+                    MovieDetailView(
+                        viewModel = viewModel,
+                        movieId = args.movieId,
+                        onNavigateBack = { navHost.popBackStack() }
+                    )
                 }
                 composable<Screen.TvShowDetail> { backStackEntry ->
                     val args = backStackEntry.toRoute<Screen.TvShowDetail>()
                     val viewModel: SeriesDetailViewModel = koinViewModel()
-                    SeriesDetailView(nav = navHost, vm = viewModel, tvShowId = args.tvShowId)
+                    SeriesDetailView(
+                        vm = viewModel,
+                        tvShowId = args.tvShowId,
+                        onNavigateBack = { navHost.popBackStack() }
+                    )
                 }
                 composable<Screen.GameDetail> { backStackEntry ->
                     val args = backStackEntry.toRoute<Screen.GameDetail>()
@@ -138,21 +186,30 @@ fun Navigation(
                     // For now, books are passed via NavigationStore since there's no detail endpoint
                     val book = NavigationStore.selectedBook
                     BookDetailView(
-                        nav = navHost,
                         bookId = args.bookId,
                         book = book,
                         selectedTheme = selectedTheme,
-                        darkTheme = darkTheme
+                        darkTheme = darkTheme,
+                        onNavigateBack = { navHost.popBackStack() }
                     )
                 }
                 composable<Screen.Settings> {
-                    SettingView(navHost, SettingsViewModel())
+                    SettingView(
+                        vm = SettingsViewModel(),
+                        onNavigateBack = { navHost.popBackStack() }
+                    )
                 }
                 composable<Screen.Chat> {
-                    ChatView(nav = navHost, vm = ChatViewModel())
+                    ChatView(
+                        vm = ChatViewModel(),
+                        onNavigateBack = { navHost.popBackStack() }
+                    )
                 }
                 composable<Screen.Profile> {
-                    ProfileView(nav = navHost, vm = ProfileViewModel())
+                    ProfileView(
+                        vm = ProfileViewModel(),
+                        onNavigateBack = { navHost.popBackStack() }
+                    )
                 }
             }
         }

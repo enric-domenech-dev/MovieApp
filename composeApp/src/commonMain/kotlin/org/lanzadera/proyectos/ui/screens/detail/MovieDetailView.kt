@@ -37,7 +37,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
@@ -50,9 +49,9 @@ import org.lanzadera.proyectos.utils.Strings
 @Composable
 @Preview
 fun MovieDetailView(
-    nav: NavHostController,
     movieId: Int,
-    viewModel: MovieDetailViewModel = koinInject()
+    viewModel: MovieDetailViewModel = koinInject(),
+    onNavigateBack: () -> Unit
 ) {
     val movieDetail by viewModel.movieDetail.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()

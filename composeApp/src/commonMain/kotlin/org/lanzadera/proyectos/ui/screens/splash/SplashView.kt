@@ -14,7 +14,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import movieapp.composeapp.generated.resources.Res
 import movieapp.composeapp.generated.resources.new_edge_logo
 import org.jetbrains.compose.resources.painterResource
@@ -26,19 +25,16 @@ import org.lanzadera.proyectos.navigation.Screen
 @OptIn(KoinExperimentalAPI::class)
 @Composable
 fun SplashView(
-    nav: NavHostController,
     darkTheme: Boolean = false,
     selectedTheme: AppTheme = AppTheme.SYSTEM,
-    viewModel: SplashViewModel = koinViewModel()
+    viewModel: SplashViewModel = koinViewModel(),
+    onNavigateToHome: () -> Unit
 ) {
     val isLoadingComplete = viewModel.isLoadingComplete.collectAsState().value
 
     LaunchedEffect(key1 = isLoadingComplete) {
         if (isLoadingComplete) {
-            // Navigate to Home Screen
-            nav.navigate(Screen.Home) {
-                popUpTo<Screen.SplashScreen> { inclusive = true }
-            }
+            onNavigateToHome()
         }
     }
     Scaffold { paddingValues ->

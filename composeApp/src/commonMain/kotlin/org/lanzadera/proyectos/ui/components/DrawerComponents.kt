@@ -50,7 +50,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 import kotlinx.coroutines.launch
 import movieapp.composeapp.generated.resources.Res
 import movieapp.composeapp.generated.resources.new_edge_logo
@@ -62,10 +61,12 @@ import org.lanzadera.proyectos.utils.Strings
 
 @Composable
 fun DrawerAppBar(
-    navViewModel: NavHostController,
     drawerState: DrawerState,
     modifier: Modifier = Modifier,
     drawerEnabled: Boolean = false,
+    onNavigateToSearch: () -> Unit,
+    onNavigateToSettings: () -> Unit,
+    onNavigateToLogin: () -> Unit,
     content: @Composable () -> Unit
 ) {
     var showDialog by remember { mutableStateOf(false) }
@@ -131,7 +132,7 @@ fun DrawerAppBar(
                         }
                         DropdownMenuItem(
                             text = { Text(Strings.Menu.PROFILE) },
-                            onClick = { navViewModel.navigate(Screen.Search) },
+                            onClick = { onNavigateToSearch() },
                             leadingIcon = {
                                 Icon(Icons.Outlined.Person, contentDescription = null)
                             }
@@ -140,7 +141,7 @@ fun DrawerAppBar(
                         DropdownMenuItem(
                             text = { Text(Strings.Settings.THEME) },
                             onClick = {
-                                navViewModel.navigate(Screen.Settings)
+                                onNavigateToSettings()
                                 scope.launch { drawerState.close() }
                             },
                             leadingIcon = {

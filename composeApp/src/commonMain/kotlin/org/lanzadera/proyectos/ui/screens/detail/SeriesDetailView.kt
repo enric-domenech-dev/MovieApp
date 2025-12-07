@@ -53,7 +53,7 @@ import org.lanzadera.proyectos.utils.Strings
 @Composable
 @Preview
 fun SeriesDetailView(
-    nav: NavHostController,
+    onNavigateBack: () -> Unit,
     tvShow: TvShowUI? = null,
     tvShowId: Int? = null,
     vm: SeriesDetailViewModel = koinInject()
@@ -88,7 +88,7 @@ fun SeriesDetailView(
                 CustomTopAppBar(
                     title = Strings.Detail.NO_DATA,
                     navigationIcon = {
-                        IconButton(onClick = { nav.popBackStack() }) {
+                        IconButton(onClick = { onNavigateBack() }) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                                 contentDescription = "Volver",
@@ -121,7 +121,7 @@ fun SeriesDetailView(
             CustomTopAppBar(
                 title = displayedTvShow.name ?: "",
                 navigationIcon = {
-                    IconButton(onClick = { nav.popBackStack() }) {
+                    IconButton(onClick = { onNavigateBack() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                             contentDescription = "Volver",

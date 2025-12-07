@@ -30,7 +30,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.lanzadera.proyectos.ui.components.PlaceholderScreen
 import org.lanzadera.proyectos.ui.components.sections.BookSection
@@ -56,21 +55,27 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 @Preview
 fun HomeView(
-    nav: NavHostController,
     vm: HomeViewModel = koinViewModel(),
     favoritesVM: FavoritesTabViewModel = koinViewModel(),
     booksVM: BooksTabViewModel = koinViewModel(),
     filmsVM: FilmsTabViewModel = koinViewModel(),
     seriesVM: SeriesTabViewModel = koinViewModel(),
     gamesVM: GamesTabViewModel = koinViewModel(),
+    // Navigation lambdas
+    onNavigateToMovieDetail: (movieId: Int) -> Unit,
+    onNavigateToTvShowDetail: (tvShowId: Int) -> Unit,
+    onNavigateToGameDetail: (gameId: Int) -> Unit,
+    onNavigateToBookDetail: (bookId: String) -> Unit
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val selectedTab by vm.selectedTab.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
 
     org.lanzadera.proyectos.ui.components.DrawerAppBar(
-        navViewModel = nav,
-        drawerState = drawerState
+        drawerState = drawerState,
+        onNavigateToSearch = { /* Not used from Home */ },
+        onNavigateToSettings = { /* Not used from Home */ },
+        onNavigateToLogin = { /* Not used from Home */ }
     ) {
         Scaffold(
             modifier = Modifier.fillMaxSize().safeDrawingPadding(),
