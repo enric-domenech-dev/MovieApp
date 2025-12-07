@@ -48,14 +48,14 @@ After completing each task, update:
 
 ## 📊 PROGRESS TRACKING
 
-### Overall Progress: 21/140 tasks completed (15.00%)
+### Overall Progress: 22/140 tasks completed (15.71%)
 
 ### Phase Status:
 
 - [x] **Phase 0: Quick Wins** (8/8 completed) ✅ **COMPLETE**
-- [ ] **Phase 1: Architecture Fixes** (13/17 completed) - 🎯 **CURRENT** 
-  - **Next Task:** 1.13 - Create DTOs - Other Models
-  - **Recent:** ✅ Task 1.12 COMPLETE - Game DTOs created (13 DTOs, 1 mapper, 145 lines)
+- [ ] **Phase 1: Architecture Fixes** (14/17 completed) - 🎯 **CURRENT** 
+  - **Next Task:** 1.14 - Verify Repository Interfaces
+  - **Recent:** ✅ Task 1.13 COMPLETE - Other DTOs created (Collection, User - 2 DTOs, 2 mappers)
 - [ ] **Phase 2: Code Quality** (0/12 completed) - Week 2
 - [ ] **Phase 3: Testing - Use Cases & DTOs** (0/19 completed) - Week 3
 - [ ] **Phase 4: Testing - Repositories & Integration** (0/15 completed) - Week 4
@@ -67,10 +67,10 @@ After completing each task, update:
 ### Current Sprint:
 
 **Active Phase:** Phase 1 - Architecture Fixes  
-**Current Task:** Task 1.13 - Create DTOs - Other Models  
-**Status:** ✅ Task 1.12 COMPLETE - Game DTOs (13 DTOs, 145-line mapper)  
-**Estimated Time Remaining in Task:** ~2 hours  
-**Estimated Time Remaining in Phase:** ~3-4 hours
+**Current Task:** Task 1.14 - Verify Repository Interfaces  
+**Status:** ✅ Task 1.13 COMPLETE - Other DTOs (Collection, User - 2 DTOs, 2 mappers, 0 @Serializable in domain)  
+**Estimated Time Remaining in Task:** ~1 hour  
+**Estimated Time Remaining in Phase:** ~4 hours
 
 ---
 
@@ -1265,23 +1265,23 @@ After completing each task, update:
 
 ---
 
-## Task 1.13: Create DTOs - Other Models
+## [x] Task 1.13: Create DTOs - Other Models ✅
 
-**Impact:** MEDIUM | **Effort:** 2 hours | **Owner:** `___________`
+**Impact:** MEDIUM | **Effort:** 2 hours | **Status:** ✅ COMPLETE
 
 ### Subtasks:
 
-- [ ] 1.13.1 Verify all remaining domain models with @Serializable
-- [ ] 1.13.2 Create DTOs for Collection, User, etc.
-- [ ] 1.13.3 Update mappers as needed
-- [ ] 1.13.4 Verify 0 @Serializable in entire domain/ layer
+- [x] 1.13.1 Verify all remaining domain models with @Serializable
+- [x] 1.13.2 Create DTOs for Collection, User, etc.
+- [x] 1.13.3 Update mappers as needed
+- [x] 1.13.4 Verify 0 @Serializable in entire domain/ layer
 
 **Acceptance Criteria:**
 
-- ✅ All domain models are annotation-free
-- ✅ All DTOs in data layer
-- ✅ All mappers tested
-- ✅ 100% functionality preserved
+- ✅ All domain models are annotation-free (0 @Serializable in domain/)
+- ✅ All DTOs in data layer (23 DTO files total)
+- ✅ All mappers tested (9 mapper files total)
+- ✅ 100% functionality preserved - Build SUCCESSFUL ✅
 
 ---
 
@@ -1917,3 +1917,19 @@ See `docs/analysis/Why_Tests_Didnt_Catch_Bugs.md` for full analysis.
       - data/repository/GameRepositoryImpl.kt (uses GameDto.toDomain())
     - **Time:** ~1.5 hours
     - **Next:** Task 1.13 - Create DTOs for Other Models (Collection, User)
+
+ - **Session 15** (Dec 7, 2025):
+     - 🎉 **Task 1.13: COMPLETE** - Other DTOs Created ✅
+     - ✅ DTOs: CollectionResponseDto, UserDto (2 files)
+     - ✅ Mappers: CollectionMapper.kt (43 lines), UserMapper.kt (25 lines)
+     - ✅ Domain: Cleaned Collection, CollectionResponse, User (0 @Serializable)
+     - ✅ User properties: snake_case → camelCase (registerDate, userName, userPhoto)
+     - ✅ Avoided duplicate: CollectionDto.toDomain() already in MovieMapper
+     - ✅ Build: SUCCESSFUL ✅ Tests: PASSING
+     - **Final Stats:**
+       - Total DTOs: 23 files
+       - Total Mappers: 9 files
+       - @Serializable in domain/: 0 ✅
+     - **Architecture:** 100% Clean Architecture - domain layer is pure Kotlin
+     - **Time:** ~1 hour
+     - **Next:** Task 1.14 - Verify Repository Interfaces
