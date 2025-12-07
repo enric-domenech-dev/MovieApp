@@ -7,9 +7,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
-import org.lanzadera.proyectos.domain.models.tvshow.Season
+import org.lanzadera.proyectos.data.dto.tvshow.SeasonDto
+import org.lanzadera.proyectos.data.dto.tvshow.TvShowDto
+import org.lanzadera.proyectos.data.dto.tvshow.TvShowResponseDto
+import org.lanzadera.proyectos.data.mapper.toDomain
 import org.lanzadera.proyectos.domain.models.tvshow.TvShow
-import org.lanzadera.proyectos.domain.models.tvshow.TvShowResponse
 import org.lanzadera.proyectos.domain.repository.TvShowRepository
 import org.lanzadera.proyectos.utils.Constants
 import org.lanzadera.proyectos.utils.Logger
@@ -114,7 +116,8 @@ class TvShowRepositoryImpl(
                     parameters.append("language", "es")
                 }
             }.bodyAsText()
-            var tvShow: TvShow = json.decodeFromString(text)
+            val tvShowDto: TvShowDto = json.decodeFromString(text)
+            var tvShow: TvShow = tvShowDto.toDomain()
 
             // Cargar episodios para cada temporada
             tvShow = tvShow.copy(
@@ -125,8 +128,8 @@ class TvShowRepositoryImpl(
                                 parameters.append("language", "es")
                             }
                         }.bodyAsText()
-                        val seasonWithEpisodes: Season = json.decodeFromString(seasonText)
-                        seasonWithEpisodes
+                        val seasonDto: SeasonDto = json.decodeFromString(seasonText)
+                        seasonDto.toDomain()
                     } catch (e: Exception) {
                         Logger.d("error fetching season ${season.seasonNumber}: ${e.message}")
                         season // Devuelve la temporada sin episodios si falla
@@ -179,8 +182,8 @@ class TvShowRepositoryImpl(
                 }
             }.bodyAsText()
 
-            val dto: TvShowResponse = json.decodeFromString(text)
-            val valid = dto.results.filter(::isValidTvShow)
+            val dto: TvShowResponseDto = json.decodeFromString(text)
+            val valid = dto.results.map { it.toDomain() }.filter(::isValidTvShow)
 
             if (valid.isEmpty()) break
             acc += valid

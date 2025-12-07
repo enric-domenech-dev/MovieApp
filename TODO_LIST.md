@@ -48,14 +48,14 @@ After completing each task, update:
 
 ## 📊 PROGRESS TRACKING
 
-### Overall Progress: 18/136 tasks completed (13.24%)
+### Overall Progress: 19/136 tasks completed (13.97%)
 
 ### Phase Status:
 
 - [x] **Phase 0: Quick Wins** (8/8 completed) ✅ **COMPLETE**
-- [ ] **Phase 1: Architecture Fixes** (10/17 completed) - 🎯 **CURRENT** 
-  - **Next Task:** 1.10 - Create DTOs - TV Show Models
-  - **Recent:** ✅ Task 1.9 COMPLETE - Movie DTOs created (12 DTOs, 3 mappers, tests fixed)
+- [ ] **Phase 1: Architecture Fixes** (11/17 completed) - 🎯 **CURRENT** 
+  - **Next Task:** 1.11 - Create DTOs - Book Models
+  - **Recent:** ✅ Task 1.10 COMPLETE - TV Show DTOs created (11 DTOs, 1 mapper, 0 annotations)
 - [ ] **Phase 2: Code Quality** (0/12 completed) - Week 2
 - [ ] **Phase 3: Testing - Use Cases** (0/15 completed) - Week 3
 - [ ] **Phase 4: Testing - Repositories** (0/12 completed) - Week 4
@@ -67,10 +67,10 @@ After completing each task, update:
 ### Current Sprint:
 
 **Active Phase:** Phase 1 - Architecture Fixes  
-**Current Task:** Task 1.10 - Create DTOs - TV Show Models  
-**Status:** ✅ Task 1.9 COMPLETE - Movie DTOs (12 DTOs, 0 annotations in domain)  
-**Estimated Time Remaining in Task:** ~4 hours  
-**Estimated Time Remaining in Phase:** ~8-9 hours
+**Current Task:** Task 1.11 - Create DTOs - Book Models  
+**Status:** ✅ Task 1.10 COMPLETE - TV Show DTOs (11 DTOs, 91-line mapper)  
+**Estimated Time Remaining in Task:** ~2 hours  
+**Estimated Time Remaining in Phase:** ~6-7 hours
 
 ---
 
@@ -1095,36 +1095,117 @@ After completing each task, update:
 
 ---
 
-## Task 1.10-1.13: Create DTOs for Other Models
+## [x] Task 1.10: Create DTOs - TV Show Models ✅
 
-**Impact:** HIGH | **Effort:** 9 hours total | **Owner:** `___________`
+**Impact:** HIGH | **Effort:** 3 hours | **Status:** ✅ COMPLETE
 
-### Task 1.10: TV Show Models (3 hours)
+### Subtasks:
 
-- [ ] Create `TvShowDto.kt`, `SeasonDto.kt`, `EpisodeDto.kt`
-- [ ] Update domain models
-- [ ] Create mappers
-- [ ] Update `TvShowRepositoryImpl`
+- [x] 1.10.1 Create TV Show DTOs
+  - [x] TvShowDto.kt - Main DTO with 40+ fields
+  - [x] TvShowResponseDto.kt - API response wrapper
+  - [x] SeasonDto.kt - Season data with episodes
+  - [x] EpisodeDto.kt - Episode data
+  - [x] NetworkDto.kt - Network info
+  - [x] CreatedByDto.kt - Creator info
+  - [x] Reused existing AggregateCast/Crew/Credits DTOs
 
-### Task 1.11: Book Models (2 hours)
+- [x] 1.10.2 Create TvShowMapper.kt
+  - [x] TvShowDto → TvShow mapping
+  - [x] TvShowResponseDto → TvShowResponse mapping
+  - [x] SeasonDto → Season mapping
+  - [x] EpisodeDto → Episode mapping
+  - [x] NetworkDto → Network mapping
+  - [x] CreatedByDto → CreatedBy mapping
+  - [x] 91 lines of comprehensive mapping logic
 
-- [ ] Create `BookDto.kt`
-- [ ] Update domain model
-- [ ] Create mapper
-- [ ] Update `BooksRepositoryImpl`
+- [x] 1.10.3 Clean domain models
+  - [x] Removed @Serializable from TvShow.kt (15 classes)
+  - [x] Removed @SerialName annotations
+  - [x] Removed kotlinx.serialization imports
+  - [x] Made voteAverageDouble non-private
+  - [x] All domain models are pure Kotlin data classes
 
-### Task 1.12: Game Models (2 hours)
+- [x] 1.10.4 Update TvShowRepositoryImpl
+  - [x] Use TvShowDto for deserialization
+  - [x] Use TvShowResponseDto for API responses
+  - [x] Use SeasonDto for season details
+  - [x] Map DTOs to domain models with .toDomain()
+
+- [x] 1.10.5 Update SearchRepositoryImpl
+  - [x] Use TvShowResponseDto for search results
+  - [x] Map DTOs to domain models
+
+- [x] 1.10.6 Verify build and tests
+  - [x] Build successful ✅
+  - [x] All tests passing ✅
+  - [x] 0 @Serializable in domain/models/tvshow/ ✅
+
+**Acceptance Criteria:**
+
+- ✅ All TV Show DTOs created (11 files)
+- ✅ TvShowMapper with complete DTO → Domain mappings
+- ✅ 0 @Serializable annotations in TV Show domain models
+- ✅ 0 kotlinx.serialization imports in domain models
+- ✅ TvShowRepositoryImpl uses DTOs for deserialization
+- ✅ SearchRepositoryImpl uses DTOs for search
+- ✅ Build successful and tests passing
+- ✅ Clean Architecture compliance: 100%
+
+**Files Created:**
+1. data/dto/tvshow/TvShowDto.kt
+2. data/dto/tvshow/TvShowResponseDto.kt
+3. data/dto/tvshow/SeasonDto.kt
+4. data/dto/tvshow/EpisodeDto.kt
+5. data/dto/tvshow/NetworkDto.kt
+6. data/dto/tvshow/CreatedByDto.kt
+7. data/mapper/TvShowMapper.kt
+
+**Files Modified:**
+1. domain/models/tvshow/TvShow.kt
+2. domain/models/tvshow/TvShowResponse.kt
+3. data/repository/TvShowRepositoryImpl.kt
+4. data/repository/SearchRepositoryImpl.kt
+
+---
+
+## Task 1.11: Create DTOs - Book Models
+
+**Impact:** HIGH | **Effort:** 2 hours | **Owner:** `___________`
+
+### Subtasks:
+
+- [ ] 1.11.1 Create `BookDto.kt` and related DTOs
+- [ ] 1.11.2 Update domain Book model (remove @Serializable)
+- [ ] 1.11.3 Create BookMapper.kt
+- [ ] 1.11.4 Update `BooksRepositoryImpl` to use DTOs
+
+**Acceptance Criteria:**
+
+- ✅ Book DTOs created
+- ✅ Domain Book model is annotation-free
+- ✅ BookMapper functions work
+- ✅ App functionality unchanged
+
+---
+
+## Task 1.12: Create DTOs - Game Models
 
 - [ ] Create `GameDto.kt`
 - [ ] Update domain model
 - [ ] Create mapper
 - [ ] Update `GameRepositoryImpl`
 
-### Task 1.13: Other Models (2 hours)
+## Task 1.13: Create DTOs - Other Models
 
-- [ ] Collection, Genre, Credits, etc.
-- [ ] Create DTOs
-- [ ] Update mappers
+**Impact:** MEDIUM | **Effort:** 2 hours | **Owner:** `___________`
+
+### Subtasks:
+
+- [ ] 1.13.1 Verify all remaining domain models with @Serializable
+- [ ] 1.13.2 Create DTOs for Collection, User, etc.
+- [ ] 1.13.3 Update mappers as needed
+- [ ] 1.13.4 Verify 0 @Serializable in entire domain/ layer
 
 **Acceptance Criteria:**
 
