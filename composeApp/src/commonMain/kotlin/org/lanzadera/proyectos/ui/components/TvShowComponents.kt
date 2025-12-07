@@ -66,7 +66,7 @@ import org.lanzadera.proyectos.ui.models.SeasonUI
 import org.lanzadera.proyectos.ui.models.EpisodeUI
 import org.lanzadera.proyectos.ui.models.AggregateCastUI
 import org.lanzadera.proyectos.ui.models.AggregateCrewUI
-import org.lanzadera.proyectos.navigation.NavigationStore
+import org.lanzadera.proyectos.navigation.Screen
 import org.lanzadera.proyectos.utils.Constants
 
 @Composable
@@ -79,8 +79,8 @@ fun TvShowItem(
     Column(
         modifier = modifier
             .clickable {
-                NavigationStore.selectedTvShow = tvShow
-                nav.navigate(Constants.Screen.SeriesDetail.createRoute(tvShow.id))
+                
+                nav.navigate(Screen.TvShowDetail(tvShowId = tvShow.id))
             }
     ) {
         Box(
@@ -137,9 +137,9 @@ fun TvShowHeader(modifier: Modifier = Modifier, nav: NavHostController, tvShow: 
         modifier = modifier
             .wrapContentHeight()
             .clickable {
-                NavigationStore.selectedTvShow = tvShow
+                
                 tvShow.id?.let { tvShowId ->
-                    nav.navigate(Constants.Screen.SeriesDetail.createRoute(tvShowId))
+                    nav.navigate(Screen.TvShowDetail(tvShowId = tvShowId))
                 }
             }
     ) {
@@ -183,9 +183,9 @@ fun TvShowSubheader(modifier: Modifier = Modifier, nav: NavHostController, tvSho
         modifier = modifier
             .wrapContentHeight()
             .clickable {
-                NavigationStore.selectedTvShow = tvShow
+                
                 tvShow.id?.let { tvShowId ->
-                    nav.navigate(Constants.Screen.SeriesDetail.createRoute(tvShowId))
+                    nav.navigate(Screen.TvShowDetail(tvShowId = tvShowId))
                 }
             }
     ) {
@@ -1028,9 +1028,9 @@ fun TvShowHeaderWithNextEpisode(
         modifier = modifier
             .wrapContentHeight()
             .clickable {
-                NavigationStore.selectedTvShow = tvShow
+                
                 tvShow.id?.let { tvShowId ->
-                    nav.navigate(Constants.Screen.SeriesDetail.createRoute(tvShowId))
+                    nav.navigate(Screen.TvShowDetail(tvShowId = tvShowId))
                 }
             }
     ) {
@@ -1078,9 +1078,9 @@ fun TvShowHeaderFinished(
         modifier = modifier
             .wrapContentHeight()
             .clickable {
-                NavigationStore.selectedTvShow = tvShow
+                
                 tvShow.id?.let { tvShowId ->
-                    nav.navigate(Constants.Screen.SeriesDetail.createRoute(tvShowId))
+                    nav.navigate(Screen.TvShowDetail(tvShowId = tvShowId))
                 }
             }
     ) {

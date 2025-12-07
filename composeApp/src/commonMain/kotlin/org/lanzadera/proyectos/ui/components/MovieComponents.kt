@@ -57,7 +57,7 @@ import org.lanzadera.proyectos.ui.models.MovieWithReleaseInfoUI
 import org.lanzadera.proyectos.ui.models.MovieDetailUI
 import org.lanzadera.proyectos.ui.models.AggregateCastUI
 import org.lanzadera.proyectos.ui.models.AggregateCrewUI
-import org.lanzadera.proyectos.navigation.NavigationStore
+import org.lanzadera.proyectos.navigation.Screen
 import org.lanzadera.proyectos.utils.Constants
 
 @Composable
@@ -70,8 +70,7 @@ fun MovieItem(
     Column(
         modifier = modifier
             .clickable {
-                NavigationStore.selectedMovie = movie
-                nav.navigate(Constants.Screen.MovieDetail.createRoute(movie.id))
+                nav.navigate(Screen.MovieDetail(movieId = movie.id))
             }
     ) {
         Box(
@@ -122,9 +121,8 @@ fun MovieHeader(modifier: Modifier = Modifier, nav: NavHostController, movie: Mo
         modifier = modifier
             .wrapContentHeight()
             .clickable {
-                NavigationStore.selectedMovie = movie
                 movie.id?.let { movieId ->
-                    nav.navigate(Constants.Screen.MovieDetail.createRoute(movieId))
+                    nav.navigate(Screen.MovieDetail(movieId = movieId))
                 }
             }
     ) {
@@ -168,9 +166,8 @@ fun MovieSubheader(modifier: Modifier = Modifier, nav: NavHostController, movie:
         modifier = modifier
             .wrapContentHeight()
             .clickable {
-                NavigationStore.selectedMovie = movie
                 movie.id?.let { movieId ->
-                    nav.navigate(Constants.Screen.MovieDetail.createRoute(movieId))
+                    nav.navigate(Screen.MovieDetail(movieId = movieId))
                 }
             }
     ) {
@@ -989,9 +986,8 @@ fun MovieHeaderWithReleaseInfo(
         modifier = modifier
             .wrapContentHeight()
             .clickable {
-                NavigationStore.selectedMovie = movie
                 movie.id?.let { movieId ->
-                    nav.navigate(Constants.Screen.MovieDetail.createRoute(movieId))
+                    nav.navigate(Screen.MovieDetail(movieId = movieId))
                 }
             }
     ) {

@@ -35,6 +35,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.lanzadera.proyectos.ui.models.BookUI
 import org.lanzadera.proyectos.utils.Logger
 import org.lanzadera.proyectos.navigation.NavigationStore
+import org.lanzadera.proyectos.navigation.Screen
 import org.lanzadera.proyectos.utils.Constants
 
 @Composable
@@ -47,11 +48,9 @@ fun BookItem(
     Column(
         modifier = modifier
             .clickable {
-                // clear any selected movie and set the selected book, then navigate
-                NavigationStore.selectedMovie = null
                 NavigationStore.selectedBook = book
                 Logger.d("clicking book, thumbnail=${book.thumbnail}", tag = "BookComponents")
-                nav.navigate(Constants.Screen.Detail.route)
+                nav.navigate(Screen.BookDetail(bookId = book.id))
             }
     ) {
         Box(
@@ -142,9 +141,8 @@ fun BookHeader(modifier: Modifier = Modifier, nav: NavHostController, book: Book
         modifier = modifier
             .wrapContentHeight()
             .clickable {
-                NavigationStore.selectedMovie = null
                 NavigationStore.selectedBook = book
-                nav.navigate(Constants.Screen.Detail.route)
+                nav.navigate(Screen.BookDetail(bookId = book.id))
             }
     ) {
         Box(
@@ -187,9 +185,8 @@ fun BookSubheader(modifier: Modifier = Modifier, nav: NavHostController, book: B
         modifier = modifier
             .wrapContentHeight()
             .clickable {
-                NavigationStore.selectedMovie = null
                 NavigationStore.selectedBook = book
-                nav.navigate(Constants.Screen.Detail.route)
+                nav.navigate(Screen.BookDetail(bookId = book.id))
             }
     ) {
         Box(

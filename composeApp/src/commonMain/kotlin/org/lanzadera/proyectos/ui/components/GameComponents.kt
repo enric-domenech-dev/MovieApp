@@ -34,7 +34,7 @@ import movieapp.composeapp.generated.resources.Res
 import movieapp.composeapp.generated.resources.new_edge_logo
 import org.jetbrains.compose.resources.painterResource
 import org.lanzadera.proyectos.ui.models.GameUI
-import org.lanzadera.proyectos.navigation.NavigationStore
+import org.lanzadera.proyectos.navigation.Screen
 import org.lanzadera.proyectos.utils.Constants
 
 @Composable
@@ -43,9 +43,9 @@ fun GameHeader(modifier: Modifier = Modifier, nav: NavHostController, game: Game
         modifier = modifier
             .wrapContentHeight()
             .clickable {
-                NavigationStore.selectedGame = game
+                
                 game.id?.let { gameId ->
-                    nav.navigate(Constants.Screen.GameDetail.createRoute(gameId))
+                    nav.navigate(Screen.GameDetail(gameId = gameId))
                 }
             }
     ) {
@@ -84,9 +84,9 @@ fun GameSubheader(modifier: Modifier = Modifier, nav: NavHostController, game: G
         modifier = modifier
             .wrapContentHeight()
             .clickable {
-                NavigationStore.selectedGame = game
+                
                 game.id?.let { gameId ->
-                    nav.navigate(Constants.Screen.GameDetail.createRoute(gameId))
+                    nav.navigate(Screen.GameDetail(gameId = gameId))
                 }
             }
     ) {

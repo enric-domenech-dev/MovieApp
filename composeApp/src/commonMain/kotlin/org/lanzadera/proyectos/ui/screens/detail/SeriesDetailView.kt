@@ -71,9 +71,9 @@ fun SeriesDetailView(
         watchedEpisodes.map { "${it.seasonNumber}-${it.episodeNumber}" }.toSet()
     }
 
-    // Load by ID from NavigationStore or parameter
+    // Load by ID from parameter
     LaunchedEffect(tvShow, tvShowId) {
-        val idToLoad = tvShowId ?: tvShow?.id ?: NavigationStore.selectedTvShow?.id
+        val idToLoad = tvShowId ?: tvShow?.id
         idToLoad?.let {
             vm.loadTvShowDetails(it)
         }

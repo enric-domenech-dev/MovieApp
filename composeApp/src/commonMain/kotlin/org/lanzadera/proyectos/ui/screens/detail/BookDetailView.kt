@@ -26,7 +26,8 @@ import androidx.navigation.NavHostController
 @Preview
 fun BookDetailView(
     nav: NavHostController,
-    book: BookUI?,
+    bookId: String,
+    book: BookUI? = null, // TODO: Load book by ID from repository when available
     selectedTheme: AppTheme = AppTheme.SYSTEM,
     darkTheme: Boolean = false
 ) {
