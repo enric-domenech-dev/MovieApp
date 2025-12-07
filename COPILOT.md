@@ -9,7 +9,12 @@ This file provides guidance to Copilot when working with code in this repository
 **⚡ ALWAYS START EVERY SESSION WITH THIS COMMAND:**
 
 ```bash
-cat COPILOT.md TODO_LIST.md
+cat COPILOT.md
+cat .github/copilot-instructions.md
+cat .github/copilot-commands.json
+cat TODO_LIST.md | grep "Next Task:"
+cat TESTING_COVERAGE.md | grep -A 5 "## Coverage Targets:"
+cat TESTING_STRATEGY.md | grep -A 5 "## Testing Approach:"
 ```
 
 **Why?** This ensures:
@@ -32,9 +37,11 @@ cat COPILOT.md TODO_LIST.md
 **📚 Required Reading (read these files at session start):**
 
 1. [COPILOT.md](./COPILOT.md) - Architecture, build commands, and project structure
-2. [copilot-instructions.md](./.github/copilot-instructions.md) - How to interact with Copilot in this project
+2. [copilot-instructions.md](copilot/copilot-instructions.md) - How to interact with Copilot in this project
 3. [AUDIT_REPORT.md](./AUDIT_REPORT.md) - Comprehensive code audit with identified issues
 4. [TODO_LIST.md](./TODO_LIST.md) - Detailed task list to reach 100/100 score
+5. [TESTING_STRATEGY.md](./TESTING_STRATEGY.md) - Testing approach and guidelines
+6. [TESTING_COVERAGE.md](./TESTING_COVERAGE.md) - Test coverage configuration and targets
 
 ---
 
