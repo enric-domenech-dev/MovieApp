@@ -125,18 +125,20 @@ class BooksRepositoryImpl(
         query: String,
         methodName: String
     ) {
-        val keyPart = if (apiKey.isBlank()) "" else "&key=${apiKey}"
-        val path = "/books/v1/volumes?q=${query.encodeURLParameter()}&maxResults=$maxResultsPerQuery${keyPart}"
-
         try {
+            val keyPart = if (apiKey.isBlank()) "" else "&key=${apiKey}"
+            val path = "/books/v1/volumes?q=${query.encodeURLParameter()}&maxResults=$maxResultsPerQuery${keyPart}"
+
             val text = client.get(path).bodyAsText()
             val dto: GoogleBooksResponseDto = json.decodeFromString(text)
             val mapped = dto.items?.map { mapVolumeToBook(it) } ?: emptyList()
             stateFlow.value = mapped
             Logger.d("$methodName fetched ${mapped.size} books", tag = "BooksRepository")
-        } catch (t: Throwable) {
-            Logger.d("$methodName error: ${t.message}", tag = "BooksRepository")
-            throw t
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Logger.e("$methodName error for query: $query", tag = "BooksRepository", throwable = e)
+            stateFlow.value = emptyList()
         }
     }
 }

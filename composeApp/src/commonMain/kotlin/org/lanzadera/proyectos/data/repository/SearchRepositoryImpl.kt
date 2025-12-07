@@ -33,8 +33,10 @@ class SearchRepositoryImpl(
 
             val responseDto = json.decodeFromString<MovieResponseDto>(text)
             responseDto.toDomain().results
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
         } catch (e: Exception) {
-            Logger.d("Error searching movies: ${e.message}", tag = "SearchRepository")
+            Logger.e("Error searching movies with query: $query", tag = "SearchRepository", throwable = e)
             emptyList()
         }
     }
@@ -56,8 +58,10 @@ class SearchRepositoryImpl(
 
             val responseDto = json.decodeFromString<TvShowResponseDto>(text)
             responseDto.toDomain().results
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
         } catch (e: Exception) {
-            Logger.d("Error searching TV shows: ${e.message}", tag = "SearchRepository")
+            Logger.e("Error searching TV shows with query: $query", tag = "SearchRepository", throwable = e)
             emptyList()
         }
     }

@@ -54,14 +54,15 @@ class GameRepositoryImpl(
         state: MutableStateFlow<List<Game>>,
         query: String
     ) {
-        val now = Clock.System.now().toEpochMilliseconds()
-        val last = lastUpdated[state] ?: 0L
-
-        if ((now - last) < ttl && state.value.isNotEmpty()) {
-            return
-        }
-
         try {
+            val now = Clock.System.now().toEpochMilliseconds()
+            val last = lastUpdated[state] ?: 0L
+
+            if ((now - last) < ttl && state.value.isNotEmpty()) {
+                Logger.d("Cache is fresh, skipping refresh", tag = "GameRepository")
+                return
+            }
+
             val accessToken = authManager.getAccessToken()
             val clientId = BuildConfig.IGDB_CLIENT_ID
 
@@ -84,9 +85,11 @@ class GameRepositoryImpl(
 
             state.value = validGames
             lastUpdated[state] = now
+            Logger.d("Updated feed with ${validGames.size} games", tag = "GameRepository")
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
         } catch (e: Exception) {
-            Logger.d("Error - ${e.message}", tag = "GameRepository")
-            e.printStackTrace()
+            Logger.e("Error refreshing game feed with query: $query", tag = "GameRepository", throwable = e)
         }
     }
 
@@ -144,10 +147,14 @@ class GameRepositoryImpl(
 
             if (game != null) {
                 gameDetailsCache[gameId] = game
+                Logger.d("Cached game details for ID $gameId", tag = "GameRepository")
             }
 
             game
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
         } catch (e: Exception) {
+            Logger.e("Error fetching game details for ID $gameId", tag = "GameRepository", throwable = e)
             null
         }
     }

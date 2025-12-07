@@ -59,20 +59,26 @@ class MovieRepositoryImpl(
         lastUpdated: MutableMap<MutableStateFlow<List<Movie>>, Long>,
         crossinline fetch: suspend () -> List<Movie>
     ) {
-        val now = Clock.System.now().toEpochMilliseconds()
-        val last = lastUpdated[state] ?: 0L
-        val freshEnough = ttlMillis > 0 && (now - last) < ttlMillis
+        try {
+            val now = Clock.System.now().toEpochMilliseconds()
+            val last = lastUpdated[state] ?: 0L
+            val freshEnough = ttlMillis > 0 && (now - last) < ttlMillis
 
-        Logger.d("force=$force, state.size=${state.value.size}, freshEnough=$freshEnough", tag = "MovieRepository")
-        if (!force && (state.value.isNotEmpty() || freshEnough)) {
-            Logger.d("skipping fetch, cache is fresh", tag = "MovieRepository")
-            return
+            Logger.d("force=$force, state.size=${state.value.size}, freshEnough=$freshEnough", tag = "MovieRepository")
+            if (!force && (state.value.isNotEmpty() || freshEnough)) {
+                Logger.d("skipping fetch, cache is fresh", tag = "MovieRepository")
+                return
+            }
+            Logger.d("fetching new data", tag = "MovieRepository")
+            val data = fetch()
+            state.value = data
+            lastUpdated[state] = now
+            Logger.d("updated state with ${data.size} movies", tag = "MovieRepository")
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Logger.e("Error refreshing movie feed", tag = "MovieRepository", throwable = e)
         }
-        Logger.d("fetching new data", tag = "MovieRepository")
-        val data = fetch()
-        state.value = data
-        lastUpdated[state] = now
-        Logger.d("updated state with ${data.size} movies", tag = "MovieRepository")
     }
 
     override suspend fun refreshMovies(force: Boolean) =
@@ -135,25 +141,32 @@ class MovieRepositoryImpl(
         )
 
     private suspend fun fetchPaged(path: String, baseParams: Map<String, String>): List<Movie> {
-        val acc = mutableListOf<Movie>()
-        for (page in 1..maxPages) {
-            val text = client.get(path) {
-                url {
-                    baseParams.forEach { (k, v) -> parameters.append(k, v) }
-                    parameters.append("page", page.toString())
-                }
-            }.bodyAsText()
+        return try {
+            val acc = mutableListOf<Movie>()
+            for (page in 1..maxPages) {
+                val text = client.get(path) {
+                    url {
+                        baseParams.forEach { (k, v) -> parameters.append(k, v) }
+                        parameters.append("page", page.toString())
+                    }
+                }.bodyAsText()
 
-            val dto: MovieResponseDto = json.decodeFromString(text)
-            val domainMovies = dto.results.map { it.toDomain() }
-            val valid = domainMovies.filter(::isValidMovie)
+                val dto: MovieResponseDto = json.decodeFromString(text)
+                val domainMovies = dto.results.map { it.toDomain() }
+                val valid = domainMovies.filter(::isValidMovie)
 
-            if (valid.isEmpty()) break
-            acc += valid
-            Logger.d("page $page, downloaded ${valid.size} movies, total so far: ${acc.size}", tag = "MovieRepository")
+                if (valid.isEmpty()) break
+                acc += valid
+                Logger.d("page $page, downloaded ${valid.size} movies, total so far: ${acc.size}", tag = "MovieRepository")
+            }
+            Logger.d("finished, total movies downloaded: ${acc.size}", tag = "MovieRepository")
+            acc
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Logger.e("Error fetching paged movies from $path", tag = "MovieRepository", throwable = e)
+            emptyList()
         }
-        Logger.d("finished, total movies downloaded: ${acc.size}", tag = "MovieRepository")
-        return acc
     }
 }
 

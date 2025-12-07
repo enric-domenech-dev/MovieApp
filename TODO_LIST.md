@@ -48,14 +48,14 @@ After completing each task, update:
 
 ## 📊 PROGRESS TRACKING
 
-### Overall Progress: 26/141 tasks completed (18.44%)
+### Overall Progress: 27/141 tasks completed (19.15%)
 
 ### Phase Status:
 
 - [x] **Phase 0: Quick Wins** (8/8 completed) ✅ **COMPLETE**
 - [x] **Phase 1: Architecture Fixes** (17/17 completed) ✅ **COMPLETE** 
 - [x] **Phase 1.5: Navigation Lambda Refactoring** (1/1 completed) ✅ **COMPLETE**
-- [~] **Phase 2: Code Quality** (1/12 completed) 🔄 **IN PROGRESS** - Week 2
+- [~] **Phase 2: Code Quality** (2/12 completed) 🔄 **IN PROGRESS** - Week 2
 - [ ] **Phase 3: Testing - Use Cases & DTOs** (0/19 completed) - Week 3
 - [ ] **Phase 4: Testing - Repositories & Integration** (0/15 completed) - Week 4
 - [ ] **Phase 5: Testing - ViewModels** (0/22 completed) - Weeks 5-6
@@ -66,10 +66,10 @@ After completing each task, update:
 ### Current Sprint:
 
 **Active Phase:** Phase 2 - Code Quality  
-**Current Task:** Task 2.1 - Error Handling in Use Cases (COMPLETE ✅)  
-**Next Task:** Task 2.2 - Error Handling in Repositories  
+**Current Task:** Task 2.2 - Error Handling in Repositories (COMPLETE ✅)  
+**Next Task:** Task 2.3 - Apply .asStateFlow() Consistently  
 **Status:** 🟢 In Progress  
-**Estimated Time Remaining in Task:** ~4 hours  
+**Estimated Time Remaining in Phase:** ~10 hours  
 **Next Phase:** Continue with Phase 2 tasks
 
 ---
@@ -1597,7 +1597,7 @@ After completing each task, update:
 **Goal:** Reach 100/100 in Code Quality  
 **Estimated Time:** 14-16 hours
 
-## [x] Task 2.1: Add Error Handling to Remaining Use Cases ✅
+## [x] Task 2.1: Error Handling in Use Cases ✅
 
 **Impact:** HIGH | **Effort:** 6 hours | **Status:** ✅ COMPLETE
 
@@ -1660,24 +1660,53 @@ suspend operator fun invoke(...): Result<T> {
 
 ---
 
-## Task 2.2: Add Error Handling to Repositories
+## [x] Task 2.2: Error Handling in Repositories ✅
 
-**Impact:** MEDIUM | **Effort:** 4 hours | **Owner:** `___________`
+**Impact:** MEDIUM | **Effort:** 4 hours | **Status:** ✅ COMPLETE
 
 ### Subtasks:
 
-- [ ] 2.2.1 Add try-catch to `MovieRepositoryImpl` methods
-- [ ] 2.2.2 Add try-catch to `TvShowRepositoryImpl` methods
-- [ ] 2.2.3 Add try-catch to `BooksRepositoryImpl` methods
-- [ ] 2.2.4 Add try-catch to `GameRepositoryImpl` methods
-- [ ] 2.2.5 Add try-catch to `SearchRepositoryImpl` methods
-- [ ] 2.2.6 Log all errors appropriately
+- [x] 2.2.1 Add try-catch to `MovieRepositoryImpl` methods
+  - [x] refreshFeed() - Added CancellationException + Logger.e()
+  - [x] fetchPaged() - Added CancellationException + Logger.e()
+  - [x] getMovieDetails() - Already had error handling ✅
+  
+- [x] 2.2.2 Add try-catch to `TvShowRepositoryImpl` methods
+  - [x] refreshFeed() - Added CancellationException + Logger.e()
+  - [x] getTvShowDetails() - Added CancellationException + Logger.e()
+  - [x] Season fetching loop - Added CancellationException + Logger.e()
+  - [x] fetchPaged() - Added CancellationException + Logger.e()
+  
+- [x] 2.2.3 Add try-catch to `BooksRepositoryImpl` methods
+  - [x] fetchAndStore() - Added CancellationException + Logger.e()
+  - [x] Returns emptyList() on error (graceful degradation)
+  
+- [x] 2.2.4 Add try-catch to `GameRepositoryImpl` methods
+  - [x] refreshFeed() - Added CancellationException + Logger.e()
+  - [x] getGameDetails() - Added CancellationException + Logger.e()
+  
+- [x] 2.2.5 Add try-catch to `SearchRepositoryImpl` methods
+  - [x] searchMovies() - Added CancellationException + Logger.e()
+  - [x] searchTvShows() - Added CancellationException + Logger.e()
+  
+- [x] 2.2.6 Log all errors appropriately
+  - [x] All errors use Logger.e() with throwable
+  - [x] All log messages include context (method, query, ID)
 
 **Acceptance Criteria:**
 
-- ✅ Network failures don't crash app
-- ✅ All errors logged with context
-- ✅ Graceful degradation implemented
+- ✅ Network failures don't crash app (graceful degradation)
+- ✅ All errors logged with context (Logger.e() with throwable)
+- ✅ CancellationException properly propagated (not caught)
+- ✅ Graceful degradation implemented (emptyList() on error)
+- ✅ Build successful: compileDebugKotlinAndroid PASSED
+
+**Files Modified (5 total):**
+1. MovieRepositoryImpl.kt (refreshFeed, fetchPaged)
+2. TvShowRepositoryImpl.kt (refreshFeed, getTvShowDetails, fetchPaged)
+3. BooksRepositoryImpl.kt (fetchAndStore)
+4. GameRepositoryImpl.kt (refreshFeed, getGameDetails)
+5. SearchRepositoryImpl.kt (searchMovies, searchTvShows)
 
 ---
 
