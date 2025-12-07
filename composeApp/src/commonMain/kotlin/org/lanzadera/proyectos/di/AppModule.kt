@@ -57,7 +57,10 @@ import org.lanzadera.proyectos.domain.usecase.episodes.ToggleEpisodeWatchedUseCa
 import org.lanzadera.proyectos.domain.usecase.favorites.GetFavoriteDetailsUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.ObserveFavoritesUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.SyncFavoritesUseCase
-import org.lanzadera.proyectos.domain.usecase.favorites.ToggleFavoriteUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.ToggleMovieFavoriteUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.ToggleTvShowFavoriteUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.ToggleBookFavoriteUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.ToggleGameFavoriteUseCase
 import org.lanzadera.proyectos.domain.usecase.games.GetGameDetailsUseCase
 import org.lanzadera.proyectos.domain.usecase.games.RefreshGamesUseCase
 import org.lanzadera.proyectos.domain.usecase.load_initial_data.GetInitialDataUseCase
@@ -251,7 +254,10 @@ val viewModelsModule = module {
     single { RefreshGamesUseCase(get()) }
     single { GetGameDetailsUseCase(get()) }
     single { ObserveFavoritesUseCase(get()) }
-    single { ToggleFavoriteUseCase(get(), get(), get(), get(), get()) }
+    single { ToggleMovieFavoriteUseCase(get(), get(), get()) }
+    single { ToggleTvShowFavoriteUseCase(get(), get(), get(), get()) }
+    single { ToggleBookFavoriteUseCase(get()) }
+    single { ToggleGameFavoriteUseCase(get()) }
     single { SyncFavoritesUseCase(get()) }
     single { ObserveWatchedEpisodesUseCase(get()) }
     single { ObserveAllWatchedEpisodesUseCase(get()) }
@@ -282,7 +288,7 @@ val viewModelsModule = module {
     viewModel { HomeViewModel() }
     
     // Home Tabs - Each tab has its own ViewModel
-    viewModel { FavoritesTabViewModel(get(), get(), get(), get(), get()) }
+    viewModel { FavoritesTabViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
     viewModel { BooksTabViewModel(getOrNull()) }
     viewModel { FilmsTabViewModel(get()) }
     viewModel { SeriesTabViewModel(getOrNull()) }

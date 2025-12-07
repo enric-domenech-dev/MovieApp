@@ -16,17 +16,17 @@ import org.lanzadera.proyectos.domain.models.tvshow.TvShow
 import org.lanzadera.proyectos.domain.usecase.episodes.ObserveWatchedEpisodesUseCase
 import org.lanzadera.proyectos.domain.usecase.episodes.ToggleEpisodeWatchedUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.ObserveFavoritesUseCase
-import org.lanzadera.proyectos.domain.usecase.favorites.ToggleFavoriteUseCase
-import org.lanzadera.proyectos.domain.usecase.tvshows.RefreshTvShowsUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.ToggleTvShowFavoriteUseCase
+import org.lanzadera.proyectos.domain.usecase.tvshows.GetTvShowDetailsUseCase
 import org.lanzadera.proyectos.ui.mapper.toDetailUI
 import org.lanzadera.proyectos.ui.models.TvShowDetailUI
 
 class SeriesDetailViewModel(
-    private val refreshTvShowsUseCase: RefreshTvShowsUseCase,
     observeFavoritesUseCase: ObserveFavoritesUseCase,
-    private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
+    private val toggleTvShowFavoriteUseCase: ToggleTvShowFavoriteUseCase,
     private val observeWatchedEpisodesUseCase: ObserveWatchedEpisodesUseCase,
-    private val toggleEpisodeWatchedUseCase: ToggleEpisodeWatchedUseCase
+    private val toggleEpisodeWatchedUseCase: ToggleEpisodeWatchedUseCase,
+    private val getTvShowDetailsUseCase: GetTvShowDetailsUseCase
 ) : ViewModel() {
 
     // Internal domain model state
@@ -54,7 +54,7 @@ class SeriesDetailViewModel(
             try {
                 _isLoading.value = true
                 _error.value = null
-                val details = refreshTvShowsUseCase.getTvShowDetails(tvShowId)
+                val details = getTvShowDetailsUseCase.execute(tvShowId)
                 _tvShowDetailDomain.value = details
                 if (details == null) {
                     _error.value = "No se pudieron cargar los detalles de la serie"
@@ -90,7 +90,7 @@ class SeriesDetailViewModel(
             posterUrl = tvShow.posterPath?.let { "https://image.tmdb.org/t/p/w500$it" },
             overview = tvShow.overview
         )
-        viewModelScope.launch { toggleFavoriteUseCase(item) }
+        viewModelScope.launch { toggleTvShowFavoriteUseCase(item) }
     }
 
     fun toggleEpisodeWatched(seasonNumber: Int, episodeNumber: Int, isWatched: Boolean) {

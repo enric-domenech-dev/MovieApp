@@ -10,11 +10,11 @@ import org.lanzadera.proyectos.domain.models.book.Book
 import org.lanzadera.proyectos.domain.models.favorite.FavoriteItem
 import org.lanzadera.proyectos.domain.models.favorite.FavoriteType
 import org.lanzadera.proyectos.domain.usecase.favorites.ObserveFavoritesUseCase
-import org.lanzadera.proyectos.domain.usecase.favorites.ToggleFavoriteUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.ToggleBookFavoriteUseCase
 
 class BookDetailViewModel(
     observeFavoritesUseCase: ObserveFavoritesUseCase,
-    private val toggleFavoriteUseCase: ToggleFavoriteUseCase
+    private val toggleBookFavoriteUseCase: ToggleBookFavoriteUseCase
 ) : ViewModel() {
 
     val favorites: StateFlow<List<FavoriteItem>> = observeFavoritesUseCase()
@@ -29,7 +29,7 @@ class BookDetailViewModel(
             posterUrl = book.thumbnail,
             overview = book.description
         )
-        viewModelScope.launch { toggleFavoriteUseCase(item) }
+        viewModelScope.launch { toggleBookFavoriteUseCase(item) }
     }
 }
 

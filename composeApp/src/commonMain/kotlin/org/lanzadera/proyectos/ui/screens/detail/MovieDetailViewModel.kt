@@ -14,7 +14,7 @@ import org.lanzadera.proyectos.domain.models.favorite.FavoriteItem
 import org.lanzadera.proyectos.domain.models.favorite.FavoriteType
 import org.lanzadera.proyectos.domain.models.movie.Movie
 import org.lanzadera.proyectos.domain.usecase.favorites.ObserveFavoritesUseCase
-import org.lanzadera.proyectos.domain.usecase.favorites.ToggleFavoriteUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.ToggleMovieFavoriteUseCase
 import org.lanzadera.proyectos.domain.usecase.movies.GetMovieDetailsUseCase
 import org.lanzadera.proyectos.domain.usecase.movies.ObserveWatchedMoviesUseCase
 import org.lanzadera.proyectos.domain.usecase.movies.ToggleMovieWatchedUseCase
@@ -25,7 +25,7 @@ import org.lanzadera.proyectos.utils.DateUtils
 class MovieDetailViewModel(
     private val getMovieDetailsUseCase: GetMovieDetailsUseCase,
     observeFavoritesUseCase: ObserveFavoritesUseCase,
-    private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
+    private val toggleMovieFavoriteUseCase: ToggleMovieFavoriteUseCase,
     private val observeWatchedMoviesUseCase: ObserveWatchedMoviesUseCase,
     private val toggleMovieWatchedUseCase: ToggleMovieWatchedUseCase
 ) : ViewModel() {
@@ -102,7 +102,7 @@ class MovieDetailViewModel(
             posterUrl = movie.posterPath?.let { "https://image.tmdb.org/t/p/w500$it" },
             overview = movie.overview
         )
-        viewModelScope.launch { toggleFavoriteUseCase(item) }
+        viewModelScope.launch { toggleMovieFavoriteUseCase(item) }
     }
 
     fun toggleWatched() {

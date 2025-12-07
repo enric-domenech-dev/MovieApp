@@ -25,7 +25,10 @@ import org.lanzadera.proyectos.domain.models.tvshow.TvShowWithNextEpisode
 import org.lanzadera.proyectos.domain.usecase.episodes.ObserveAllWatchedEpisodesUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.GetFavoriteDetailsUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.ObserveFavoritesUseCase
-import org.lanzadera.proyectos.domain.usecase.favorites.ToggleFavoriteUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.ToggleMovieFavoriteUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.ToggleTvShowFavoriteUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.ToggleBookFavoriteUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.ToggleGameFavoriteUseCase
 import org.lanzadera.proyectos.domain.usecase.movies.ObserveWatchedMoviesUseCase
 import org.lanzadera.proyectos.ui.mapper.toUI
 import org.lanzadera.proyectos.ui.models.FavoriteItemUI
@@ -48,7 +51,10 @@ import kotlinx.coroutines.flow.SharingStarted
  */
 class FavoritesTabViewModel(
     private val observeFavoritesUseCase: ObserveFavoritesUseCase,
-    private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
+    private val toggleMovieFavoriteUseCase: ToggleMovieFavoriteUseCase,
+    private val toggleTvShowFavoriteUseCase: ToggleTvShowFavoriteUseCase,
+    private val toggleBookFavoriteUseCase: ToggleBookFavoriteUseCase,
+    private val toggleGameFavoriteUseCase: ToggleGameFavoriteUseCase,
     private val observeAllWatchedEpisodesUseCase: ObserveAllWatchedEpisodesUseCase,
     private val getFavoriteDetailsUseCase: GetFavoriteDetailsUseCase,
     private val observeWatchedMoviesUseCase: ObserveWatchedMoviesUseCase
@@ -244,7 +250,14 @@ class FavoritesTabViewModel(
                     posterUrl = item.posterUrl,
                     addedAt = Instant.fromEpochMilliseconds(item.addedAt)
                 )
-                toggleFavoriteUseCase(domainItem)
+                
+                // Use specific use case based on type
+                when(item.type) {
+                    FavoriteTypeUI.MOVIE -> toggleMovieFavoriteUseCase(domainItem)
+                    FavoriteTypeUI.TV_SHOW -> toggleTvShowFavoriteUseCase(domainItem)
+                    FavoriteTypeUI.BOOK -> toggleBookFavoriteUseCase(domainItem)
+                    FavoriteTypeUI.GAME -> toggleGameFavoriteUseCase(domainItem)
+                }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
