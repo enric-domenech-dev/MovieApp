@@ -15,8 +15,9 @@ import kotlinx.serialization.json.Json
 import org.lanzadera.proyectos.domain.models.movie.Movie
 import org.lanzadera.proyectos.utils.Logger
 import org.lanzadera.proyectos.utils.Constants
-import org.lanzadera.proyectos.domain.models.movie.MovieResponse
 import org.lanzadera.proyectos.domain.repository.LoadInitialData
+import org.lanzadera.proyectos.data.dto.movie.MovieResponseDto
+import org.lanzadera.proyectos.data.mapper.toDomain
 
 class LoadInitialDataImpl(
     private val client: HttpClient,
@@ -211,8 +212,9 @@ private suspend inline fun refreshFeed(
                 }
             }.bodyAsText()
 
-            val dto: MovieResponse = json.decodeFromString(text)
-            val valid = dto.results.filter(::isValidMovie)
+            val dto: MovieResponseDto = json.decodeFromString(text)
+            val domainMovies = dto.results.map { it.toDomain() }
+            val valid = domainMovies.filter(::isValidMovie)
 
             if (valid.isEmpty()) break
             acc += valid

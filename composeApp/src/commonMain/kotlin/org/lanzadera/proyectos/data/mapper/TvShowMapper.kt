@@ -89,3 +89,29 @@ fun CreatedByDto.toDomain(): CreatedBy = CreatedBy(
     profilePath = profilePath
 )
 
+// Reverse mappings (Domain -> DTO) for serialization
+
+fun Season.toDto(): SeasonDto = SeasonDto(
+    id = id,
+    name = name,
+    seasonNumber = seasonNumber,
+    episodeCount = episodeCount,
+    airDate = airDate,
+    overview = overview,
+    posterPath = posterPath,
+    episodes = episodes?.map { it.toDto() }
+)
+
+fun Episode.toDto(): EpisodeDto = EpisodeDto(
+    id = id,
+    name = name,
+    episodeNumber = episodeNumber,
+    seasonNumber = seasonNumber,
+    airDate = airDate,
+    overview = overview,
+    runtime = runtime,
+    stillPath = stillPath,
+    voteAverage = voteAverage,
+    voteCount = voteCount
+)
+

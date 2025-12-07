@@ -12,6 +12,9 @@ import org.lanzadera.proyectos.domain.models.movie.Movie
 import org.lanzadera.proyectos.domain.models.tvshow.Season
 import org.lanzadera.proyectos.domain.models.tvshow.TvShow
 import org.lanzadera.proyectos.domain.repository.FavoriteDetailsRepository
+import org.lanzadera.proyectos.data.dto.tvshow.SeasonDto
+import org.lanzadera.proyectos.data.mapper.toDto
+import org.lanzadera.proyectos.data.mapper.toDomain
 
 class FavoriteDetailsRepositoryImpl(
     private val tvShowDao: FavoriteTvShowDao,
@@ -64,7 +67,11 @@ class FavoriteDetailsRepositoryImpl(
     }
 
     private fun TvShow.toEntity(json: Json): FavoriteTvShowEntity {
-        val seasonsJson = seasons?.let { json.encodeToString(it) }
+        val seasonsJson = seasons?.let { 
+            // Convert to DTOs for serialization
+            val seasonDtos = it.map { season -> season.toDto() }
+            json.encodeToString(seasonDtos) 
+        }
         return FavoriteTvShowEntity(
             id = id.toString(),
             name = name ?: "",
@@ -90,7 +97,9 @@ class FavoriteDetailsRepositoryImpl(
     private fun FavoriteTvShowEntity.toTvShow(json: Json): TvShow {
         val seasons = seasonsJson?.let {
             try {
-                json.decodeFromString<List<Season>>(it)
+                // Deserialize as DTOs, then convert to domain
+                val seasonDtos = json.decodeFromString<List<SeasonDto>>(it)
+                seasonDtos.map { dto -> dto.toDomain() }
             } catch (e: Exception) {
                 null
             }
@@ -108,6 +117,7 @@ class FavoriteDetailsRepositoryImpl(
             numberOfEpisodes = numberOfEpisodes,
             status = status,
             inProduction = inProduction,
+            voteAverageDouble = voteAverage,
             voteCount = voteCount,
             popularity = popularity,
             seasons = seasons
@@ -146,6 +156,7 @@ class FavoriteDetailsRepositoryImpl(
             releaseDate = releaseDate,
             runtime = runtime,
             status = status,
+            voteAverageDouble = voteAverage,
             voteCount = voteCount,
             popularity = popularity,
             budget = budget,
