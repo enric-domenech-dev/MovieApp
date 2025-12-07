@@ -1,6 +1,9 @@
-package org.lanzadera.proyectos.domain.models.book
+package org.lanzadera.proyectos.data.dto.book
 
-data class Book(
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class BookDto(
     val id: String? = null,
     val title: String? = null,
     val authors: List<String>? = null,
@@ -8,4 +11,3 @@ data class Book(
     val thumbnail: String? = null,
     val publishedDate: String? = null
 )
-

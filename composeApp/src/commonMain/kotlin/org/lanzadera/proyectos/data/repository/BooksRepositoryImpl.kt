@@ -6,10 +6,12 @@ import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.json.Json
+import org.lanzadera.proyectos.data.dto.book.GoogleBooksResponseDto
+import org.lanzadera.proyectos.data.dto.book.VolumeItemDto
+import org.lanzadera.proyectos.data.mapper.toDomain
 import org.lanzadera.proyectos.domain.models.book.Book
-import org.lanzadera.proyectos.utils.Logger
-import org.lanzadera.proyectos.domain.models.book.GoogleBooksResponse
 import org.lanzadera.proyectos.domain.repository.BooksRepository
+import org.lanzadera.proyectos.utils.Logger
 
 class BooksRepositoryImpl(
     private val client: HttpClient,
@@ -47,7 +49,7 @@ class BooksRepositoryImpl(
 
     private var lastQuery: String = ""
 
-    private fun mapVolumeToBook(item: org.lanzadera.proyectos.domain.models.book.VolumeItem): Book {
+    private fun mapVolumeToBook(item: VolumeItemDto): Book {
         val info = item.volumeInfo
         val rawThumb = info?.imageLinks?.thumbnail ?: info?.imageLinks?.smallThumbnail
         val normalizedThumb = rawThumb?.let { thumb ->
@@ -128,7 +130,7 @@ class BooksRepositoryImpl(
 
         try {
             val text = client.get(path).bodyAsText()
-            val dto: GoogleBooksResponse = json.decodeFromString(text)
+            val dto: GoogleBooksResponseDto = json.decodeFromString(text)
             val mapped = dto.items?.map { mapVolumeToBook(it) } ?: emptyList()
             stateFlow.value = mapped
             Logger.d("$methodName fetched ${mapped.size} books", tag = "BooksRepository")

@@ -48,14 +48,14 @@ After completing each task, update:
 
 ## 📊 PROGRESS TRACKING
 
-### Overall Progress: 19/140 tasks completed (13.57%)
+### Overall Progress: 20/140 tasks completed (14.29%)
 
 ### Phase Status:
 
 - [x] **Phase 0: Quick Wins** (8/8 completed) ✅ **COMPLETE**
-- [ ] **Phase 1: Architecture Fixes** (11/17 completed) - 🎯 **CURRENT** 
-  - **Next Task:** 1.11 - Create DTOs - Book Models
-  - **Recent:** ✅ Task 1.10 COMPLETE - TV Show DTOs created (11 DTOs, 1 mapper, 0 annotations)
+- [ ] **Phase 1: Architecture Fixes** (12/17 completed) - 🎯 **CURRENT** 
+  - **Next Task:** 1.12 - Create DTOs - Game Models
+  - **Recent:** ✅ Task 1.11 COMPLETE - Book DTOs created (2 DTOs, 1 mapper, 78 lines)
 - [ ] **Phase 2: Code Quality** (0/12 completed) - Week 2
 - [ ] **Phase 3: Testing - Use Cases & DTOs** (0/19 completed) - Week 3
 - [ ] **Phase 4: Testing - Repositories & Integration** (0/15 completed) - Week 4
@@ -67,10 +67,10 @@ After completing each task, update:
 ### Current Sprint:
 
 **Active Phase:** Phase 1 - Architecture Fixes  
-**Current Task:** Task 1.11 - Create DTOs - Book Models  
-**Status:** ✅ Task 1.10 COMPLETE - TV Show DTOs (11 DTOs, 91-line mapper)  
-**Estimated Time Remaining in Task:** ~2 hours  
-**Estimated Time Remaining in Phase:** ~6-7 hours
+**Current Task:** Task 1.12 - Create DTOs - Game Models  
+**Status:** ✅ Task 1.11 COMPLETE - Book DTOs (2 DTOs, 78-line mapper)  
+**Estimated Time Remaining in Task:** ~3 hours  
+**Estimated Time Remaining in Phase:** ~5-6 hours
 
 ---
 
@@ -1169,23 +1169,51 @@ After completing each task, update:
 
 ---
 
-## Task 1.11: Create DTOs - Book Models
+## [x] Task 1.11: Create DTOs - Book Models ✅
 
-**Impact:** HIGH | **Effort:** 2 hours | **Owner:** `___________`
+**Impact:** HIGH | **Effort:** 2 hours | **Status:** ✅ COMPLETE
 
 ### Subtasks:
 
-- [ ] 1.11.1 Create `BookDto.kt` and related DTOs
-- [ ] 1.11.2 Update domain Book model (remove @Serializable)
-- [ ] 1.11.3 Create BookMapper.kt
-- [ ] 1.11.4 Update `BooksRepositoryImpl` to use DTOs
+- [x] 1.11.1 Create `BookDto.kt` and related DTOs
+  - [x] BookDto.kt (6 fields)
+  - [x] GoogleBooksResponseDto.kt (3 nested DTOs)
+  - [x] VolumeItemDto, VolumeInfoDto, ImageLinksDto
+
+- [x] 1.11.2 Update domain Book model (remove @Serializable)
+  - [x] Removed @Serializable from Book.kt
+  - [x] Removed @Serializable from GoogleBooksResponse.kt (4 classes)
+  - [x] Removed kotlinx.serialization imports
+
+- [x] 1.11.3 Create BookMapper.kt
+  - [x] 8 mapper functions (toDomain + toDto)
+  - [x] 78 lines of mapping logic
+  - [x] Bidirectional: DTO ↔ Domain
+
+- [x] 1.11.4 Update `BooksRepositoryImpl` to use DTOs
+  - [x] Use GoogleBooksResponseDto for deserialization
+  - [x] Use VolumeItemDto for mapping
+  - [x] Map DTOs to domain models with .toDomain()
 
 **Acceptance Criteria:**
 
-- ✅ Book DTOs created
-- ✅ Domain Book model is annotation-free
-- ✅ BookMapper functions work
-- ✅ App functionality unchanged
+- ✅ Book DTOs created (2 files with nested classes)
+- ✅ Domain Book model is annotation-free (0 @Serializable)
+- ✅ BookMapper functions work (78 lines)
+- ✅ BooksRepositoryImpl uses DTOs for deserialization
+- ✅ Build successful ✅
+- ✅ All tests passing ✅
+- ✅ Clean Architecture compliance: 100%
+
+**Files Created:**
+1. data/dto/book/BookDto.kt
+2. data/dto/book/GoogleBooksResponseDto.kt
+3. data/mapper/BookMapper.kt
+
+**Files Modified:**
+1. domain/models/book/Book.kt
+2. domain/models/book/GoogleBooksResponse.kt
+3. data/repository/BooksRepositoryImpl.kt
 
 ---
 
