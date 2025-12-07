@@ -5,6 +5,7 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
 import org.lanzadera.proyectos.data.dto.tvshow.SeasonDto
@@ -23,25 +24,25 @@ class TvShowRepositoryImpl(
 ) : TvShowRepository {
 
     private val _tvShows = MutableStateFlow<List<TvShow>>(emptyList())
-    override val tvShowsFlow: StateFlow<List<TvShow>> = _tvShows
+    override val tvShowsFlow: StateFlow<List<TvShow>> = _tvShows.asStateFlow()
 
     private val _popularTvShows = MutableStateFlow<List<TvShow>>(emptyList())
-    override val popularTvShowsFlow: StateFlow<List<TvShow>> = _popularTvShows
+    override val popularTvShowsFlow: StateFlow<List<TvShow>> = _popularTvShows.asStateFlow()
 
     private val _topRatedTvShows = MutableStateFlow<List<TvShow>>(emptyList())
-    override val topRatedTvShowsFlow: StateFlow<List<TvShow>> = _topRatedTvShows
+    override val topRatedTvShowsFlow: StateFlow<List<TvShow>> = _topRatedTvShows.asStateFlow()
 
     private val _onAirTvShows = MutableStateFlow<List<TvShow>>(emptyList())
-    override val onAirTvShowsFlow: StateFlow<List<TvShow>> = _onAirTvShows
+    override val onAirTvShowsFlow: StateFlow<List<TvShow>> = _onAirTvShows.asStateFlow()
 
     private val _trendingTvShows = MutableStateFlow<List<TvShow>>(emptyList())
-    override val trendingTvShowsFlow: StateFlow<List<TvShow>> = _trendingTvShows
+    override val trendingTvShowsFlow: StateFlow<List<TvShow>> = _trendingTvShows.asStateFlow()
 
     private val _airingTodayTvShows = MutableStateFlow<List<TvShow>>(emptyList())
-    override val airingTodayTvShowsFlow: StateFlow<List<TvShow>> = _airingTodayTvShows
+    override val airingTodayTvShowsFlow: StateFlow<List<TvShow>> = _airingTodayTvShows.asStateFlow()
 
     private val _trendingTvShowsWeek = MutableStateFlow<List<TvShow>>(emptyList())
-    override val trendingTvShowsWeekFlow: StateFlow<List<TvShow>> = _trendingTvShowsWeek
+    override val trendingTvShowsWeekFlow: StateFlow<List<TvShow>> = _trendingTvShowsWeek.asStateFlow()
 
     private val lastUpdated = mutableMapOf<MutableStateFlow<List<TvShow>>, Long>()
     private val ttl = Constants.Cache.DEFAULT_TTL_MS

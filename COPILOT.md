@@ -507,3 +507,58 @@ Favorites and watched tracking work across all content types via `FavoriteType` 
 5. Register in `AppModule.kt`
 6. Create screen + ViewModel in `ui/screens/`
 7. Create DTO to represent domain models in presentation layer '`ui/`
+
+---
+
+## 🔄 StateFlow Pattern - ALWAYS Use .asStateFlow()
+
+### Rule: ALL Exposed StateFlows MUST Use .asStateFlow()
+
+**WHY:** `.asStateFlow()` provides encapsulation and prevents external callers from casting back to `MutableStateFlow`.
+
+### Pattern in Repositories:
+
+```kotlin
+// ✅ CORRECT
+class MovieRepositoryImpl : MovieRepository {
+    private val _movies = MutableStateFlow<List<Movie>>(emptyList())
+    override val moviesFlow: StateFlow<List<Movie>> = _movies.asStateFlow()
+}
+
+// ❌ WRONG - Direct assignment allows external modification
+class MovieRepositoryImpl : MovieRepository {
+    private val _movies = MutableStateFlow<List<Movie>>(emptyList())
+    override val moviesFlow: StateFlow<List<Movie>> = _movies  // ❌ BAD
+}
+```
+
+### Pattern in ViewModels:
+
+```kotlin
+// ✅ CORRECT
+class HomeViewModel : ViewModel() {
+    private val _selectedTab = MutableStateFlow(HomeTab.FAVORITES)
+    val selectedTab: StateFlow<HomeTab> = _selectedTab.asStateFlow()
+}
+
+// ❌ WRONG
+class HomeViewModel : ViewModel() {
+    private val _selectedTab = MutableStateFlow(HomeTab.FAVORITES)
+    val selectedTab: StateFlow<HomeTab> = _selectedTab  // ❌ BAD
+}
+```
+
+### Required Import:
+
+```kotlin
+import kotlinx.coroutines.flow.asStateFlow
+```
+
+### Benefits:
+
+1. **Immutability:** External code cannot modify the flow
+2. **Encapsulation:** Implementation details hidden
+3. **Type Safety:** Prevents casting to MutableStateFlow
+4. **Best Practice:** Kotlin official recommendation
+
+---

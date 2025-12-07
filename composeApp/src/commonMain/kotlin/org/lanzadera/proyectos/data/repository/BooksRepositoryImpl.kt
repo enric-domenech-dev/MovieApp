@@ -5,6 +5,7 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.json.Json
 import org.lanzadera.proyectos.data.dto.book.GoogleBooksResponseDto
 import org.lanzadera.proyectos.data.dto.book.VolumeItemDto
@@ -21,31 +22,31 @@ class BooksRepositoryImpl(
 ) : BooksRepository {
 
     private val _books = MutableStateFlow<List<Book>>(emptyList())
-    override val booksFlow: StateFlow<List<Book>> = _books
+    override val booksFlow: StateFlow<List<Book>> = _books.asStateFlow()
 
     private val _fictionBooks = MutableStateFlow<List<Book>>(emptyList())
-    override val fictionBooksFlow: StateFlow<List<Book>> = _fictionBooks
+    override val fictionBooksFlow: StateFlow<List<Book>> = _fictionBooks.asStateFlow()
 
     private val _scienceBooks = MutableStateFlow<List<Book>>(emptyList())
-    override val scienceBooksFlow: StateFlow<List<Book>> = _scienceBooks
+    override val scienceBooksFlow: StateFlow<List<Book>> = _scienceBooks.asStateFlow()
 
     private val _historyBooks = MutableStateFlow<List<Book>>(emptyList())
-    override val historyBooksFlow: StateFlow<List<Book>> = _historyBooks
+    override val historyBooksFlow: StateFlow<List<Book>> = _historyBooks.asStateFlow()
 
     private val _biographyBooks = MutableStateFlow<List<Book>>(emptyList())
-    override val biographyBooksFlow: StateFlow<List<Book>> = _biographyBooks
+    override val biographyBooksFlow: StateFlow<List<Book>> = _biographyBooks.asStateFlow()
 
     private val _businessBooks = MutableStateFlow<List<Book>>(emptyList())
-    override val businessBooksFlow: StateFlow<List<Book>> = _businessBooks
+    override val businessBooksFlow: StateFlow<List<Book>> = _businessBooks.asStateFlow()
 
     private val _technologyBooks = MutableStateFlow<List<Book>>(emptyList())
-    override val technologyBooksFlow: StateFlow<List<Book>> = _technologyBooks
+    override val technologyBooksFlow: StateFlow<List<Book>> = _technologyBooks.asStateFlow()
 
     private val _selfHelpBooks = MutableStateFlow<List<Book>>(emptyList())
-    override val selfHelpBooksFlow: StateFlow<List<Book>> = _selfHelpBooks
+    override val selfHelpBooksFlow: StateFlow<List<Book>> = _selfHelpBooks.asStateFlow()
 
     private val _recentBooks = MutableStateFlow<List<Book>>(emptyList())
-    override val recentBooksFlow: StateFlow<List<Book>> = _recentBooks
+    override val recentBooksFlow: StateFlow<List<Book>> = _recentBooks.asStateFlow()
 
     private var lastQuery: String = ""
 

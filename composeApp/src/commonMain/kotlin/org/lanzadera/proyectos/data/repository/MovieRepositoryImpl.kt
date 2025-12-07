@@ -5,6 +5,7 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
 import org.lanzadera.proyectos.data.dto.movie.MovieDto
@@ -22,19 +23,19 @@ class MovieRepositoryImpl(
 ) : MovieRepository {
 
     private val _movies = MutableStateFlow<List<Movie>>(emptyList())
-    override val moviesFlow: StateFlow<List<Movie>> = _movies
+    override val moviesFlow: StateFlow<List<Movie>> = _movies.asStateFlow()
 
     private val _popularMovies = MutableStateFlow<List<Movie>>(emptyList())
-    override val popularMoviesFlow: StateFlow<List<Movie>> = _popularMovies
+    override val popularMoviesFlow: StateFlow<List<Movie>> = _popularMovies.asStateFlow()
 
     private val _topRatedMovies = MutableStateFlow<List<Movie>>(emptyList())
-    override val topRatedMoviesFlow: StateFlow<List<Movie>> = _topRatedMovies
+    override val topRatedMoviesFlow: StateFlow<List<Movie>> = _topRatedMovies.asStateFlow()
 
     private val _upcomingMovies = MutableStateFlow<List<Movie>>(emptyList())
-    override val upcomingMoviesFlow: StateFlow<List<Movie>> = _upcomingMovies
+    override val upcomingMoviesFlow: StateFlow<List<Movie>> = _upcomingMovies.asStateFlow()
 
     private val _trendingMovies = MutableStateFlow<List<Movie>>(emptyList())
-    override val trendingMoviesFlow: StateFlow<List<Movie>> = _trendingMovies
+    override val trendingMoviesFlow: StateFlow<List<Movie>> = _trendingMovies.asStateFlow()
 
     private val lastUpdated = mutableMapOf<MutableStateFlow<List<Movie>>, Long>()
     private val ttl = Constants.Cache.DEFAULT_TTL_MS
