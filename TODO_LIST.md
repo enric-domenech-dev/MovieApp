@@ -48,7 +48,7 @@ After completing each task, update:
 
 ## 📊 PROGRESS TRACKING
 
-### Overall Progress: 19/136 tasks completed (13.97%)
+### Overall Progress: 19/140 tasks completed (13.57%)
 
 ### Phase Status:
 
@@ -57,8 +57,8 @@ After completing each task, update:
   - **Next Task:** 1.11 - Create DTOs - Book Models
   - **Recent:** ✅ Task 1.10 COMPLETE - TV Show DTOs created (11 DTOs, 1 mapper, 0 annotations)
 - [ ] **Phase 2: Code Quality** (0/12 completed) - Week 2
-- [ ] **Phase 3: Testing - Use Cases** (0/15 completed) - Week 3
-- [ ] **Phase 4: Testing - Repositories** (0/12 completed) - Week 4
+- [ ] **Phase 3: Testing - Use Cases & DTOs** (0/19 completed) - Week 3
+- [ ] **Phase 4: Testing - Repositories & Integration** (0/15 completed) - Week 4
 - [ ] **Phase 5: Testing - ViewModels** (0/22 completed) - Weeks 5-6
 - [ ] **Phase 6: UI Testing** (0/18 completed) - Week 7
 - [ ] **Phase 7: Integration & Polish** (0/15 completed) - Week 8
@@ -1485,6 +1485,312 @@ suspend operator fun invoke(...): Result<T> {
 
 [... Continue with similar detail for all remaining phases ...]
 
+# 🧪 PHASE 3: TESTING - USE CASES & DTOS (Week 3)
+
+**Priority:** P0 - CRITICAL  
+**Goal:** Add missing serialization tests & increase coverage to 30%  
+**Estimated Time:** 18-20 hours  
+**Context:** Lessons learned from bugs in Task 1.9-1.10 - see docs/analysis/Why_Tests_Didnt_Catch_Bugs.md
+
+## Task 3.1: Add DTO Serialization Tests
+
+**Impact:** CRITICAL | **Effort:** 4 hours | **Owner:** `___________`
+
+**Context:** Bug found in Task 1.10 - Season serialization failed silently because domain models lost @Serializable
+
+### Subtasks:
+
+- [ ] 3.1.1 Create `MovieMapperTest.kt`
+  ```kotlin
+  @Test
+  fun `MovieDto can be serialized and deserialized`() {
+      val dto = MovieDto(id = 1, title = "Test", ...)
+      val json = Json.encodeToString(dto)
+      val decoded = Json.decodeFromString<MovieDto>(json)
+      assertThat(decoded).isEqualTo(dto)
+  }
+  
+  @Test
+  fun `MovieDto to Domain mapping preserves all fields`() {
+      val dto = MovieDto(...)
+      val domain = dto.toDomain()
+      assertThat(domain.id).isEqualTo(dto.id)
+      assertThat(domain.voteAverageDouble).isEqualTo(dto.voteAverage)
+  }
+  ```
+
+- [ ] 3.1.2 Create `TvShowMapperTest.kt`
+  ```kotlin
+  @Test
+  fun `SeasonDto with episodes can be serialized and deserialized`() {
+      val season = SeasonDto(
+          seasonNumber = 1,
+          episodes = listOf(EpisodeDto(...), EpisodeDto(...))
+      )
+      val json = Json.encodeToString(season)
+      val decoded = Json.decodeFromString<SeasonDto>(json)
+      assertThat(decoded.episodes).hasSize(2)
+  }
+  
+  @Test
+  fun `Season domain to DTO and back preserves episodes`() {
+      val domainSeason = Season(episodes = listOf(...))
+      val dto = domainSeason.toDto()
+      val backToDomain = dto.toDomain()
+      assertThat(backToDomain.episodes).hasSize(domainSeason.episodes?.size)
+  }
+  ```
+
+- [ ] 3.1.3 Create `CommonMapperTest.kt`
+  - Test GenreDto, ProductionCompanyDto serialization
+  - Test SpokenLanguageDto, ProductionCountryDto serialization
+
+- [ ] 3.1.4 Create `CreditsMapperTest.kt`
+  - Test AggregateCastDto, AggregateCrewDto serialization
+  - Test CastRoleDto, CrewJobDto serialization
+
+**Acceptance Criteria:**
+
+- ✅ All DTOs have serialization round-trip tests
+- ✅ All mappers (Domain ↔ DTO) have tests
+- ✅ Tests verify NO data loss in mapping
+- ✅ All tests pass
+
+**Why this matters:** These tests would have caught the Task 1.10 bug where Season couldn't serialize.
+
+---
+
+## Task 3.2: Add Repository Integration Tests (HTTP + JSON)
+
+**Impact:** HIGH | **Effort:** 6 hours | **Owner:** `___________`
+
+**Context:** Bug found in Task 1.9 - LoadInitialDataImpl used MovieResponse (domain) instead of MovieResponseDto
+
+### Subtasks:
+
+- [ ] 3.2.1 Create `LoadInitialDataImplTest.kt`
+  ```kotlin
+  @Test
+  fun `can deserialize TMDB movie response`() {
+      val mockClient = MockEngine { request ->
+          respond(
+              content = """{"results":[{"id":1,"title":"Test",...}]}""",
+              status = HttpStatusCode.OK,
+              headers = headersOf(HttpHeaders.ContentType, "application/json")
+          )
+      }
+      val repository = LoadInitialDataImpl(
+          client = HttpClient(mockClient),
+          maxPages = 1,
+          json = Json { ignoreUnknownKeys = true }
+      )
+      
+      repository.refreshMovies(force = true)
+      
+      assertThat(repository.moviesFlow.value).isNotEmpty()
+  }
+  ```
+
+- [ ] 3.2.2 Create `TvShowRepositoryImplTest.kt`
+  - Test getTvShowDetails() deserializes TvShowDto
+  - Test seasons endpoint deserializes SeasonDto with episodes
+  - Use real JSON samples from TMDB API
+
+- [ ] 3.2.3 Create `MovieRepositoryImplTest.kt`
+  - Test getMovieDetails() deserializes MovieDto
+  - Test collections endpoint deserializes CollectionDto
+  - Use real JSON samples from TMDB API
+
+- [ ] 3.2.4 Add test JSON samples directory
+  ```
+  composeApp/src/commonTest/resources/
+    ├── movie_response.json
+    ├── tvshow_response.json
+    ├── season_details.json
+    └── movie_details.json
+  ```
+
+**Acceptance Criteria:**
+
+- ✅ 3 repository implementations have integration tests
+- ✅ Tests use real JSON from APIs (not mock objects)
+- ✅ Tests verify deserialization works end-to-end
+- ✅ All tests pass
+
+**Why this matters:** These tests would have caught the Task 1.9 bug where MovieResponse couldn't deserialize.
+
+---
+
+## Task 3.3: Add Room Persistence Tests (Android)
+
+**Impact:** CRITICAL | **Effort:** 4 hours | **Owner:** `___________`
+
+**Context:** Bug found in Task 1.10 - FavoriteDetailsRepositoryImpl couldn't serialize Season to JSON
+
+### Subtasks:
+
+- [ ] 3.3.1 Setup Robolectric for Room tests
+  ```kotlin
+  // build.gradle.kts
+  testImplementation("org.robolectric:robolectric:4.11.1")
+  ```
+
+- [ ] 3.3.2 Create `FavoriteDetailsRepositoryImplTest.kt` (androidTest or with Robolectric)
+  ```kotlin
+  @Test
+  fun `TvShow with seasons can be saved to Room and retrieved`() {
+      val tvShow = TvShow(
+          id = 1,
+          name = "Test Show",
+          seasons = listOf(
+              Season(seasonNumber = 1, episodes = listOf(...))
+          )
+      )
+      
+      repository.saveFavoriteTvShow(tvShow)
+      val retrieved = repository.getFavoriteTvShow("1")
+      
+      assertThat(retrieved).isNotNull()
+      assertThat(retrieved?.seasons).hasSize(1)
+      assertThat(retrieved?.seasons?.first()?.episodes).isNotEmpty()
+  }
+  
+  @Test
+  fun `Movie voteAverage is preserved in Room`() {
+      val movie = Movie(id = 1, voteAverageDouble = 8.5, ...)
+      
+      repository.saveFavoriteMovie(movie)
+      val retrieved = repository.getFavoriteMovie("1")
+      
+      assertThat(retrieved?.voteAverageDouble).isEqualTo(8.5)
+  }
+  ```
+
+- [ ] 3.3.3 Test serialization edge cases
+  - Null seasons → shouldn't crash
+  - Empty episodes → should serialize/deserialize
+  - Special characters in names → should handle
+
+**Acceptance Criteria:**
+
+- ✅ FavoriteDetailsRepositoryImpl has persistence tests
+- ✅ Tests verify JSON serialization to Room works
+- ✅ Tests verify ALL fields are preserved (including voteAverage)
+- ✅ Tests cover edge cases (null, empty lists)
+- ✅ All tests pass
+
+**Why this matters:** These tests would have caught BOTH bugs in Task 1.10 (Season serialization + voteAverage missing).
+
+---
+
+## Task 3.4: Add Use Case Tests (Existing Plan)
+
+**Impact:** MEDIUM | **Effort:** 4-5 hours | **Owner:** `___________`
+
+[... Keep existing Phase 3 use case tests from original TODO ...]
+
+---
+
+# 🧪 PHASE 4: TESTING - REPOSITORIES & INTEGRATION (Week 4)
+
+**Priority:** P1 - HIGH  
+**Goal:** Comprehensive repository testing + integration tests  
+**Estimated Time:** 16-18 hours
+
+## Task 4.1: Add Regression Tests for Known Bugs
+
+**Impact:** HIGH | **Effort:** 2 hours | **Owner:** `___________`
+
+**Context:** Document and prevent regression of bugs found in production
+
+### Subtasks:
+
+- [ ] 4.1.1 Create `SerializationRegressionTest.kt`
+  ```kotlin
+  @Test
+  fun `REGRESSION Bug 2025-12-07: TV shows without @Serializable can be saved to Room`() {
+      // This test documents the bug from Task 1.10
+      // where Season lost @Serializable and failed to serialize
+      val tvShow = TvShow(
+          id = 1,
+          seasons = listOf(Season(episodes = listOf(Episode(...))))
+      )
+      
+      // Should NOT throw exception
+      assertDoesNotThrow {
+          repository.saveFavoriteTvShow(tvShow)
+          repository.getFavoriteTvShow("1")
+      }
+  }
+  
+  @Test
+  fun `REGRESSION Bug 2025-12-07: LoadInitialData uses DTOs not domain models`() {
+      // This test documents the bug from Task 1.9
+      // where LoadInitialDataImpl used MovieResponse instead of MovieResponseDto
+      val mockClient = createMockClientWithMovieResponse()
+      val repository = LoadInitialDataImpl(mockClient, 1, json)
+      
+      // Should NOT throw SerializationException
+      assertDoesNotThrow {
+          repository.refreshMovies(force = true)
+      }
+      
+      assertThat(repository.moviesFlow.value).isNotEmpty()
+  }
+  ```
+
+- [ ] 4.1.2 Add to CI/CD pipeline
+  - Ensure regression tests run on every commit
+  - Mark as CRITICAL - build fails if these tests fail
+
+**Acceptance Criteria:**
+
+- ✅ Regression tests for all production bugs
+- ✅ Tests document the bug and prevention
+- ✅ Tests fail if bug is reintroduced
+
+---
+
+## Task 4.2-4.X: [Keep existing Phase 4 tasks]
+
+[... Continue with existing Phase 4 repository tests ...]
+
+---
+
+## 📋 TESTING SUMMARY - Lessons Learned
+
+### What we learned from Task 1.9-1.10 bugs:
+
+1. **Unit tests with Fakes don't test serialization**
+   - Fakes use in-memory lists → Don't catch JSON bugs
+   - Need integration tests with real JSON
+
+2. **DTO migration requires serialization tests**
+   - When removing @Serializable → Tests MUST fail
+   - Tests should verify round-trip: DTO → JSON → DTO
+
+3. **Repository tests need both types:**
+   - Unit tests (with Fakes) → Business logic
+   - Integration tests (real impl) → Persistence, Network, Serialization
+
+4. **Definition of Done for DTOs:**
+   - [ ] DTO created with @Serializable
+   - [ ] Mapper Domain ↔ DTO created
+   - [ ] Serialization test (JSON round-trip)
+   - [ ] Mapper test (no data loss)
+   - [ ] Integration test (used in repository)
+
+### New testing guidelines:
+
+- **Every DTO → Needs serialization test**
+- **Every Repository → Needs integration test**
+- **Every migration → Needs regression test**
+
+See `docs/analysis/Why_Tests_Didnt_Catch_Bugs.md` for full analysis.
+
+---
+
+ 
 - **Session 11** (Dec 7, 2025):
     - 🎉 **Task 1.9: COMPLETE** - Movie DTOs Created ✅
     - ✅ DTOs: 12 files (MovieDto, CollectionDto, Common, Credits)
@@ -1495,3 +1801,22 @@ suspend operator fun invoke(...): Result<T> {
     - ✅ Build: SUCCESSFUL, Tests: PASSING
     - **Time:** ~3 hours
     - **Next:** Task 1.10 - TV Show DTOs (Phase 2)
+
+- **Session 12** (Dec 7, 2025):
+    - 🐛 **Bug Fixes:** Restored favorites tab (TV shows) + films tab
+    - 🔍 **Root Causes Identified:**
+      1. FavoriteDetailsRepositoryImpl: Couldn't serialize Season (lost @Serializable)
+      2. LoadInitialDataImpl: Used MovieResponse instead of MovieResponseDto
+    - ✅ **Solutions Applied:**
+      - Added Season.toDto() and Episode.toDto() reverse mappers
+      - Updated FavoriteDetailsRepositoryImpl to use DTOs for JSON serialization
+      - Updated LoadInitialDataImpl to use MovieResponseDto
+    - 📊 **Analysis:** Created docs/analysis/Why_Tests_Didnt_Catch_Bugs.md
+    - 📝 **TODO Updates:** Added 4 new testing tasks to Phase 3-4:
+      - Task 3.1: DTO Serialization Tests (4h)
+      - Task 3.2: Repository Integration Tests (6h)
+      - Task 3.3: Room Persistence Tests (4h)
+      - Task 4.1: Regression Tests (2h)
+    - ✅ Build: SUCCESSFUL ✅ Tests: PASSING
+    - **Time:** ~3 hours
+    - **Next:** Task 1.11 - Book DTOs (continue Phase 1)
