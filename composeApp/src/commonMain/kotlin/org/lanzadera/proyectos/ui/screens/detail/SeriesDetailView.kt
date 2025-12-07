@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.ButtonDefaults
@@ -32,7 +33,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
@@ -41,7 +41,8 @@ import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
-import org.lanzadera.proyectos.domain.models.tvshow.TvShow
+import org.lanzadera.proyectos.domain.models.favorite.FavoriteType
+import org.lanzadera.proyectos.ui.models.TvShowUI
 import org.lanzadera.proyectos.navigation.NavigationStore
 import org.lanzadera.proyectos.ui.components.CustomTopAppBar
 import org.lanzadera.proyectos.ui.components.SeriesCreditsTab
@@ -52,33 +53,33 @@ import org.lanzadera.proyectos.utils.Strings
 @Composable
 @Preview
 fun SeriesDetailView(
-    nav: NavHostController,
-    tvShow: TvShow? = null,
+    onNavigateBack: () -> Unit,
+    tvShow: TvShowUI? = null,
     tvShowId: Int? = null,
     vm: SeriesDetailViewModel = koinInject()
 ) {
     val tvShowDetail by vm.tvShowDetail.collectAsStateWithLifecycle()
     val isLoading by vm.isLoading.collectAsStateWithLifecycle()
     val error by vm.error.collectAsStateWithLifecycle()
+    val favorites by vm.favorites.collectAsStateWithLifecycle()
+    val watchedEpisodes by vm.watchedEpisodes.collectAsStateWithLifecycle()
     val selectedTab = remember { mutableStateOf(0) }
+    val isFavorite = remember(tvShowDetail, favorites) {
+        favorites.any { it.id == tvShowDetail?.id?.toString() && it.type == FavoriteType.TV_SHOW }
+    }
+    val watchedEpisodesSet = remember(watchedEpisodes) {
+        watchedEpisodes.map { "${it.seasonNumber}-${it.episodeNumber}" }.toSet()
+    }
 
-    // Si recibimos un tvShowId, cargar por ID
-    LaunchedEffect(tvShowId) {
-        if (tvShowId != null && tvShowId > 0) {
-            vm.loadTvShowDetails(tvShowId)
+    // Load by ID from parameter
+    LaunchedEffect(tvShow, tvShowId) {
+        val idToLoad = tvShowId ?: tvShow?.id
+        idToLoad?.let {
+            vm.loadTvShowDetails(it)
         }
     }
 
-    // Si recibimos un tvShow del NavigationStore, úsalo
-    // Si no, intenta cargar por ID (para casos donde se recarga la página)
-    LaunchedEffect(tvShow) {
-        when {
-            tvShow != null -> vm.setTvShowDetail(tvShow)
-            NavigationStore.selectedTvShow != null -> vm.setTvShowDetail(NavigationStore.selectedTvShow!!)
-        }
-    }
-
-    val displayedTvShow = tvShowDetail ?: tvShow ?: NavigationStore.selectedTvShow
+    val displayedTvShow = tvShowDetail
 
     if (displayedTvShow == null) {
         Scaffold(
@@ -87,7 +88,7 @@ fun SeriesDetailView(
                 CustomTopAppBar(
                     title = Strings.Detail.NO_DATA,
                     navigationIcon = {
-                        IconButton(onClick = { nav.popBackStack() }) {
+                        IconButton(onClick = { onNavigateBack() }) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                                 contentDescription = "Volver",
@@ -120,7 +121,7 @@ fun SeriesDetailView(
             CustomTopAppBar(
                 title = displayedTvShow.name ?: "",
                 navigationIcon = {
-                    IconButton(onClick = { nav.popBackStack() }) {
+                    IconButton(onClick = { onNavigateBack() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                             contentDescription = "Volver",
@@ -134,16 +135,23 @@ fun SeriesDetailView(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Like Button - Green
+                        // Like Button - Deshabilitado mientras carga
                         IconButton(
-                            onClick = { /* TODO: Implement favorite functionality */ },
-                            modifier = Modifier.size(40.dp)
+                            onClick = { vm.toggleFavorite() },
+                            modifier = Modifier.size(40.dp),
+                            enabled = !isLoading
                         ) {
                             Icon(
-                                imageVector = Icons.Outlined.FavoriteBorder,
+                                imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                                 contentDescription = "Agregar a favoritos",
                                 modifier = Modifier.size(ButtonDefaults.IconSize),
-                                tint = Color(0xFF2AE98E)
+                                tint = if (isLoading) {
+                                    MaterialTheme.colorScheme.onBackground.copy(alpha = 0.38f)
+                                } else if (isFavorite) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onBackground
+                                }
                             )
                         }
                     }
@@ -247,7 +255,35 @@ fun SeriesDetailView(
                         Box(modifier = Modifier.fillMaxSize()) {
                             when (selectedTab.value) {
                                 0 -> SeriesInfoTab(tvShow = displayedTvShow)
-                                1 -> SeriesSeasonsTab(tvShow = displayedTvShow)
+                                1 -> {
+                                    if (isLoading) {
+                                        // Mostrar loading en el tab de temporadas
+                                        Box(
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Column(
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                                            ) {
+                                                CircularProgressIndicator()
+                                                Text(
+                                                    "Cargando temporadas y episodios...",
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                        }
+                                    } else {
+                                        SeriesSeasonsTab(
+                                            tvShow = displayedTvShow,
+                                            watchedEpisodes = watchedEpisodesSet,
+                                            onEpisodeToggle = { season, episode, isWatched ->
+                                                vm.toggleEpisodeWatched(season, episode, isWatched)
+                                            }
+                                        )
+                                    }
+                                }
                                 2 -> SeriesCreditsTab(tvShow = displayedTvShow)
                             }
                         }
@@ -257,4 +293,3 @@ fun SeriesDetailView(
         }
     )
 }
-

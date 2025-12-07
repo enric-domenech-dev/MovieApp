@@ -28,21 +28,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
-import org.lanzadera.proyectos.domain.models.game.Game
-import org.lanzadera.proyectos.navigation.NavigationStore
+import movieapp.composeapp.generated.resources.Res
+import movieapp.composeapp.generated.resources.new_edge_logo
+import org.jetbrains.compose.resources.painterResource
+import org.lanzadera.proyectos.ui.models.GameUI
+import org.lanzadera.proyectos.navigation.Screen
 import org.lanzadera.proyectos.utils.Constants
 
 @Composable
-fun GameHeader(modifier: Modifier = Modifier, nav: NavHostController, game: Game) {
+fun GameHeader(
+    modifier: Modifier = Modifier,
+    game: GameUI,
+    onGameClick: (gameId: Int) -> Unit
+) {
     Column(
         modifier = modifier
             .wrapContentHeight()
             .clickable {
-                NavigationStore.selectedGame = game
                 game.id?.let { gameId ->
-                    nav.navigate(Constants.Screen.GameDetail.createRoute(gameId))
+                    onGameClick(gameId)
                 }
             }
     ) {
@@ -52,9 +57,9 @@ fun GameHeader(modifier: Modifier = Modifier, nav: NavHostController, game: Game
                 .clip(MaterialTheme.shapes.small)
                 .background(MaterialTheme.colorScheme.surfaceVariant)
         ) {
-            if (game.cover != null) {
+            if (game.hasValidCover) {
                 AsyncImage(
-                    model = game.cover.getImageUrl(),
+                    model = game.coverImageUrl,
                     contentDescription = game.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
@@ -76,14 +81,18 @@ fun GameHeader(modifier: Modifier = Modifier, nav: NavHostController, game: Game
 }
 
 @Composable
-fun GameSubheader(modifier: Modifier = Modifier, nav: NavHostController, game: Game, showMeta: Boolean) {
+fun GameSubheader(
+    modifier: Modifier = Modifier,
+    game: GameUI,
+    showMeta: Boolean,
+    onGameClick: (gameId: Int) -> Unit
+) {
     Column(
         modifier = modifier
             .wrapContentHeight()
             .clickable {
-                NavigationStore.selectedGame = game
                 game.id?.let { gameId ->
-                    nav.navigate(Constants.Screen.GameDetail.createRoute(gameId))
+                    onGameClick(gameId)
                 }
             }
     ) {
@@ -93,14 +102,13 @@ fun GameSubheader(modifier: Modifier = Modifier, nav: NavHostController, game: G
                 .clip(MaterialTheme.shapes.small)
                 .background(MaterialTheme.colorScheme.surfaceVariant)
         ) {
-            if (game.cover != null) {
-                AsyncImage(
-                    model = game.cover.getImageUrl(),
-                    contentDescription = game.name,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
+            AsyncImage(
+                model = game.coverImageUrl,
+                contentDescription = game.name,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+                error = painterResource(Res.drawable.new_edge_logo)
+            )
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -121,7 +129,7 @@ fun GameSubheader(modifier: Modifier = Modifier, nav: NavHostController, game: G
                             .padding(end = 4.dp)
                     )
                     Text(
-                        text = game.ratingFormatted,
+                        text = game.ratingText,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface

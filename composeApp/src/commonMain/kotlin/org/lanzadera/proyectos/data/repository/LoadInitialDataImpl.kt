@@ -13,8 +13,11 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.Json
 import org.lanzadera.proyectos.domain.models.movie.Movie
-import org.lanzadera.proyectos.domain.models.movie.MovieResponse
+import org.lanzadera.proyectos.utils.Logger
+import org.lanzadera.proyectos.utils.Constants
 import org.lanzadera.proyectos.domain.repository.LoadInitialData
+import org.lanzadera.proyectos.data.dto.movie.MovieResponseDto
+import org.lanzadera.proyectos.data.mapper.toDomain
 
 class LoadInitialDataImpl(
     private val client: HttpClient,
@@ -53,7 +56,7 @@ class LoadInitialDataImpl(
 
     // (Opcional) TTL por feed para evitar sobrecarga
     private val lastUpdated = mutableMapOf<MutableStateFlow<List<Movie>>, Long>()
-    private val TTL = 2 * 60 * 1000L // 2 min, ajusta a tu gusto
+    private val ttl = Constants.Cache.DEFAULT_TTL_MS
 
     private fun isValidMovie(m: Movie): Boolean =
         m.id != null &&
@@ -83,48 +86,48 @@ private suspend inline fun refreshFeed(
     val last = lastUpdated[state] ?: 0L
     val freshEnough = ttlMillis > 0 && (now - last) < ttlMillis
 
-    println("SYNCRO refreshFeed: force=$force, state.size=${state.value.size}, freshEnough=$freshEnough, ttlMillis=$ttlMillis, last=$last, now=$now")
+    Logger.d("force=$force, state.size=${state.value.size}, freshEnough=$freshEnough, ttlMillis=$ttlMillis, last=$last, now=$now", tag = "LoadInitialData")
     if (!force && (state.value.isNotEmpty() || freshEnough)) {
-        println("SYNCRO refreshFeed: skipping fetch, cache is fresh or not forced")
+        Logger.d("skipping fetch, cache is fresh or not forced", tag = "LoadInitialData")
         return
     }
-    println("SYNCRO refreshFeed: fetching new data")
+    Logger.d("fetching new data", tag = "LoadInitialData")
     val data = fetch()
     state.value = data                          // emitir ANTES de devolver
     lastUpdated[state] = now
-    println("SYNCRO refreshFeed: updated state with ${data.size} movies")
+    Logger.d("updated state with ${data.size} movies", tag = "LoadInitialData")
 }
 
 
     // --- Core refresh ---
     override suspend fun refreshMovies(force: Boolean) =
-        refreshFeed(_movies, force, TTL, lastUpdated) { fetchNowPlayingMovies() }
+        refreshFeed(_movies, force, ttl, lastUpdated) { fetchNowPlayingMovies() }
 
     override suspend fun refreshTrendingMovies(force: Boolean) =
-        refreshFeed(_trending, force, TTL, lastUpdated) { fetchTrendingMoviesWeek() }
+        refreshFeed(_trending, force, ttl, lastUpdated) { fetchTrendingMoviesWeek() }
 
     // --- Additional refresh ---
     override suspend fun refreshPopularMovies(force: Boolean) =
-        refreshFeed(_popular, force, TTL, lastUpdated) { fetchPopularMovies() }
+        refreshFeed(_popular, force, ttl, lastUpdated) { fetchPopularMovies() }
 
     override suspend fun refreshTopRatedMovies(force: Boolean) =
-        refreshFeed(_topRated, force, TTL, lastUpdated) { fetchTopRatedMovies() }
+        refreshFeed(_topRated, force, ttl, lastUpdated) { fetchTopRatedMovies() }
 
     override suspend fun refreshUpcomingMovies(force: Boolean) =
-        refreshFeed(_upcoming, force, TTL, lastUpdated) { fetchUpcomingMovies() }
+        refreshFeed(_upcoming, force, ttl, lastUpdated) { fetchUpcomingMovies() }
 
     override suspend fun refreshDiscoverMovies(force: Boolean) {
-        refreshFeed(_discover, force, TTL, lastUpdated) { fetchTrendingMovies() }
+        refreshFeed(_discover, force, ttl, lastUpdated) { fetchTrendingMovies() }
     }
 
     override suspend fun refreshHeroMovies(force: Boolean) =
-        refreshFeed(_hero, force, TTL, lastUpdated) { fetchHeroMovies() }
+        refreshFeed(_hero, force, ttl, lastUpdated) { fetchHeroMovies() }
 
     override suspend fun refreshTrendingMoviesDaily(force: Boolean) =
-        refreshFeed(_trendingDaily, force, TTL, lastUpdated) { fetchTrendingMoviesDay() }
+        refreshFeed(_trendingDaily, force, ttl, lastUpdated) { fetchTrendingMoviesDay() }
 
     override suspend fun refreshInCinemasToday(force: Boolean) {
-        refreshFeed(_inCinemasToday, force, TTL, lastUpdated) { fetchInCinemasToday() }
+        refreshFeed(_inCinemasToday, force, ttl, lastUpdated) { fetchInCinemasToday() }
     }
 
 
@@ -209,15 +212,16 @@ private suspend inline fun refreshFeed(
                 }
             }.bodyAsText()
 
-            val dto: MovieResponse = json.decodeFromString(text)
-            val valid = dto.results.filter(::isValidMovie)
+            val dto: MovieResponseDto = json.decodeFromString(text)
+            val domainMovies = dto.results.map { it.toDomain() }
+            val valid = domainMovies.filter(::isValidMovie)
 
             if (valid.isEmpty()) break
             acc += valid
-            println("SYNCRO fetchPaged: page $page, downloaded ${valid.size} movies, total so far: ${acc.size}")
+            Logger.d("page $page, downloaded ${valid.size} movies, total so far: ${acc.size}", tag = "LoadInitialData")
 
         }
-        println("SYNCRO fetchPaged: finished, total movies downloaded: ${acc.size}")
+        Logger.d("finished, total movies downloaded: ${acc.size}", tag = "LoadInitialData")
         return acc
     }
 }

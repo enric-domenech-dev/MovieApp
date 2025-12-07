@@ -25,8 +25,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
-import org.lanzadera.proyectos.domain.models.tvshow.TvShow
+import org.lanzadera.proyectos.ui.models.TvShowUI
 import org.lanzadera.proyectos.ui.components.TvShowHeader
 import org.lanzadera.proyectos.ui.components.TvShowSubheader
 import org.lanzadera.proyectos.ui.components.dialogs.TvShowSectionDialog
@@ -35,8 +34,8 @@ import org.lanzadera.proyectos.ui.screens.home.SectionMode
 @Composable
 fun TvShowSection(
     title: String,
-    items: List<TvShow>,
-    nav: NavHostController,
+    items: List<TvShowUI>,
+    onTvShowClick: (tvShowId: Int) -> Unit,
     sectionIndex: Int = 0,
     mode: SectionMode = SectionMode.HEADER
 ) {
@@ -95,22 +94,22 @@ fun TvShowSection(
                     when (mode) {
                         SectionMode.HEADER -> TvShowHeader(
                             modifier = itemModifier,
-                            nav = nav,
-                            tvShow = tvShow
+                            tvShow = tvShow,
+                            onTvShowClick = onTvShowClick
                         )
 
                         SectionMode.SUBHEADER_SHOW_META -> TvShowSubheader(
                             modifier = itemModifier,
-                            nav = nav,
                             tvShow = tvShow,
-                            showMeta = true
+                            showMeta = true,
+                            onTvShowClick = onTvShowClick
                         )
 
                         SectionMode.SUBHEADER_HIDE_META -> TvShowSubheader(
                             modifier = itemModifier,
-                            nav = nav,
                             tvShow = tvShow,
-                            showMeta = false
+                            showMeta = false,
+                            onTvShowClick = onTvShowClick
                         )
                     }
                 }
@@ -120,7 +119,7 @@ fun TvShowSection(
                 TvShowSectionDialog(
                     title = title,
                     items = items,
-                    nav = nav,
+                    onTvShowClick = onTvShowClick,
                     sectionIndex = sectionIndex,
                     dialogVisible = dialogContentVisible,
                     onRequestHideContent = { dialogContentVisible = false },

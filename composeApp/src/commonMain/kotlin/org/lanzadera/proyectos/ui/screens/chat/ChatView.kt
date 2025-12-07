@@ -23,7 +23,7 @@ import androidx.navigation.NavHostController
 
 @Composable
 @Preview
-fun ChatView(navIndexBottomBar: Int = 3, nav: NavHostController, vm: ChatViewModel) {
+fun ChatView(navIndexBottomBar: Int = 3, onNavigateBack: () -> Unit, vm: ChatViewModel) {
     val scope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 

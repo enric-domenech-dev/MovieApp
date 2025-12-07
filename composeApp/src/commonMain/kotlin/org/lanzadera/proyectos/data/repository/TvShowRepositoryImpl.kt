@@ -7,10 +7,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
-import org.lanzadera.proyectos.domain.models.tvshow.Season
+import org.lanzadera.proyectos.data.dto.tvshow.SeasonDto
+import org.lanzadera.proyectos.data.dto.tvshow.TvShowDto
+import org.lanzadera.proyectos.data.dto.tvshow.TvShowResponseDto
+import org.lanzadera.proyectos.data.mapper.toDomain
 import org.lanzadera.proyectos.domain.models.tvshow.TvShow
-import org.lanzadera.proyectos.domain.models.tvshow.TvShowResponse
 import org.lanzadera.proyectos.domain.repository.TvShowRepository
+import org.lanzadera.proyectos.utils.Constants
+import org.lanzadera.proyectos.utils.Logger
 
 class TvShowRepositoryImpl(
     private val client: HttpClient,
@@ -40,7 +44,7 @@ class TvShowRepositoryImpl(
     override val trendingTvShowsWeekFlow: StateFlow<List<TvShow>> = _trendingTvShowsWeek
 
     private val lastUpdated = mutableMapOf<MutableStateFlow<List<TvShow>>, Long>()
-    private val TTL = 2 * 60 * 1000L // 2 min
+    private val ttl = Constants.Cache.DEFAULT_TTL_MS
 
     private val tvShowDetailsCache = mutableMapOf<Int, TvShow>()
 
@@ -66,38 +70,38 @@ class TvShowRepositoryImpl(
         val last = lastUpdated[state] ?: 0L
         val freshEnough = ttlMillis > 0 && (now - last) < ttlMillis
 
-        println("SYNCRO TvShowRepositoryImpl: force=$force, state.size=${state.value.size}, freshEnough=$freshEnough")
+        Logger.d("force=$force, state.size=${state.value.size}, freshEnough=$freshEnough")
         if (!force && (state.value.isNotEmpty() || freshEnough)) {
-            println("SYNCRO TvShowRepositoryImpl: skipping fetch, cache is fresh")
+            Logger.d("skipping fetch, cache is fresh")
             return
         }
-        println("SYNCRO TvShowRepositoryImpl: fetching new data")
+        Logger.d("fetching new data")
         val data = fetch()
         state.value = data
         lastUpdated[state] = now
-        println("SYNCRO TvShowRepositoryImpl: updated state with ${data.size} tv shows")
+        Logger.d("updated state with ${data.size} tv shows")
     }
 
     override suspend fun refreshTvShows(force: Boolean) =
-        refreshFeed(_tvShows, force, TTL, lastUpdated) { fetchTrendingTvShowsWeek() }
+        refreshFeed(_tvShows, force, ttl, lastUpdated) { fetchTrendingTvShowsWeek() }
 
     override suspend fun refreshPopularTvShows(force: Boolean) =
-        refreshFeed(_popularTvShows, force, TTL, lastUpdated) { fetchPopularTvShows() }
+        refreshFeed(_popularTvShows, force, ttl, lastUpdated) { fetchPopularTvShows() }
 
     override suspend fun refreshTopRatedTvShows(force: Boolean) =
-        refreshFeed(_topRatedTvShows, force, TTL, lastUpdated) { fetchTopRatedTvShows() }
+        refreshFeed(_topRatedTvShows, force, ttl, lastUpdated) { fetchTopRatedTvShows() }
 
     override suspend fun refreshOnAirTvShows(force: Boolean) =
-        refreshFeed(_onAirTvShows, force, TTL, lastUpdated) { fetchOnAirTvShows() }
+        refreshFeed(_onAirTvShows, force, ttl, lastUpdated) { fetchOnAirTvShows() }
 
     override suspend fun refreshTrendingTvShows(force: Boolean) =
-        refreshFeed(_trendingTvShows, force, TTL, lastUpdated) { fetchTrendingTvShowsDay() }
+        refreshFeed(_trendingTvShows, force, ttl, lastUpdated) { fetchTrendingTvShowsDay() }
 
     override suspend fun refreshAiringTodayTvShows(force: Boolean) =
-        refreshFeed(_airingTodayTvShows, force, TTL, lastUpdated) { fetchAiringTodayTvShows() }
+        refreshFeed(_airingTodayTvShows, force, ttl, lastUpdated) { fetchAiringTodayTvShows() }
 
     override suspend fun refreshTrendingTvShowsWeek(force: Boolean) =
-        refreshFeed(_trendingTvShowsWeek, force, TTL, lastUpdated) { fetchTrendingTvShowsWeek() }
+        refreshFeed(_trendingTvShowsWeek, force, ttl, lastUpdated) { fetchTrendingTvShowsWeek() }
 
     override suspend fun getTvShowDetails(tvShowId: Int): TvShow? {
         // Intenta cache primero
@@ -112,7 +116,8 @@ class TvShowRepositoryImpl(
                     parameters.append("language", "es")
                 }
             }.bodyAsText()
-            var tvShow: TvShow = json.decodeFromString(text)
+            val tvShowDto: TvShowDto = json.decodeFromString(text)
+            var tvShow: TvShow = tvShowDto.toDomain()
 
             // Cargar episodios para cada temporada
             tvShow = tvShow.copy(
@@ -123,10 +128,10 @@ class TvShowRepositoryImpl(
                                 parameters.append("language", "es")
                             }
                         }.bodyAsText()
-                        val seasonWithEpisodes: Season = json.decodeFromString(seasonText)
-                        seasonWithEpisodes
+                        val seasonDto: SeasonDto = json.decodeFromString(seasonText)
+                        seasonDto.toDomain()
                     } catch (e: Exception) {
-                        println("SYNCRO TvShowRepositoryImpl: error fetching season ${season.seasonNumber}: ${e.message}")
+                        Logger.d("error fetching season ${season.seasonNumber}: ${e.message}")
                         season // Devuelve la temporada sin episodios si falla
                     }
                 }
@@ -135,7 +140,7 @@ class TvShowRepositoryImpl(
             tvShowDetailsCache[tvShowId] = tvShow
             tvShow
         } catch (t: Throwable) {
-            println("SYNCRO TvShowRepositoryImpl: error fetching tv show details: ${t.message}")
+            Logger.d("error fetching tv show details: ${t.message}")
             null
         }
     }
@@ -177,14 +182,14 @@ class TvShowRepositoryImpl(
                 }
             }.bodyAsText()
 
-            val dto: TvShowResponse = json.decodeFromString(text)
-            val valid = dto.results.filter(::isValidTvShow)
+            val dto: TvShowResponseDto = json.decodeFromString(text)
+            val valid = dto.results.map { it.toDomain() }.filter(::isValidTvShow)
 
             if (valid.isEmpty()) break
             acc += valid
-            println("SYNCRO fetchPaged TvShow: page $page, downloaded ${valid.size} tv shows, total so far: ${acc.size}")
+            Logger.d("page $page, downloaded ${valid.size} tv shows, total so far: ${acc.size}")
         }
-        println("SYNCRO fetchPaged TvShow: finished, total tv shows downloaded: ${acc.size}")
+        Logger.d("finished, total tv shows downloaded: ${acc.size}")
         return acc
     }
 }

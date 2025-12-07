@@ -12,6 +12,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.androidxRoom)
     alias(libs.plugins.gradleBuildConfig)
+    alias(libs.plugins.kover)
 }
 
 kotlin {
@@ -67,6 +68,7 @@ kotlin {
             implementation(libs.androidx.biometric)
 
             implementation(libs.androidx.compose.material.iconsExtended)
+            implementation(libs.androidx.room.ktx)
         }
         commonMain.dependencies {
 
@@ -79,6 +81,9 @@ kotlin {
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
+
+            // Logging
+            implementation(libs.napier)
 
             implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.serialization.json)
@@ -249,4 +254,49 @@ buildConfig {
     buildConfigField("String", "APP_VERSION", "\"$appVersion\"")
     buildConfigField("String", "IGDB_CLIENT_ID", "\"$igdbClientId\"")
     buildConfigField("String", "IGDB_CLIENT_SECRET", "\"$igdbClientSecret\"")
+}
+// Kover Configuration
+kover {
+    reports {
+        filters {
+            excludes {
+                // Exclude generated code
+                classes("*.BuildConfig")
+                classes("*ComposableSingletons*")
+                classes("*_Factory")
+                classes("*_Impl")
+                
+                // Exclude Android framework
+                packages("android.*")
+                packages("androidx.*")
+                
+                // Exclude DI modules
+                classes("*.di.*")
+                
+                // Exclude data models (DTOs)
+                packages("*.data.dto")
+                
+                // Exclude UI previews and themes
+                packages("*.ui.theme")
+            }
+        }
+        
+        total {
+            html {
+                onCheck.set(false)
+                title.set("MovieApp Test Coverage Report")
+            }
+            
+            xml {
+                onCheck.set(false)
+            }
+            
+            verify {
+                onCheck.set(true)
+                rule {
+                    minBound(20) // Minimum 20% coverage for now
+                }
+            }
+        }
+    }
 }

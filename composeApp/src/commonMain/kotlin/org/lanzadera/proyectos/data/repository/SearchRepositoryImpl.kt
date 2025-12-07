@@ -4,11 +4,13 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import kotlinx.serialization.json.Json
+import org.lanzadera.proyectos.data.dto.movie.MovieResponseDto
+import org.lanzadera.proyectos.data.dto.tvshow.TvShowResponseDto
+import org.lanzadera.proyectos.data.mapper.toDomain
 import org.lanzadera.proyectos.domain.models.movie.Movie
-import org.lanzadera.proyectos.domain.models.movie.MovieResponse
 import org.lanzadera.proyectos.domain.models.tvshow.TvShow
-import org.lanzadera.proyectos.domain.models.tvshow.TvShowResponse
 import org.lanzadera.proyectos.domain.repository.SearchRepository
+import org.lanzadera.proyectos.utils.Logger
 
 class SearchRepositoryImpl(
     private val client: HttpClient,
@@ -29,10 +31,10 @@ class SearchRepositoryImpl(
                 }
             }.bodyAsText()
 
-            val response = json.decodeFromString<MovieResponse>(text)
-            response.results
+            val responseDto = json.decodeFromString<MovieResponseDto>(text)
+            responseDto.toDomain().results
         } catch (e: Exception) {
-            println("Error searching movies: ${e.message}")
+            Logger.d("Error searching movies: ${e.message}", tag = "SearchRepository")
             emptyList()
         }
     }
@@ -52,10 +54,10 @@ class SearchRepositoryImpl(
                 }
             }.bodyAsText()
 
-            val response = json.decodeFromString<TvShowResponse>(text)
-            response.results
+            val responseDto = json.decodeFromString<TvShowResponseDto>(text)
+            responseDto.toDomain().results
         } catch (e: Exception) {
-            println("Error searching TV shows: ${e.message}")
+            Logger.d("Error searching TV shows: ${e.message}", tag = "SearchRepository")
             emptyList()
         }
     }

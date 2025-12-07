@@ -25,12 +25,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import movieapp.composeapp.generated.resources.Res
-import movieapp.composeapp.generated.resources.unicorn
+import movieapp.composeapp.generated.resources.new_edge_logo
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.lanzadera.proyectos.AppTheme
+import org.lanzadera.proyectos.navigation.Screen
 import org.lanzadera.proyectos.ui.components.DevelopingDialog
 import org.lanzadera.proyectos.ui.components.EmailInput
 import org.lanzadera.proyectos.ui.components.FingerPrintAuthentication
@@ -42,9 +42,11 @@ import org.lanzadera.proyectos.utils.Strings
 @Composable
 @Preview
 fun LoginView(
-    nav: NavHostController, vm: LoginViewModel,
+    vm: LoginViewModel,
     selectedTheme: AppTheme = AppTheme.SYSTEM,
-    darkTheme: Boolean = false
+    darkTheme: Boolean = false,
+    onNavigateToHome: () -> Unit,
+    onNavigateBack: () -> Unit
 ) {
     val user by vm.userState.collectAsState()
     val scope = rememberCoroutineScope()
@@ -61,7 +63,7 @@ fun LoginView(
     // Observa el estado de login y navega cuando se haya realizado correctamente
     LaunchedEffect(isLoginSuccessful) {
         if (isLoginSuccessful == true) {
-            nav.navigate(Constants.Screen.Home.route)
+            onNavigateToHome()
         } else {
             // Si el login falla, incrementar el contador de intentos fallidos
             if (failedAttempts < 3) {
@@ -84,7 +86,7 @@ fun LoginView(
             Spacer(modifier = Modifier.height(16.dp))
 
             Image(
-                painter = painterResource(resource = Res.drawable.unicorn),
+                painter = painterResource(resource = Res.drawable.new_edge_logo),
                 contentDescription = null,
                 modifier = Modifier.size(200.dp)
             )

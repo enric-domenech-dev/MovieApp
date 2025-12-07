@@ -27,30 +27,29 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import movieapp.composeapp.generated.resources.Res
-import movieapp.composeapp.generated.resources.unicorn
+import movieapp.composeapp.generated.resources.new_edge_logo
 import org.jetbrains.compose.resources.painterResource
-import org.lanzadera.proyectos.domain.models.book.Book
+import org.lanzadera.proyectos.ui.models.BookUI
+import org.lanzadera.proyectos.utils.Logger
 import org.lanzadera.proyectos.navigation.NavigationStore
+import org.lanzadera.proyectos.navigation.Screen
 import org.lanzadera.proyectos.utils.Constants
 
 @Composable
 fun BookItem(
-    nav: NavHostController,
-    book: Book,
+    book: BookUI,
+    onBookClick: (bookId: String) -> Unit,
     modifier: Modifier = Modifier.wrapContentHeight(),
     showMeta: Boolean = true
 ) {
     Column(
         modifier = modifier
             .clickable {
-                // clear any selected movie and set the selected book, then navigate
-                NavigationStore.selectedMovie = null
                 NavigationStore.selectedBook = book
-                println("SYNCRO BookItem: clicking book, thumbnail=${book.thumbnail}")
-                nav.navigate(Constants.Screen.Detail.route)
+                Logger.d("clicking book, thumbnail=${book.thumbnail}", tag = "BookComponents")
+                onBookClick(book.id)
             }
     ) {
         Box(
@@ -63,7 +62,7 @@ fun BookItem(
                 contentDescription = book.title,
                 contentScale = ContentScale.FillBounds,
                 modifier = Modifier.fillMaxSize(),
-                placeholder = painterResource(Res.drawable.unicorn)
+                error = painterResource(Res.drawable.new_edge_logo)
             )
         }
 
@@ -92,7 +91,7 @@ fun BookItem(
 }
 
 @Composable
-fun BookDetail(book: Book?) {
+fun BookDetail(book: BookUI?) {
     if (book == null) return
     Column {
         Column(
@@ -104,7 +103,7 @@ fun BookDetail(book: Book?) {
                 contentDescription = book.title,
                 contentScale = ContentScale.FillWidth,
                 modifier = Modifier.fillMaxWidth().size(240.dp),
-                placeholder = painterResource(Res.drawable.unicorn)
+                error = painterResource(Res.drawable.new_edge_logo)
             )
         }
 
@@ -136,14 +135,17 @@ fun BookDetail(book: Book?) {
 }
 
 @Composable
-fun BookHeader(modifier: Modifier = Modifier, nav: NavHostController, book: Book) {
+fun BookHeader(
+    modifier: Modifier = Modifier,
+    book: BookUI,
+    onBookClick: (bookId: String) -> Unit
+) {
     Column(
         modifier = modifier
             .wrapContentHeight()
             .clickable {
-                NavigationStore.selectedMovie = null
                 NavigationStore.selectedBook = book
-                nav.navigate(Constants.Screen.Detail.route)
+                onBookClick(book.id)
             }
     ) {
         Box(
@@ -156,7 +158,7 @@ fun BookHeader(modifier: Modifier = Modifier, nav: NavHostController, book: Book
                 contentDescription = book.title,
                 contentScale = ContentScale.FillBounds,
                 modifier = Modifier.fillMaxSize(),
-                placeholder = painterResource(Res.drawable.unicorn)
+                error = painterResource(Res.drawable.new_edge_logo)
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
@@ -181,14 +183,18 @@ fun BookHeader(modifier: Modifier = Modifier, nav: NavHostController, book: Book
 }
 
 @Composable
-fun BookSubheader(modifier: Modifier = Modifier, nav: NavHostController, book: Book, showMeta: Boolean) {
+fun BookSubheader(
+    modifier: Modifier = Modifier,
+    book: BookUI,
+    showMeta: Boolean,
+    onBookClick: (bookId: String) -> Unit
+) {
     Column(
         modifier = modifier
             .wrapContentHeight()
             .clickable {
-                NavigationStore.selectedMovie = null
                 NavigationStore.selectedBook = book
-                nav.navigate(Constants.Screen.Detail.route)
+                onBookClick(book.id)
             }
     ) {
         Box(
@@ -201,7 +207,7 @@ fun BookSubheader(modifier: Modifier = Modifier, nav: NavHostController, book: B
                 contentDescription = book.title,
                 contentScale = ContentScale.FillBounds,
                 modifier = Modifier.fillMaxSize(),
-                placeholder = painterResource(Res.drawable.unicorn)
+                error = painterResource(Res.drawable.new_edge_logo)
             )
         }
         if (showMeta) {

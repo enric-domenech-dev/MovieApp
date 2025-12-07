@@ -12,7 +12,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
 import org.lanzadera.proyectos.BuildConfig
+import org.lanzadera.proyectos.utils.Logger
+import org.lanzadera.proyectos.utils.Constants
 import org.lanzadera.proyectos.data.authentication.IGDBAuthManager
+import org.lanzadera.proyectos.data.dto.game.GameDto
+import org.lanzadera.proyectos.data.mapper.toDomain
 import org.lanzadera.proyectos.domain.models.game.Game
 import org.lanzadera.proyectos.domain.repository.GameRepository
 
@@ -39,7 +43,7 @@ class GameRepositoryImpl(
     override val trendingGamesFlow: StateFlow<List<Game>> = _trendingGames
 
     private val lastUpdated = mutableMapOf<MutableStateFlow<List<Game>>, Long>()
-    private val TTL = 2 * 60 * 1000L // 2 min
+    private val ttl = Constants.Cache.DEFAULT_TTL_MS
 
     private val gameDetailsCache = mutableMapOf<Int, Game>()
 
@@ -53,7 +57,7 @@ class GameRepositoryImpl(
         val now = Clock.System.now().toEpochMilliseconds()
         val last = lastUpdated[state] ?: 0L
 
-        if ((now - last) < TTL && state.value.isNotEmpty()) {
+        if ((now - last) < ttl && state.value.isNotEmpty()) {
             return
         }
 
@@ -61,7 +65,7 @@ class GameRepositoryImpl(
             val accessToken = authManager.getAccessToken()
             val clientId = BuildConfig.IGDB_CLIENT_ID
 
-            println("SYNCRO: Sending request with Authorization: Bearer ${accessToken.take(20)}...")
+            Logger.d("Sending request with Authorization: Bearer ${accessToken.take(20)}...", tag = "GameRepository")
 
             val response = client.post("https://api.igdb.com/v4/games") {
                 headers {
@@ -72,15 +76,16 @@ class GameRepositoryImpl(
                 setBody(query)
             }
 
-            println("SYNCRO: Response status: ${response.status}")
+            Logger.d("Response status: ${response.status}", tag = "GameRepository")
 
-            val games = json.decodeFromString<List<Game>>(response.bodyAsText())
+            val gameDtos = json.decodeFromString<List<GameDto>>(response.bodyAsText())
+            val games = gameDtos.map { it.toDomain() }
             val validGames = games.filter { isValidGame(it) }
 
             state.value = validGames
             lastUpdated[state] = now
         } catch (e: Exception) {
-            println("SYNCRO GameRepository: Error - ${e.message}")
+            Logger.d("Error - ${e.message}", tag = "GameRepository")
             e.printStackTrace()
         }
     }
@@ -133,7 +138,8 @@ class GameRepositoryImpl(
                 setBody(query)
             }
 
-            val games = json.decodeFromString<List<Game>>(response.bodyAsText())
+            val gameDtos = json.decodeFromString<List<GameDto>>(response.bodyAsText())
+            val games = gameDtos.map { it.toDomain() }
             val game = games.firstOrNull()
 
             if (game != null) {

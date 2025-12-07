@@ -1,5 +1,7 @@
 package org.lanzadera.proyectos.di
 
+import io.github.aakira.napier.DebugAntilog
+import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.api.createClientPlugin
@@ -20,31 +22,66 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
 import org.lanzadera.proyectos.BuildConfig
+import org.lanzadera.proyectos.utils.Constants
+import org.lanzadera.proyectos.utils.Logger
 import org.lanzadera.proyectos.data.authentication.IGDBAuthManager
+import org.lanzadera.proyectos.data.datasource.FavoritesLocalDataSource
+import org.lanzadera.proyectos.data.datasource.WatchedEpisodesDataSource
+import org.lanzadera.proyectos.data.datasource.createFavoriteDetailsRepository
+import org.lanzadera.proyectos.data.datasource.createFavoritesLocalDataSource
+import org.lanzadera.proyectos.data.datasource.createWatchedEpisodesDataSource
+import org.lanzadera.proyectos.data.datasource.createWatchedMoviesDataSource
 import org.lanzadera.proyectos.data.repository.BooksRepositoryImpl
+import org.lanzadera.proyectos.data.repository.FavoritesRepositoryImpl
 import org.lanzadera.proyectos.data.repository.GameRepositoryImpl
 import org.lanzadera.proyectos.data.repository.LoadInitialDataImpl
 import org.lanzadera.proyectos.data.repository.MovieRepositoryImpl
 import org.lanzadera.proyectos.data.repository.SearchRepositoryImpl
 import org.lanzadera.proyectos.data.repository.TvShowRepositoryImpl
+import org.lanzadera.proyectos.data.repository.WatchedEpisodesRepositoryImpl
+import org.lanzadera.proyectos.data.repository.WatchedMoviesRepositoryImpl
 import org.lanzadera.proyectos.domain.repository.BooksRepository
+import org.lanzadera.proyectos.domain.repository.FavoriteDetailsRepository
+import org.lanzadera.proyectos.domain.repository.FavoritesRepository
 import org.lanzadera.proyectos.domain.repository.GameRepository
 import org.lanzadera.proyectos.domain.repository.LoadInitialData
 import org.lanzadera.proyectos.domain.repository.MovieRepository
 import org.lanzadera.proyectos.domain.repository.SearchRepository
 import org.lanzadera.proyectos.domain.repository.TvShowRepository
+import org.lanzadera.proyectos.domain.repository.WatchedEpisodesRepository
+import org.lanzadera.proyectos.domain.repository.WatchedMoviesRepository
 import org.lanzadera.proyectos.domain.usecase.books.RefreshBooksUseCase
+import org.lanzadera.proyectos.domain.usecase.episodes.ObserveAllWatchedEpisodesUseCase
+import org.lanzadera.proyectos.domain.usecase.episodes.ObserveWatchedEpisodesUseCase
+import org.lanzadera.proyectos.domain.usecase.episodes.ToggleEpisodeWatchedUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.GetFavoriteDetailsUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.ObserveFavoritesUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.SyncFavoritesUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.ToggleMovieFavoriteUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.ToggleTvShowFavoriteUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.ToggleBookFavoriteUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.ToggleGameFavoriteUseCase
 import org.lanzadera.proyectos.domain.usecase.games.GetGameDetailsUseCase
 import org.lanzadera.proyectos.domain.usecase.games.RefreshGamesUseCase
-import org.lanzadera.proyectos.domain.usecase.load_initial_data.LoadInitialDataUseCase
+import org.lanzadera.proyectos.domain.usecase.load_initial_data.GetInitialDataUseCase
+import org.lanzadera.proyectos.domain.usecase.movies.GetMovieDetailsUseCase
+import org.lanzadera.proyectos.domain.usecase.movies.ObserveWatchedMoviesUseCase
+import org.lanzadera.proyectos.domain.usecase.movies.ToggleMovieWatchedUseCase
 import org.lanzadera.proyectos.domain.usecase.search.SearchMoviesUseCase
+import org.lanzadera.proyectos.domain.usecase.search.SearchTvShowsUseCase
 import org.lanzadera.proyectos.domain.usecase.tvshows.GetTvShowDetailsUseCase
 import org.lanzadera.proyectos.domain.usecase.tvshows.RefreshTvShowsUseCase
 import org.lanzadera.proyectos.ui.screens.detail.MovieDetailViewModel
 import org.lanzadera.proyectos.ui.screens.detail.SeriesDetailViewModel
 import org.lanzadera.proyectos.ui.screens.games.GameDetailViewModel
 import org.lanzadera.proyectos.ui.screens.home.HomeViewModel
+import org.lanzadera.proyectos.ui.screens.home.tabs.BooksTabViewModel
+import org.lanzadera.proyectos.ui.screens.home.tabs.FavoritesTabViewModel
+import org.lanzadera.proyectos.ui.screens.home.tabs.FilmsTabViewModel
+import org.lanzadera.proyectos.ui.screens.home.tabs.GamesTabViewModel
+import org.lanzadera.proyectos.ui.screens.home.tabs.SeriesTabViewModel
 import org.lanzadera.proyectos.ui.screens.search.SearchViewModel
+import org.lanzadera.proyectos.ui.screens.splash.SplashViewModel
 
 val appModule = module {
     single(named("apiBearerToken")) { BuildConfig.API_BEARER_TOKEN }
@@ -58,8 +95,8 @@ val LoggingPlugin = createClientPlugin("LoggingPlugin") {
     onRequest { request, _ ->
         val method = request.method.value
         val url = request.url
-        println(
-            "--> SYNCRO REQUEST $method $url \n " +
+        Logger.d(
+            "--> REQUEST $method $url \n " +
                     "---> HEADERS: ${
                         json.encodeToString(
                             MapSerializer(String.serializer(), ListSerializer(String.serializer())),
@@ -67,7 +104,8 @@ val LoggingPlugin = createClientPlugin("LoggingPlugin") {
                         )
                     } \n ---> BODY: ${
                         json.encodeToString(String.serializer(), request.body.toString())
-                    }"
+                    }",
+            tag = "HTTP"
         )
     }
     onResponse { response ->
@@ -80,15 +118,15 @@ val LoggingPlugin = createClientPlugin("LoggingPlugin") {
         val endTime = response.responseTime.timestamp
         val elapsed = endTime - startTime
         val body = response.bodyAsText()
-        println("<-- END REQUEST ${method.value} $url (${elapsed}ms)")
-        println("<-- SYNCRO RESPONSE CODE ${response.status}")
+        Logger.d("<-- END REQUEST ${method.value} $url (${elapsed}ms)", tag = "HTTP")
+        Logger.d("<-- RESPONSE CODE ${response.status}", tag = "HTTP")
         runCatching {
             if (ct.contains("application/json", ignoreCase = true))
-                println("<-- RESPONSE BODY (json): ${json.encodeToString(JsonElement.serializer(), Json.parseToJsonElement(body))}")
+                Logger.d("<-- RESPONSE BODY (json): ${json.encodeToString(JsonElement.serializer(), Json.parseToJsonElement(body))}", tag = "HTTP")
             else
-                println("<-- RESPONSE BODY (text): $body")
+                Logger.d("<-- RESPONSE BODY (text): $body", tag = "HTTP")
         }.getOrElse {
-            println("<-- RESPONSE BODY (raw): $body") // no bloquees la llamada por el logger
+            Logger.d("<-- RESPONSE BODY (raw): $body", tag = "HTTP")
         }
     }
 }
@@ -114,7 +152,11 @@ val dataModule = module {
     single {
         HttpClient {
             expectSuccess = true
-            install(HttpTimeout)
+            install(HttpTimeout) {
+                requestTimeoutMillis = Constants.Network.HTTP_TIMEOUT_MS
+                connectTimeoutMillis = Constants.Network.CONNECT_TIMEOUT_MS
+                socketTimeoutMillis = Constants.Network.SOCKET_TIMEOUT_MS
+            }
             install(ContentNegotiation) { json(get()) }
 //            install(Logging) { level = LogLevel.ALL }
             install(LoggingPlugin)
@@ -133,7 +175,11 @@ val dataModule = module {
     single(named("googleBooksClient")) {
         HttpClient {
             expectSuccess = true
-            install(HttpTimeout)
+            install(HttpTimeout) {
+                requestTimeoutMillis = Constants.Network.HTTP_TIMEOUT_MS
+                connectTimeoutMillis = Constants.Network.CONNECT_TIMEOUT_MS
+                socketTimeoutMillis = Constants.Network.SOCKET_TIMEOUT_MS
+            }
             install(ContentNegotiation) { json(get()) }
             install(LoggingPlugin)
             defaultRequest {
@@ -154,7 +200,11 @@ val dataModule = module {
     single(named("igdbClient")) {
         HttpClient {
             expectSuccess = false
-            install(HttpTimeout)
+            install(HttpTimeout) {
+                requestTimeoutMillis = Constants.Network.HTTP_TIMEOUT_MS
+                connectTimeoutMillis = Constants.Network.CONNECT_TIMEOUT_MS
+                socketTimeoutMillis = Constants.Network.SOCKET_TIMEOUT_MS
+            }
             install(ContentNegotiation) { json(get()) }
             install(LoggingPlugin)
             defaultRequest {
@@ -176,18 +226,46 @@ val dataModule = module {
             json = get()
         )
     }
+
+    // Favorites persistence
+    single<FavoritesLocalDataSource> { createFavoritesLocalDataSource() }
+    single<FavoritesRepository> { FavoritesRepositoryImpl(get()) }
+
+    // Favorite details with full info (Room)
+    single<FavoriteDetailsRepository> { createFavoriteDetailsRepository() }
+
+    // Watched episodes persistence
+    single<WatchedEpisodesDataSource> { createWatchedEpisodesDataSource() }
+    single<WatchedEpisodesRepository> { WatchedEpisodesRepositoryImpl(get()) }
+
+    // Watched movies persistence - need provider
+    single<WatchedMoviesRepository> { WatchedMoviesRepositoryImpl(createWatchedMoviesDataSource()) }
 }
 
 val viewModelsModule = module {
 
     // UseCases
-    single { LoadInitialDataUseCase(get()) }
+    single { GetInitialDataUseCase(get()) }
     single { RefreshBooksUseCase(get()) }
     single { RefreshTvShowsUseCase(get()) }
     single { GetTvShowDetailsUseCase(get()) }
     single { SearchMoviesUseCase(get()) }
+    single { SearchTvShowsUseCase(get()) }
     single { RefreshGamesUseCase(get()) }
     single { GetGameDetailsUseCase(get()) }
+    single { ObserveFavoritesUseCase(get()) }
+    single { ToggleMovieFavoriteUseCase(get(), get(), get()) }
+    single { ToggleTvShowFavoriteUseCase(get(), get(), get(), get()) }
+    single { ToggleBookFavoriteUseCase(get()) }
+    single { ToggleGameFavoriteUseCase(get()) }
+    single { SyncFavoritesUseCase(get()) }
+    single { ObserveWatchedEpisodesUseCase(get()) }
+    single { ObserveAllWatchedEpisodesUseCase(get()) }
+    single { ToggleEpisodeWatchedUseCase(get()) }
+    single { ToggleMovieWatchedUseCase(get()) }
+    single { ObserveWatchedMoviesUseCase(get()) }
+    single { GetMovieDetailsUseCase(get()) }
+    single { GetFavoriteDetailsUseCase(get()) }
 
     // Repositories
     single<LoadInitialData> { LoadInitialDataImpl(get(), 5, get()) }
@@ -204,16 +282,31 @@ val viewModelsModule = module {
     single<GameRepository> { GameRepositoryImpl(get(), get(named("igdbClient")), 5, get()) }
 
     // ViewModels
-    viewModel { HomeViewModel(get(), get(), get(), get()) }
-    viewModel { SeriesDetailViewModel(get()) }
-    viewModel { MovieDetailViewModel(get()) }
-    viewModel { SearchViewModel(get()) }
+    viewModel { SplashViewModel(get()) }
+    
+    // Home - Simplified coordinator
+    viewModel { HomeViewModel() }
+    
+    // Home Tabs - Each tab has its own ViewModel
+    viewModel { FavoritesTabViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { BooksTabViewModel(getOrNull()) }
+    viewModel { FilmsTabViewModel(get()) }
+    viewModel { SeriesTabViewModel(getOrNull()) }
+    viewModel { GamesTabViewModel(getOrNull()) }
+    
+    // Other screens
+    viewModel { SeriesDetailViewModel(get(), get(), get(), get(), get()) }
+    viewModel { MovieDetailViewModel(get(), get(), get(), get(), get()) }
+    viewModel { SearchViewModel(get(), get()) }
     viewModel { GameDetailViewModel(get()) }
 }
 
 val nativeModule: Module = module {}
 
 fun initKoin(config: KoinAppDeclaration? = null) {
+    // Initialize Napier logging
+    Napier.base(DebugAntilog())
+    
     startKoin {
         config?.invoke(this)
         modules(appModule, dataModule, viewModelsModule, nativeModule)

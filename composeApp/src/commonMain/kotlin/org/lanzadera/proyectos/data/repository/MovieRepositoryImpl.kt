@@ -7,9 +7,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
+import org.lanzadera.proyectos.data.dto.movie.MovieDto
+import org.lanzadera.proyectos.data.dto.movie.MovieResponseDto
+import org.lanzadera.proyectos.data.mapper.toDomain
 import org.lanzadera.proyectos.domain.models.movie.Movie
-import org.lanzadera.proyectos.domain.models.movie.MovieResponse
 import org.lanzadera.proyectos.domain.repository.MovieRepository
+import org.lanzadera.proyectos.utils.Constants
+import org.lanzadera.proyectos.utils.Logger
 
 class MovieRepositoryImpl(
     private val client: HttpClient,
@@ -33,7 +37,7 @@ class MovieRepositoryImpl(
     override val trendingMoviesFlow: StateFlow<List<Movie>> = _trendingMovies
 
     private val lastUpdated = mutableMapOf<MutableStateFlow<List<Movie>>, Long>()
-    private val TTL = 2 * 60 * 1000L // 2 min
+    private val ttl = Constants.Cache.DEFAULT_TTL_MS
 
     private val movieDetailsCache = mutableMapOf<Int, Movie>()
 
@@ -59,35 +63,35 @@ class MovieRepositoryImpl(
         val last = lastUpdated[state] ?: 0L
         val freshEnough = ttlMillis > 0 && (now - last) < ttlMillis
 
-        println("SYNCRO MovieRepositoryImpl: force=$force, state.size=${state.value.size}, freshEnough=$freshEnough")
+        Logger.d("force=$force, state.size=${state.value.size}, freshEnough=$freshEnough", tag = "MovieRepository")
         if (!force && (state.value.isNotEmpty() || freshEnough)) {
-            println("SYNCRO MovieRepositoryImpl: skipping fetch, cache is fresh")
+            Logger.d("skipping fetch, cache is fresh", tag = "MovieRepository")
             return
         }
-        println("SYNCRO MovieRepositoryImpl: fetching new data")
+        Logger.d("fetching new data", tag = "MovieRepository")
         val data = fetch()
         state.value = data
         lastUpdated[state] = now
-        println("SYNCRO MovieRepositoryImpl: updated state with ${data.size} movies")
+        Logger.d("updated state with ${data.size} movies", tag = "MovieRepository")
     }
 
     override suspend fun refreshMovies(force: Boolean) =
-        refreshFeed(_movies, force, TTL, lastUpdated) { fetchTrendingMoviesWeek() }
+        refreshFeed(_movies, force, ttl, lastUpdated) { fetchTrendingMoviesWeek() }
 
     override suspend fun refreshPopularMovies(force: Boolean) =
-        refreshFeed(_popularMovies, force, TTL, lastUpdated) { fetchPopularMovies() }
+        refreshFeed(_popularMovies, force, ttl, lastUpdated) { fetchPopularMovies() }
 
     override suspend fun refreshTopRatedMovies(force: Boolean) =
-        refreshFeed(_topRatedMovies, force, TTL, lastUpdated) { fetchTopRatedMovies() }
+        refreshFeed(_topRatedMovies, force, ttl, lastUpdated) { fetchTopRatedMovies() }
 
     override suspend fun refreshUpcomingMovies(force: Boolean) =
-        refreshFeed(_upcomingMovies, force, TTL, lastUpdated) { fetchUpcomingMovies() }
+        refreshFeed(_upcomingMovies, force, ttl, lastUpdated) { fetchUpcomingMovies() }
 
     override suspend fun refreshTrendingMovies(force: Boolean) =
-        refreshFeed(_trendingMovies, force, TTL, lastUpdated) { fetchTrendingMoviesDay() }
+        refreshFeed(_trendingMovies, force, ttl, lastUpdated) { fetchTrendingMoviesDay() }
 
     override suspend fun getMovieDetails(movieId: Int): Movie? {
-        // Intenta cache primero
+        // Try cache first
         if (movieDetailsCache.containsKey(movieId)) {
             return movieDetailsCache[movieId]
         }
@@ -99,11 +103,12 @@ class MovieRepositoryImpl(
                     parameters.append("language", "es")
                 }
             }.bodyAsText()
-            val movie: Movie = json.decodeFromString(text)
+            val dto: MovieDto = json.decodeFromString(text)
+            val movie = dto.toDomain()
             movieDetailsCache[movieId] = movie
             movie
         } catch (t: Throwable) {
-            println("SYNCRO MovieRepositoryImpl: error fetching movie details: ${t.message}")
+            Logger.e("error fetching movie details: ${t.message}", tag = "MovieRepository", throwable = t)
             null
         }
     }
@@ -139,14 +144,15 @@ class MovieRepositoryImpl(
                 }
             }.bodyAsText()
 
-            val dto: MovieResponse = json.decodeFromString(text)
-            val valid = dto.results.filter(::isValidMovie)
+            val dto: MovieResponseDto = json.decodeFromString(text)
+            val domainMovies = dto.results.map { it.toDomain() }
+            val valid = domainMovies.filter(::isValidMovie)
 
             if (valid.isEmpty()) break
             acc += valid
-            println("SYNCRO fetchPaged Movie: page $page, downloaded ${valid.size} movies, total so far: ${acc.size}")
+            Logger.d("page $page, downloaded ${valid.size} movies, total so far: ${acc.size}", tag = "MovieRepository")
         }
-        println("SYNCRO fetchPaged Movie: finished, total movies downloaded: ${acc.size}")
+        Logger.d("finished, total movies downloaded: ${acc.size}", tag = "MovieRepository")
         return acc
     }
 }

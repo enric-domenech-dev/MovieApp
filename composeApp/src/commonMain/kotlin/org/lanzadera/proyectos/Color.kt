@@ -19,6 +19,38 @@ package org.lanzadera.proyectos
 import androidx.compose.ui.graphics.Color
 
 /**
+ * Colors for a cinematic theme.
+ */
+
+internal val Sunset10 = Color(0xFF2A0A00)  // fondo profundo, cálido
+internal val Sunset20 = Color(0xFF501400)  // sombras intensas
+internal val Sunset30 = Color(0xFF7A1F00)  // tono medio anaranjado
+internal val Sunset40 = Color(0xFFA53200)  // tono base primario
+internal val Sunset80 = Color(0xFFFFA45C)  // luz cálida, vibrante
+internal val Sunset90 = Color(0xFFFFC8A3)  // resplandor suave
+
+internal val Gold10 = Color(0xFF3A1F00)
+internal val Gold20 = Color(0xFF5A3500)
+internal val Gold30 = Color(0xFF805400)
+internal val Gold40 = Color(0xFFB57C00)
+internal val Gold80 = Color(0xFFFFD55E)
+internal val Gold90 = Color(0xFFFFEAA6)
+
+internal val FilmBrown10 = Color(0xFF1B0E0A)
+internal val FilmBrown20 = Color(0xFF2E1A14)
+internal val FilmBrown30 = Color(0xFF4A3129)
+internal val FilmBrown40 = Color(0xFF6B4C41)
+internal val FilmBrown80 = Color(0xFFD7B8A3)
+internal val FilmBrown90 = Color(0xFFF1E0D4)
+
+internal val CreamWhite = Color(0xFFFFF8F3)
+internal val CinematicGray = Color(0xFF3C3A38)
+internal val LightDust = Color(0xFFE8DAD0)
+internal val ShadowBlack = Color(0xFF181514)
+
+
+
+/**
  * Now in Android colors.
  */
 internal val Blue10 = Color(0xFF001F28)

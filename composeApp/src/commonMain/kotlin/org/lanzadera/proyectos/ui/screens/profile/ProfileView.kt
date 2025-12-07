@@ -23,7 +23,7 @@ import androidx.navigation.NavHostController
 
 @Composable
 @Preview
-fun ProfileView(navIndexBottomBar: Int = 4, nav: NavHostController, vm: ProfileViewModel) {
+fun ProfileView(navIndexBottomBar: Int = 4, onNavigateBack: () -> Unit, vm: ProfileViewModel) {
     val scope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 

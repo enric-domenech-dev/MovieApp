@@ -1,8 +1,5 @@
 package org.lanzadera.proyectos.domain.models.book
 
-import kotlinx.serialization.Serializable
-
-@Serializable
 data class Book(
     val id: String? = null,
     val title: String? = null,

@@ -1,0 +1,39 @@
+{
+  "commands": [
+    {
+      "name": "build-android",
+      "description": "Build Android debug APK",
+      "command": "./gradlew assembleDebug"
+    },
+    {
+      "name": "run-tests",
+      "description": "Run all multiplatform tests",
+      "command": "./gradlew :composeApp:allTests"
+    },
+    {
+      "name": "run-android",
+      "description": "Install and run app on connected device",
+      "command": "./gradlew installDebug"
+    },
+    {
+      "name": "clean-build",
+      "description": "Clean and build project",
+      "command": "./gradlew clean build"
+    },
+    {
+      "name": "run-desktop",
+      "description": "Run Compose Desktop app",
+      "command": "./gradlew :composeApp:run"
+    },
+    {
+      "name": "test-unit",
+      "description": "Run Android unit tests only",
+      "command": "./gradlew testDebug"
+    },
+    {
+      "name": "audit",
+      "description": "Comprehensive code audit: Clean Architecture, SOLID, KISS, DDD, TDD, coupling, coverage, and best practices",
+      "prompt": "Perform a comprehensive code audit of this project. Analyze:\n\n**Architecture & Design Principles:**\n- Clean Architecture: Are domain, data, and UI layers properly separated?\n- SOLID principles: Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, Dependency Inversion\n- KISS: Is the code simple and straightforward? Any over-engineering?\n- DDD: Domain models represent business logic correctly? Ubiquitous language?\n- Dependency flow: Does data layer depend on domain? Does UI depend on both? Any reverse dependencies?\n\n**Code Quality & Maintainability:**\n- Layer coupling: Check for violations (UI directly accessing data sources, etc.)\n- Code organization: Files in correct directories? Naming conventions followed?\n- Duplication: Any code that should be extracted/reused?\n- Error handling: Proper try-catch, Result types, null safety?\n- Immutability: Appropriate use of val/var, immutable collections?\n\n**Testing & Coverage:**\n- Current test coverage (check all modules)\n- Missing tests: Which classes/functions need tests?\n- Test quality: Are tests using fakes? Following AAA pattern?\n- TDD readiness: Is code testable? Too many dependencies?\n- Recommendations to reach 100% coverage\n\n**Best Practices:**\n- Kotlin idioms: Extension functions, sealed classes, data classes used appropriately?\n- Compose best practices: Side effects handled correctly? Recomposition optimized?\n- StateFlow/Flow usage: Proper lifecycle handling?\n- DI configuration: All dependencies in AppModule? Constructor injection used?\n- API integration: DTOs mapped to domain models? No domain leaking to UI?\n\n**Recommendations:**\nProvide actionable recommendations prioritized by impact (High/Medium/Low) with specific file locations and suggested fixes.\n\nGenerate a detailed report with:\n1. Overall health score (0-100)\n2. Issues found per category\n3. Quick wins (easy fixes with high impact)\n4. Long-term improvements\n5. Files needing immediate attention"
+    }
+  ]
+}

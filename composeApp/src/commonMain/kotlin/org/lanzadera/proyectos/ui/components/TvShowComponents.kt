@@ -49,34 +49,36 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import kotlinx.datetime.LocalDate
 import movieapp.composeapp.generated.resources.Res
-import movieapp.composeapp.generated.resources.film
+import movieapp.composeapp.generated.resources.new_edge_logo
 import org.jetbrains.compose.resources.painterResource
 import org.lanzadera.proyectos.domain.models.tvshow.AggregateCast
 import org.lanzadera.proyectos.domain.models.tvshow.AggregateCrew
 import org.lanzadera.proyectos.domain.models.tvshow.Episode
 import org.lanzadera.proyectos.domain.models.tvshow.Season
-import org.lanzadera.proyectos.domain.models.tvshow.TvShow
-import org.lanzadera.proyectos.navigation.NavigationStore
+import org.lanzadera.proyectos.ui.models.TvShowUI
+import org.lanzadera.proyectos.ui.models.TvShowWithNextEpisodeUI
+import org.lanzadera.proyectos.ui.models.TvShowDetailUI
+import org.lanzadera.proyectos.ui.models.SeasonUI
+import org.lanzadera.proyectos.ui.models.EpisodeUI
+import org.lanzadera.proyectos.ui.models.AggregateCastUI
+import org.lanzadera.proyectos.ui.models.AggregateCrewUI
+import org.lanzadera.proyectos.navigation.Screen
 import org.lanzadera.proyectos.utils.Constants
 
 @Composable
 fun TvShowItem(
-    nav: NavHostController,
-    tvShow: TvShow,
+    tvShow: TvShowUI,
+    onTvShowClick: (tvShowId: Int) -> Unit,
     modifier: Modifier = Modifier.wrapContentHeight(),
     showMeta: Boolean = true
 ) {
     Column(
         modifier = modifier
             .clickable {
-                NavigationStore.selectedTvShow = tvShow
-                tvShow.id?.let { tvShowId ->
-                    nav.navigate(Constants.Screen.SeriesDetail.createRoute(tvShowId))
-                }
+                onTvShowClick(tvShow.id)
             }
     ) {
         Box(
@@ -85,26 +87,24 @@ fun TvShowItem(
                 .clip(MaterialTheme.shapes.small)
         ) {
             AsyncImage(
-                model = "https://image.tmdb.org/t/p/w500${tvShow.posterPath}",
+                model = tvShow.posterUrl,
                 contentDescription = tvShow.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
-                placeholder = painterResource(Res.drawable.film)
+                error = painterResource(Res.drawable.new_edge_logo)
             )
         }
 
         if (showMeta) {
             Spacer(modifier = Modifier.height(6.dp))
-            tvShow.name?.let {
-                Text(
-                    text = it,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 15.sp,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
+            Text(
+                text = tvShow.name,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 15.sp,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
 
             val formattedDate = remember(tvShow.firstAirDate) {
                 tvShow.firstAirDate?.let {
@@ -130,14 +130,17 @@ fun TvShowItem(
 }
 
 @Composable
-fun TvShowHeader(modifier: Modifier = Modifier, nav: NavHostController, tvShow: TvShow) {
+fun TvShowHeader(
+    modifier: Modifier = Modifier,
+    tvShow: TvShowUI,
+    onTvShowClick: (tvShowId: Int) -> Unit
+) {
     Column(
         modifier = modifier
             .wrapContentHeight()
             .clickable {
-                NavigationStore.selectedTvShow = tvShow
                 tvShow.id?.let { tvShowId ->
-                    nav.navigate(Constants.Screen.SeriesDetail.createRoute(tvShowId))
+                    onTvShowClick(tvShowId)
                 }
             }
     ) {
@@ -151,7 +154,7 @@ fun TvShowHeader(modifier: Modifier = Modifier, nav: NavHostController, tvShow: 
                 contentDescription = tvShow.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
-                placeholder = painterResource(Res.drawable.film)
+                error = painterResource(Res.drawable.new_edge_logo)
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
@@ -176,14 +179,18 @@ fun TvShowHeader(modifier: Modifier = Modifier, nav: NavHostController, tvShow: 
 }
 
 @Composable
-fun TvShowSubheader(modifier: Modifier = Modifier, nav: NavHostController, tvShow: TvShow, showMeta: Boolean) {
+fun TvShowSubheader(
+    modifier: Modifier = Modifier,
+    tvShow: TvShowUI,
+    showMeta: Boolean,
+    onTvShowClick: (tvShowId: Int) -> Unit
+) {
     Column(
         modifier = modifier
             .wrapContentHeight()
             .clickable {
-                NavigationStore.selectedTvShow = tvShow
                 tvShow.id?.let { tvShowId ->
-                    nav.navigate(Constants.Screen.SeriesDetail.createRoute(tvShowId))
+                    onTvShowClick(tvShowId)
                 }
             }
     ) {
@@ -197,7 +204,7 @@ fun TvShowSubheader(modifier: Modifier = Modifier, nav: NavHostController, tvSho
                 contentDescription = tvShow.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
-                placeholder = painterResource(Res.drawable.film)
+                error = painterResource(Res.drawable.new_edge_logo)
             )
         }
         if (showMeta) {
@@ -250,7 +257,7 @@ fun CastMemberCard(actor: org.lanzadera.proyectos.domain.models.tvshow.Aggregate
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    painter = painterResource(Res.drawable.film),
+                    painter = painterResource(Res.drawable.new_edge_logo),
                     contentDescription = null,
                     modifier = Modifier.size(40.dp),
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
@@ -320,7 +327,7 @@ fun CrewMemberCard(crewMember: org.lanzadera.proyectos.domain.models.tvshow.Aggr
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    painter = painterResource(Res.drawable.film),
+                    painter = painterResource(Res.drawable.new_edge_logo),
                     contentDescription = null,
                     modifier = Modifier.size(40.dp),
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
@@ -366,7 +373,7 @@ fun CrewMemberCard(crewMember: org.lanzadera.proyectos.domain.models.tvshow.Aggr
 @OptIn(ExperimentalLayoutApi::class)
 
 @Composable
-fun SeriesInfoTab(tvShow: TvShow?, modifier: Modifier = Modifier) {
+fun SeriesInfoTab(tvShow: TvShowDetailUI?, modifier: Modifier = Modifier) {
     if (tvShow == null) return
 
     LazyColumn(
@@ -536,7 +543,12 @@ private fun StatCard(label: String, value: String, modifier: Modifier = Modifier
 }
 
 @Composable
-fun SeriesSeasonsTab(tvShow: TvShow?, modifier: Modifier = Modifier) {
+fun SeriesSeasonsTab(
+    tvShow: TvShowDetailUI?,
+    watchedEpisodes: Set<String>,
+    onEpisodeToggle: (Int, Int, Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
     if (tvShow == null || tvShow.seasons.isNullOrEmpty()) return
 
     LazyColumn(
@@ -610,7 +622,11 @@ fun SeriesSeasonsTab(tvShow: TvShow?, modifier: Modifier = Modifier) {
 
         // Seasons List
         items(tvShow.seasons.size) { index ->
-            SeasonListItem(season = tvShow.seasons[index])
+            SeasonListItem(
+                season = tvShow.seasons[index],
+                watchedEpisodes = watchedEpisodes,
+                onEpisodeToggle = onEpisodeToggle
+            )
         }
 
         item { Spacer(modifier = Modifier.height(8.dp)) }
@@ -618,7 +634,11 @@ fun SeriesSeasonsTab(tvShow: TvShow?, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun SeasonListItem(season: Season) {
+fun SeasonListItem(
+    season: SeasonUI,
+    watchedEpisodes: Set<String>,
+    onEpisodeToggle: (Int, Int, Boolean) -> Unit
+) {
     val isExpanded = rememberSaveable { mutableStateOf(false) }
 
     Surface(
@@ -637,7 +657,7 @@ fun SeasonListItem(season: Season) {
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = season.name ?: "Temporada ${season.seasonNumber}",
+                        text = season.name,
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.SemiBold
@@ -669,7 +689,21 @@ fun SeasonListItem(season: Season) {
 
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     season.episodes.forEach { episode ->
-                        EpisodeListItem(episode = episode)
+                        EpisodeListItem(
+                            episode = episode,
+                            isWatched = episode.seasonNumber?.let { sn ->
+                                episode.episodeNumber?.let { en ->
+                                    watchedEpisodes.contains("$sn-$en")
+                                }
+                            } ?: false,
+                            onToggle = { isWatched ->
+                                episode.seasonNumber?.let { sn ->
+                                    episode.episodeNumber?.let { en ->
+                                        onEpisodeToggle(sn, en, isWatched)
+                                    }
+                                }
+                            }
+                        )
                     }
                 }
             }
@@ -678,9 +712,7 @@ fun SeasonListItem(season: Season) {
 }
 
 @Composable
-fun EpisodeListItem(episode: Episode) {
-    val isWatched = rememberSaveable { mutableStateOf(false) }
-
+fun EpisodeListItem(episode: EpisodeUI, isWatched: Boolean, onToggle: (Boolean) -> Unit) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -697,8 +729,8 @@ fun EpisodeListItem(episode: Episode) {
             verticalAlignment = Alignment.Top
         ) {
             Checkbox(
-                checked = isWatched.value,
-                onCheckedChange = { isWatched.value = it },
+                checked = isWatched,
+                onCheckedChange = { onToggle(it) },
                 modifier = Modifier
                     .size(18.dp)
                     .padding(top = 2.dp)
@@ -711,7 +743,7 @@ fun EpisodeListItem(episode: Episode) {
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 Text(
-                    text = "Ep. ${episode.episodeNumber} - ${episode.name ?: "Desconocido"}",
+                    text = "Ep. ${episode.episodeNumber} - ${episode.name}",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.SemiBold,
@@ -770,7 +802,7 @@ fun EpisodeListItem(episode: Episode) {
 }
 
 @Composable
-fun SeriesCreditsTab(tvShow: TvShow?, modifier: Modifier = Modifier) {
+fun SeriesCreditsTab(tvShow: TvShowDetailUI?, modifier: Modifier = Modifier) {
     if (tvShow == null) return
 
     LazyColumn(
@@ -855,7 +887,7 @@ fun SeriesCreditsTab(tvShow: TvShow?, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun CastMemberCardModern(actor: AggregateCast) {
+fun CastMemberCardModern(actor: AggregateCastUI) {
     Column(
         modifier = Modifier
             .width(110.dp)
@@ -885,7 +917,7 @@ fun CastMemberCardModern(actor: AggregateCast) {
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        painter = painterResource(Res.drawable.film),
+                        painter = painterResource(Res.drawable.new_edge_logo),
                         contentDescription = null,
                         modifier = Modifier.size(40.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -922,7 +954,7 @@ fun CastMemberCardModern(actor: AggregateCast) {
 }
 
 @Composable
-fun CrewMemberCardModern(crewMember: AggregateCrew) {
+fun CrewMemberCardModern(crewMember: AggregateCrewUI) {
     Column(
         modifier = Modifier
             .width(110.dp)
@@ -952,7 +984,7 @@ fun CrewMemberCardModern(crewMember: AggregateCrew) {
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        painter = painterResource(Res.drawable.film),
+                        painter = painterResource(Res.drawable.new_edge_logo),
                         contentDescription = null,
                         modifier = Modifier.size(40.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -984,6 +1016,114 @@ fun CrewMemberCardModern(crewMember: AggregateCrew) {
                     fontSize = 8.sp
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun TvShowHeaderWithNextEpisode(
+    modifier: Modifier = Modifier,
+    tvShowWithNext: TvShowWithNextEpisodeUI,
+    onTvShowClick: (tvShowId: Int) -> Unit
+) {
+    val tvShow = tvShowWithNext.tvShow
+    val nextEpisode = tvShowWithNext.nextEpisode
+
+    Column(
+        modifier = modifier
+            .wrapContentHeight()
+            .clickable {
+                tvShow.id?.let { tvShowId ->
+                    onTvShowClick(tvShowId)
+                }
+            }
+    ) {
+        Box(
+            modifier = Modifier
+                .aspectRatio(2f / 3f)
+                .clip(MaterialTheme.shapes.small)
+        ) {
+            AsyncImage(
+                model = "https://image.tmdb.org/t/p/w500${tvShow.posterPath}",
+                contentDescription = tvShow.name,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+                error = painterResource(Res.drawable.new_edge_logo)
+            )
+        }
+
+        // Solo mostrar información del próximo episodio, sin título de serie
+        nextEpisode?.let { episode ->
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = episode.episodeCode,
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = episode.displayText,
+                fontSize = 14.sp,
+                color = if (episode.isAired) Color(0xFF4CAF50) else Color(0xFFFF9800),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+@Composable
+fun TvShowHeaderFinished(
+    modifier: Modifier = Modifier,
+    tvShow: TvShowUI,
+    onTvShowClick: (tvShowId: Int) -> Unit
+) {
+    Column(
+        modifier = modifier
+            .wrapContentHeight()
+            .clickable {
+                tvShow.id?.let { tvShowId ->
+                    onTvShowClick(tvShowId)
+                }
+            }
+    ) {
+        Box(
+            modifier = Modifier
+                .aspectRatio(2f / 3f)
+                .clip(MaterialTheme.shapes.small)
+        ) {
+            AsyncImage(
+                model = "https://image.tmdb.org/t/p/w500${tvShow.posterPath}",
+                contentDescription = tvShow.name,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+                error = painterResource(Res.drawable.new_edge_logo)
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        tvShow.name?.let {
+            Text(
+                text = it,
+                fontWeight = FontWeight.Bold,
+                fontSize = 17.sp,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        tvShow.status?.let { status ->
+            Text(
+                text = when (status.lowercase()) {
+                    "ended" -> "Finalizada"
+                    "canceled", "cancelled" -> "Cancelada"
+                    "returning series" -> "En producción"
+                    "in production" -> "En producción"
+                    "planned" -> "Planeada"
+                    else -> status
+                },
+                fontSize = 14.sp,
+                color = Color.Gray,
+            )
         }
     }
 }

@@ -3,11 +3,9 @@ package org.lanzadera.proyectos.navigation
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -16,6 +14,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.toRoute
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
@@ -25,7 +24,6 @@ import org.lanzadera.proyectos.ui.components.navComponents.AppBottomBar
 import org.lanzadera.proyectos.ui.screens.chat.ChatView
 import org.lanzadera.proyectos.ui.screens.chat.ChatViewModel
 import org.lanzadera.proyectos.ui.screens.detail.BookDetailView
-import org.lanzadera.proyectos.ui.screens.detail.DetailView
 import org.lanzadera.proyectos.ui.screens.detail.MovieDetailView
 import org.lanzadera.proyectos.ui.screens.detail.MovieDetailViewModel
 import org.lanzadera.proyectos.ui.screens.detail.SeriesDetailView
@@ -44,9 +42,8 @@ import org.lanzadera.proyectos.ui.screens.settings.SettingView
 import org.lanzadera.proyectos.ui.screens.settings.SettingsViewModel
 import org.lanzadera.proyectos.ui.screens.splash.SplashView
 import org.lanzadera.proyectos.utils.BottomNavItem
-import org.lanzadera.proyectos.utils.Constants
+import org.lanzadera.proyectos.navigation.NavigationStore
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Navigation(
     navHost: NavHostController,
@@ -65,21 +62,21 @@ fun Navigation(
     // derive whether drawer is open as a Compose state
     val isDrawerOpen by remember { derivedStateOf { drawerState.isOpen } }
 
-    val bottomNavRoutes = setOf(
-        Constants.Screen.Home.route,
-        Constants.Screen.Search.route,
-        Constants.Screen.Chat.route,
-        Constants.Screen.Profile.route
-    )
+    // Determine if current screen is a detail screen
+    val isDetailScreen = currentRoute?.contains("MovieDetail") == true ||
+                        currentRoute?.contains("TvShowDetail") == true ||
+                        currentRoute?.contains("GameDetail") == true ||
+                        currentRoute?.contains("BookDetail") == true
 
-    val detailRoutes = setOf(
-        Constants.Screen.MovieDetail.route,
-        Constants.Screen.SeriesDetail.route
-    )
+    val drawerEnabled = !isDetailScreen
 
-    val drawerEnabled = currentRoute !in detailRoutes
-
-    val showBottomBar = currentRoute in bottomNavRoutes || isDrawerOpen
+    // Bottom bar visible on main screens (Home, Search, Chat, Profile)
+    val isMainScreen = currentRoute?.contains("Home") == true ||
+                       currentRoute?.contains("Search") == true ||
+                       currentRoute?.contains("Chat") == true ||
+                       currentRoute?.contains("Profile") == true
+    
+    val showBottomBar = isMainScreen || isDrawerOpen
 
     // derive selected item from route, but if drawer is open show MENU selected
     val selectedItem = if (isDrawerOpen) BottomNavItem.MENU else BottomNavItem.fromRoute(currentRoute)
@@ -95,84 +92,125 @@ fun Navigation(
             )
         }
     ) {
-        DrawerAppBar(navViewModel = navHost, drawerState = drawerState, drawerEnabled = drawerEnabled) {
-            NavHost(navController = navHost, startDestination = Constants.Screen.SplashScreen.route) {
-                composable(Constants.Screen.SplashScreen.route) {
-                    SplashView(nav = navHost, darkTheme = darkTheme, selectedTheme = selectedTheme)
+        DrawerAppBar(
+            drawerState = drawerState,
+            drawerEnabled = drawerEnabled,
+            onNavigateToSearch = { navHost.navigate(Screen.Search) },
+            onNavigateToSettings = { navHost.navigate(Screen.Settings) },
+            onNavigateToLogin = { navHost.navigate(Screen.Login) }
+        ) {
+            NavHost(navController = navHost, startDestination = Screen.SplashScreen) {
+                composable<Screen.SplashScreen> {
+                    SplashView(
+                        onNavigateToHome = {
+                            navHost.navigate(Screen.Home) {
+                                popUpTo<Screen.SplashScreen> { inclusive = true }
+                            }
+                        },
+                        darkTheme = darkTheme,
+                        selectedTheme = selectedTheme
+                    )
                 }
-                composable(Constants.Screen.Home.route) {
+                composable<Screen.Home> {
                     val homeViewModel: HomeViewModel = koinViewModel()
                     HomeView(
-                        nav = navHost, vm = homeViewModel,
-                        //selectedTheme = selectedTheme, darkTheme = darkTheme
+                        vm = homeViewModel,
+                        onNavigateToMovieDetail = { movieId ->
+                            navHost.navigate(Screen.MovieDetail(movieId))
+                        },
+                        onNavigateToTvShowDetail = { tvShowId ->
+                            navHost.navigate(Screen.TvShowDetail(tvShowId))
+                        },
+                        onNavigateToGameDetail = { gameId ->
+                            navHost.navigate(Screen.GameDetail(gameId))
+                        },
+                        onNavigateToBookDetail = { bookId ->
+                            navHost.navigate(Screen.BookDetail(bookId))
+                        }
                     )
                 }
-                composable(Constants.Screen.Login.route) {
+                composable<Screen.Login> {
                     LoginView(
-                        nav = navHost, vm = LoginViewModel(),
-                        selectedTheme = selectedTheme, darkTheme = darkTheme
+                        vm = LoginViewModel(),
+                        selectedTheme = selectedTheme,
+                        darkTheme = darkTheme,
+                        onNavigateToHome = {
+                            navHost.navigate(Screen.Home)
+                        },
+                        onNavigateBack = {
+                            navHost.popBackStack()
+                        }
                     )
                 }
-                composable(Constants.Screen.Detail.route) {
-                    // Show detail depending on what was selected (movie or book). Avoid !! crashes.
-                    val movie = NavigationStore.selectedMovie
-                    val book = NavigationStore.selectedBook
-                    if (movie != null) {
-                        DetailView(nav = navHost, movie = movie, selectedTheme = selectedTheme, darkTheme = darkTheme)
-                    } else if (book != null) {
-                        BookDetailView(nav = navHost, book = book, selectedTheme = selectedTheme, darkTheme = darkTheme)
-                    } else {
-                        // fallback: nothing selected — navigate back safely
-                        LaunchedEffect(Unit) { navHost.popBackStack() }
-                    }
-                }
-                composable(Constants.Screen.Search.route) {
+                composable<Screen.Search> {
                     SearchView(
                         vm = koinViewModel<SearchViewModel>(),
-                        navController = navHost
+                        onNavigateToMovieDetail = { movieId ->
+                            navHost.navigate(Screen.MovieDetail(movieId))
+                        },
+                        onNavigateToTvShowDetail = { tvShowId ->
+                            navHost.navigate(Screen.TvShowDetail(tvShowId))
+                        }
                     )
                 }
-                composable(Constants.Screen.MovieDetail.route) { backStackEntry ->
-                    val movieId = backStackEntry.arguments?.getString("movieId")?.toIntOrNull()
-                    if (movieId != null) {
-                        val viewModel: MovieDetailViewModel = koinViewModel()
-                        MovieDetailView(nav = navHost, viewModel = viewModel, movieId = movieId)
-                    } else {
-                        LaunchedEffect(Unit) { navHost.popBackStack() }
-                    }
+                composable<Screen.MovieDetail> { backStackEntry ->
+                    val args = backStackEntry.toRoute<Screen.MovieDetail>()
+                    val viewModel: MovieDetailViewModel = koinViewModel()
+                    MovieDetailView(
+                        viewModel = viewModel,
+                        movieId = args.movieId,
+                        onNavigateBack = { navHost.popBackStack() }
+                    )
                 }
-                composable(Constants.Screen.SeriesDetail.route) { backStackEntry ->
-                    val tvShowId = backStackEntry.arguments?.getString("tvShowId")?.toIntOrNull()
-                    if (tvShowId != null) {
-                        val viewModel: SeriesDetailViewModel = koinViewModel()
-                        SeriesDetailView(nav = navHost, vm = viewModel, tvShowId = tvShowId)
-                    } else {
-                        LaunchedEffect(Unit) { navHost.popBackStack() }
-                    }
+                composable<Screen.TvShowDetail> { backStackEntry ->
+                    val args = backStackEntry.toRoute<Screen.TvShowDetail>()
+                    val viewModel: SeriesDetailViewModel = koinViewModel()
+                    SeriesDetailView(
+                        vm = viewModel,
+                        tvShowId = args.tvShowId,
+                        onNavigateBack = { navHost.popBackStack() }
+                    )
                 }
-                composable(Constants.Screen.GameDetail.route) { backStackEntry ->
-                    val gameId = backStackEntry.arguments?.getString("gameId")?.toIntOrNull()
-                    if (gameId != null) {
-                        val viewModel: GameDetailViewModel = koinViewModel()
-                        GameDetailView(
-                            gameId = gameId,
-                            viewModel = viewModel,
-                            onNavigateBack = { navHost.popBackStack() }
-                        )
-                    } else {
-                        LaunchedEffect(Unit) { navHost.popBackStack() }
-                    }
+                composable<Screen.GameDetail> { backStackEntry ->
+                    val args = backStackEntry.toRoute<Screen.GameDetail>()
+                    val viewModel: GameDetailViewModel = koinViewModel()
+                    GameDetailView(
+                        gameId = args.gameId,
+                        viewModel = viewModel,
+                        onNavigateBack = { navHost.popBackStack() }
+                    )
                 }
-                composable(Constants.Screen.Settings.route) {
-                    SettingView(navHost, SettingsViewModel())
+                composable<Screen.BookDetail> { backStackEntry ->
+                    val args = backStackEntry.toRoute<Screen.BookDetail>()
+                    // TODO: Load book by ID when repository supports it
+                    // For now, books are passed via NavigationStore since there's no detail endpoint
+                    val book = NavigationStore.selectedBook
+                    BookDetailView(
+                        bookId = args.bookId,
+                        book = book,
+                        selectedTheme = selectedTheme,
+                        darkTheme = darkTheme,
+                        onNavigateBack = { navHost.popBackStack() }
+                    )
                 }
-                composable(Constants.Screen.Chat.route) {
-                    ChatView(nav = navHost, vm = ChatViewModel())
+                composable<Screen.Settings> {
+                    SettingView(
+                        vm = SettingsViewModel(),
+                        onNavigateBack = { navHost.popBackStack() }
+                    )
                 }
-                composable(Constants.Screen.Profile.route) {
-                    ProfileView(nav = navHost, vm = ProfileViewModel())
+                composable<Screen.Chat> {
+                    ChatView(
+                        vm = ChatViewModel(),
+                        onNavigateBack = { navHost.popBackStack() }
+                    )
                 }
-
+                composable<Screen.Profile> {
+                    ProfileView(
+                        vm = ProfileViewModel(),
+                        onNavigateBack = { navHost.popBackStack() }
+                    )
+                }
             }
         }
     }
@@ -196,7 +234,15 @@ private fun NavigationBottomBar(
             }
         } else {
             scope.launch { drawerState.close() }
-            navHost.navigate(item.route) {
+            // Map BottomNavItem to Screen
+            val destination = when (item) {
+                BottomNavItem.HOME -> Screen.Home
+                BottomNavItem.SEARCH -> Screen.Search
+                BottomNavItem.CHAT -> Screen.Chat
+                BottomNavItem.PROFILE -> Screen.Profile
+                BottomNavItem.MENU -> return@AppBottomBar // Already handled above
+            }
+            navHost.navigate(destination) {
                 launchSingleTop = true
                 restoreState = true
                 popUpTo(navHost.graph.startDestinationId) {
