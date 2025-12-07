@@ -6,42 +6,101 @@ This file provides guidance to Copilot when working with code in this repository
 
 ## 🚀 SESSION INITIALIZATION PROTOCOL
 
-**⚡ ALWAYS START EVERY SESSION WITH THIS COMMAND:**
+### ⚡ MANDATORY - Read ALL Documentation Before Starting
+
+**CRITICAL:** Every Copilot session MUST execute these commands FIRST:
 
 ```bash
-cat COPILOT.md
-cat .github/copilot-instructions.md
-cat .github/copilot-commands.json
-cat TODO_LIST.md | grep "Next Task:"
-cat TESTING_COVERAGE.md | grep -A 5 "## Coverage Targets:"
-cat TESTING_STRATEGY.md | grep -A 5 "## Testing Approach:"
+# ═══════════════════════════════════════════════════════════
+# 📖 STEP 1: Read Core Project Documentation (REQUIRED)
+# ═══════════════════════════════════════════════════════════
+
+cat README.md                    # Project overview and quick start
+cat COPILOT.md                   # This file - architecture rules
+cat TODO_LIST.md                 # Current progress and next task
+cat AUDIT_REPORT.md              # Code audit findings
+
+# ═══════════════════════════════════════════════════════════
+# 🏗️ STEP 2: Read Architecture Decision Records (REQUIRED)
+# ═══════════════════════════════════════════════════════════
+
+cat docs/architecture/ADR-001-Clean-Architecture.md
+cat docs/architecture/ADR-002-Use-Case-Layer.md
+cat docs/architecture/ADR-003-Repository-Pattern.md
+cat docs/architecture/ADR-004-DTO-vs-Domain-Models.md
+
+# ═══════════════════════════════════════════════════════════
+# 🧪 STEP 3: Read Testing Documentation (REQUIRED)
+# ═══════════════════════════════════════════════════════════
+
+cat copilot/TESTING_STRATEGY.md
+cat copilot/TESTING_COVERAGE.md
+cat copilot/copilot-instructions.md
+
+# ═══════════════════════════════════════════════════════════
+# 📊 STEP 4: Check Current Status (REQUIRED)
+# ═══════════════════════════════════════════════════════════
+
+grep -A 3 "Next Task:" TODO_LIST.md
+grep "Overall Progress:" TODO_LIST.md
+grep -A 5 "Current Sprint:" TODO_LIST.md
 ```
 
-**Why?** This ensures:
-1. ✅ You read the latest architecture rules and conventions
-2. ✅ You see the current TODO progress and next task
-3. ✅ You understand the project context from the start
-4. ✅ You avoid making mistakes already documented
+### Why This Is MANDATORY
 
-**📝 User should say at session start:**
+Reading all documentation ensures:
+
+1. ✅ **No Architecture Violations** - You understand Clean Architecture rules
+2. ✅ **No Duplicate Work** - You know what's already done
+3. ✅ **Correct Task** - You work on the right task in sequence
+4. ✅ **Consistent Code** - You follow established patterns
+5. ✅ **No Regressions** - You know about past bugs and their fixes
+
+### Session Start Protocol
+
+**📝 User says:**
 > "Let's continue - initialize session"
 
-**🤖 Copilot will then:**
-1. Read COPILOT.md and TODO_LIST.md
-2. Identify the next uncompleted task
-3. Confirm the task to work on
-4. Proceed with implementation
+**🤖 Copilot MUST:**
+1. ✅ Execute ALL commands above to read documentation
+2. ✅ Identify the current phase and next task from TODO_LIST.md
+3. ✅ Confirm understanding of the task
+4. ✅ Ask for clarification if needed
+5. ✅ Only then proceed with implementation
+
+### ⚠️ DO NOT START CODING WITHOUT READING DOCS
+
+**Why?** Past sessions showed that skipping documentation leads to:
+- ❌ Architecture violations (UI importing domain models)
+- ❌ Wrong patterns (multiple public methods in use cases)
+- ❌ Bugs (removing @Serializable without tests)
+- ❌ Duplicate work (re-implementing existing code)
 
 ---
 
-**📚 Required Reading (read these files at session start):**
+**📚 Required Documentation Files:**
 
-1. [COPILOT.md](./COPILOT.md) - Architecture, build commands, and project structure
-2. [copilot-instructions.md](copilot/copilot-instructions.md) - How to interact with Copilot in this project
-3. [AUDIT_REPORT.md](./AUDIT_REPORT.md) - Comprehensive code audit with identified issues
-4. [TODO_LIST.md](./TODO_LIST.md) - Detailed task list to reach 100/100 score
-5. [TESTING_STRATEGY.md](./TESTING_STRATEGY.md) - Testing approach and guidelines
-6. [TESTING_COVERAGE.md](./TESTING_COVERAGE.md) - Test coverage configuration and targets
+### Core Files (MUST READ EVERY SESSION)
+1. [README.md](./README.md) - Project overview, structure, quick start
+2. [COPILOT.md](./COPILOT.md) - This file - architecture rules and conventions
+3. [TODO_LIST.md](./TODO_LIST.md) - Detailed task list (140 tasks)
+4. [AUDIT_REPORT.md](./AUDIT_REPORT.md) - Code audit with identified issues
+
+### Architecture Decision Records (MUST READ EVERY SESSION)
+5. [ADR-001: Clean Architecture](docs/architecture/ADR-001-Clean-Architecture.md)
+6. [ADR-002: Use Case Layer](docs/architecture/ADR-002-Use-Case-Layer.md)
+7. [ADR-003: Repository Pattern](docs/architecture/ADR-003-Repository-Pattern.md)
+8. [ADR-004: DTO vs Domain Models](docs/architecture/ADR-004-DTO-vs-Domain-Models.md)
+
+### Testing Documentation (MUST READ EVERY SESSION)
+9. [TESTING_STRATEGY.md](copilot/TESTING_STRATEGY.md) - Testing approach and guidelines
+10. [TESTING_COVERAGE.md](copilot/TESTING_COVERAGE.md) - Coverage configuration
+11. [copilot-instructions.md](copilot/copilot-instructions.md) - How to work with Copilot
+
+### Reference Documentation (READ AS NEEDED)
+- [DTO_Migration_Plan.md](docs/architecture/DTO_Migration_Plan.md) - DTO migration guide
+- [HomeViewModel_Refactoring_Plan.md](docs/architecture/HomeViewModel_Refactoring_Plan.md) - ViewModel refactoring
+- [Why_Tests_Didnt_Catch_Bugs.md](docs/analysis/Why_Tests_Didnt_Catch_Bugs.md) - Testing lessons learned
 
 ---
 
