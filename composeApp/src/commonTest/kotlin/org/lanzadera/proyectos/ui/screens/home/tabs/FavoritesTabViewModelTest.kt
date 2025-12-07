@@ -10,7 +10,10 @@ import org.lanzadera.proyectos.domain.models.favorite.FavoriteType
 import org.lanzadera.proyectos.domain.usecase.episodes.ObserveAllWatchedEpisodesUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.GetFavoriteDetailsUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.ObserveFavoritesUseCase
-import org.lanzadera.proyectos.domain.usecase.favorites.ToggleFavoriteUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.ToggleMovieFavoriteUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.ToggleTvShowFavoriteUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.ToggleBookFavoriteUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.ToggleGameFavoriteUseCase
 import org.lanzadera.proyectos.domain.usecase.movies.ObserveWatchedMoviesUseCase
 import org.lanzadera.proyectos.fakes.FakeFavoriteDetailsRepository
 import org.lanzadera.proyectos.fakes.FakeFavoritesRepository
@@ -44,12 +47,22 @@ class FavoritesTabViewModelTest : ViewModelTest() {
         fakeWatchedMoviesRepository = FakeWatchedMoviesRepository()
         
         val observeFavoritesUseCase = ObserveFavoritesUseCase(fakeFavoritesRepository)
-        val toggleFavoriteUseCase = ToggleFavoriteUseCase(
+        val toggleMovieFavoriteUseCase = ToggleMovieFavoriteUseCase(
+            favoritesRepository = fakeFavoritesRepository,
+            favoriteDetailsRepository = fakeDetailsRepository,
+            movieRepository = FakeMovieRepository()
+        )
+        val toggleTvShowFavoriteUseCase = ToggleTvShowFavoriteUseCase(
             favoritesRepository = fakeFavoritesRepository,
             favoriteDetailsRepository = fakeDetailsRepository,
             watchedEpisodesRepository = fakeWatchedEpisodesRepository,
-            tvShowRepository = FakeTvShowRepository(),
-            movieRepository = FakeMovieRepository()
+            tvShowRepository = FakeTvShowRepository()
+        )
+        val toggleBookFavoriteUseCase = ToggleBookFavoriteUseCase(
+            favoritesRepository = fakeFavoritesRepository
+        )
+        val toggleGameFavoriteUseCase = ToggleGameFavoriteUseCase(
+            favoritesRepository = fakeFavoritesRepository
         )
         val observeAllWatchedEpisodesUseCase = ObserveAllWatchedEpisodesUseCase(fakeWatchedEpisodesRepository)
         val getFavoriteDetailsUseCase = GetFavoriteDetailsUseCase(fakeDetailsRepository)
@@ -57,7 +70,10 @@ class FavoritesTabViewModelTest : ViewModelTest() {
         
         viewModel = FavoritesTabViewModel(
             observeFavoritesUseCase = observeFavoritesUseCase,
-            toggleFavoriteUseCase = toggleFavoriteUseCase,
+            toggleMovieFavoriteUseCase = toggleMovieFavoriteUseCase,
+            toggleTvShowFavoriteUseCase = toggleTvShowFavoriteUseCase,
+            toggleBookFavoriteUseCase = toggleBookFavoriteUseCase,
+            toggleGameFavoriteUseCase = toggleGameFavoriteUseCase,
             observeAllWatchedEpisodesUseCase = observeAllWatchedEpisodesUseCase,
             getFavoriteDetailsUseCase = getFavoriteDetailsUseCase,
             observeWatchedMoviesUseCase = observeWatchedMoviesUseCase

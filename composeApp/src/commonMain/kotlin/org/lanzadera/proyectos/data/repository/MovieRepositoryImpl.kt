@@ -7,8 +7,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
+import org.lanzadera.proyectos.data.dto.movie.MovieDto
+import org.lanzadera.proyectos.data.dto.movie.MovieResponseDto
+import org.lanzadera.proyectos.data.mapper.toDomain
 import org.lanzadera.proyectos.domain.models.movie.Movie
-import org.lanzadera.proyectos.domain.models.movie.MovieResponse
 import org.lanzadera.proyectos.domain.repository.MovieRepository
 import org.lanzadera.proyectos.utils.Constants
 import org.lanzadera.proyectos.utils.Logger
@@ -89,7 +91,7 @@ class MovieRepositoryImpl(
         refreshFeed(_trendingMovies, force, ttl, lastUpdated) { fetchTrendingMoviesDay() }
 
     override suspend fun getMovieDetails(movieId: Int): Movie? {
-        // Intenta cache primero
+        // Try cache first
         if (movieDetailsCache.containsKey(movieId)) {
             return movieDetailsCache[movieId]
         }
@@ -101,7 +103,8 @@ class MovieRepositoryImpl(
                     parameters.append("language", "es")
                 }
             }.bodyAsText()
-            val movie: Movie = json.decodeFromString(text)
+            val dto: MovieDto = json.decodeFromString(text)
+            val movie = dto.toDomain()
             movieDetailsCache[movieId] = movie
             movie
         } catch (t: Throwable) {
@@ -141,8 +144,9 @@ class MovieRepositoryImpl(
                 }
             }.bodyAsText()
 
-            val dto: MovieResponse = json.decodeFromString(text)
-            val valid = dto.results.filter(::isValidMovie)
+            val dto: MovieResponseDto = json.decodeFromString(text)
+            val domainMovies = dto.results.map { it.toDomain() }
+            val valid = domainMovies.filter(::isValidMovie)
 
             if (valid.isEmpty()) break
             acc += valid
