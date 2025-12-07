@@ -71,18 +71,19 @@ class GamesTabViewModel(
 
         Logger.d("Loading games", tag = "GamesTabViewModel")
         viewModelScope.launch {
-            try {
-                _isRefreshing.value = true
-                refreshGamesUseCase.invoke()
-                Logger.d("Games loaded successfully, total: ${games.value.size}", tag = "GamesTabViewModel")
-            } catch (t: Throwable) {
-                if (t !is CancellationException) {
-                    _error.value = t.message ?: "Error fetching games"
-                    Logger.e("Error refreshing games", tag = "GamesTabViewModel", throwable = t)
+            _isRefreshing.value = true
+            when (val result = refreshGamesUseCase.invoke()) {
+                is org.lanzadera.proyectos.domain.models.Result.Success -> {
+                    Logger.d("Games loaded successfully, total: ${games.value.size}", tag = "GamesTabViewModel")
                 }
-            } finally {
-                _isRefreshing.value = false
+                is org.lanzadera.proyectos.domain.models.Result.Error -> {
+                    _error.value = result.message ?: "Error fetching games"
+                }
+                is org.lanzadera.proyectos.domain.models.Result.Loading -> {
+                    // Not used in this use case
+                }
             }
+            _isRefreshing.value = false
         }
     }
 
@@ -94,17 +95,19 @@ class GamesTabViewModel(
 
         Logger.d("Force refreshing games", tag = "GamesTabViewModel")
         viewModelScope.launch {
-            try {
-                _isRefreshing.value = true
-                refreshGamesUseCase.invoke()
-            } catch (t: Throwable) {
-                if (t !is CancellationException) {
-                    _error.value = t.message ?: "Error fetching games"
-                    Logger.e("Error force refreshing games", tag = "GamesTabViewModel", throwable = t)
+            _isRefreshing.value = true
+            when (val result = refreshGamesUseCase.invoke()) {
+                is org.lanzadera.proyectos.domain.models.Result.Success -> {
+                    Logger.d("Games force refreshed successfully", tag = "GamesTabViewModel")
                 }
-            } finally {
-                _isRefreshing.value = false
+                is org.lanzadera.proyectos.domain.models.Result.Error -> {
+                    _error.value = result.message ?: "Error fetching games"
+                }
+                is org.lanzadera.proyectos.domain.models.Result.Loading -> {
+                    // Not used in this use case
+                }
             }
+            _isRefreshing.value = false
         }
     }
 

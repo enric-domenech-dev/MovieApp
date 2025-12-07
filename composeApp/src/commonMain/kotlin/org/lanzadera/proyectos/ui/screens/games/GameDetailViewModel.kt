@@ -17,11 +17,16 @@ class GameDetailViewModel(
 
     fun loadGameDetails(gameId: Int) {
         viewModelScope.launch {
-            try {
-                val game = getGameDetailsUseCase(gameId)
-                _gameDetails.value = game
-            } catch (e: Exception) {
-                e.printStackTrace()
+            when (val result = getGameDetailsUseCase(gameId)) {
+                is org.lanzadera.proyectos.domain.models.Result.Success -> {
+                    _gameDetails.value = result.data
+                }
+                is org.lanzadera.proyectos.domain.models.Result.Error -> {
+                    // Error already logged in use case
+                }
+                is org.lanzadera.proyectos.domain.models.Result.Loading -> {
+                    // Not used in this use case
+                }
             }
         }
     }
