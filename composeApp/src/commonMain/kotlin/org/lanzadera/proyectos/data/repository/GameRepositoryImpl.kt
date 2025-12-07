@@ -15,6 +15,8 @@ import org.lanzadera.proyectos.BuildConfig
 import org.lanzadera.proyectos.utils.Logger
 import org.lanzadera.proyectos.utils.Constants
 import org.lanzadera.proyectos.data.authentication.IGDBAuthManager
+import org.lanzadera.proyectos.data.dto.game.GameDto
+import org.lanzadera.proyectos.data.mapper.toDomain
 import org.lanzadera.proyectos.domain.models.game.Game
 import org.lanzadera.proyectos.domain.repository.GameRepository
 
@@ -76,7 +78,8 @@ class GameRepositoryImpl(
 
             Logger.d("Response status: ${response.status}", tag = "GameRepository")
 
-            val games = json.decodeFromString<List<Game>>(response.bodyAsText())
+            val gameDtos = json.decodeFromString<List<GameDto>>(response.bodyAsText())
+            val games = gameDtos.map { it.toDomain() }
             val validGames = games.filter { isValidGame(it) }
 
             state.value = validGames
@@ -135,7 +138,8 @@ class GameRepositoryImpl(
                 setBody(query)
             }
 
-            val games = json.decodeFromString<List<Game>>(response.bodyAsText())
+            val gameDtos = json.decodeFromString<List<GameDto>>(response.bodyAsText())
+            val games = gameDtos.map { it.toDomain() }
             val game = games.firstOrNull()
 
             if (game != null) {

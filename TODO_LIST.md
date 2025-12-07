@@ -48,14 +48,14 @@ After completing each task, update:
 
 ## 📊 PROGRESS TRACKING
 
-### Overall Progress: 20/140 tasks completed (14.29%)
+### Overall Progress: 21/140 tasks completed (15.00%)
 
 ### Phase Status:
 
 - [x] **Phase 0: Quick Wins** (8/8 completed) ✅ **COMPLETE**
-- [ ] **Phase 1: Architecture Fixes** (12/17 completed) - 🎯 **CURRENT** 
-  - **Next Task:** 1.12 - Create DTOs - Game Models
-  - **Recent:** ✅ Task 1.11 COMPLETE - Book DTOs created (2 DTOs, 1 mapper, 78 lines)
+- [ ] **Phase 1: Architecture Fixes** (13/17 completed) - 🎯 **CURRENT** 
+  - **Next Task:** 1.13 - Create DTOs - Other Models
+  - **Recent:** ✅ Task 1.12 COMPLETE - Game DTOs created (13 DTOs, 1 mapper, 145 lines)
 - [ ] **Phase 2: Code Quality** (0/12 completed) - Week 2
 - [ ] **Phase 3: Testing - Use Cases & DTOs** (0/19 completed) - Week 3
 - [ ] **Phase 4: Testing - Repositories & Integration** (0/15 completed) - Week 4
@@ -67,10 +67,10 @@ After completing each task, update:
 ### Current Sprint:
 
 **Active Phase:** Phase 1 - Architecture Fixes  
-**Current Task:** Task 1.12 - Create DTOs - Game Models  
-**Status:** ✅ Task 1.11 COMPLETE - Book DTOs (2 DTOs, 78-line mapper)  
-**Estimated Time Remaining in Task:** ~3 hours  
-**Estimated Time Remaining in Phase:** ~5-6 hours
+**Current Task:** Task 1.13 - Create DTOs - Other Models  
+**Status:** ✅ Task 1.12 COMPLETE - Game DTOs (13 DTOs, 145-line mapper)  
+**Estimated Time Remaining in Task:** ~2 hours  
+**Estimated Time Remaining in Phase:** ~3-4 hours
 
 ---
 
@@ -1217,12 +1217,53 @@ After completing each task, update:
 
 ---
 
-## Task 1.12: Create DTOs - Game Models
+## [x] Task 1.12: Create DTOs - Game Models ✅
 
-- [ ] Create `GameDto.kt`
-- [ ] Update domain model
-- [ ] Create mapper
-- [ ] Update `GameRepositoryImpl`
+**Impact:** HIGH | **Effort:** 3 hours | **Status:** ✅ COMPLETE
+
+### Subtasks:
+
+- [x] 1.12.1 Create `GameDto.kt` and related DTOs
+  - [x] GameDto (28 fields)
+  - [x] GenreDto, PlatformDto, ReleaseDateDto
+  - [x] CoverDto, ScreenshotDto, ArtworkDto
+  - [x] CompanyDto, KeywordDto, InvolvedCompanyDto
+  - [x] WebsiteDto, GameEngineDto, GameModeDto
+
+- [x] 1.12.2 Update domain Game model (remove @Serializable)
+  - [x] Removed @Serializable from Game.kt (13 classes)
+  - [x] Removed @SerialName annotations from all fields
+  - [x] Removed kotlinx.serialization imports
+
+- [x] 1.12.3 Create GameMapper.kt
+  - [x] 26 mapper functions (toDomain + toDto)
+  - [x] 145 lines of mapping logic
+  - [x] Bidirectional: DTO ↔ Domain
+
+- [x] 1.12.4 Update `GameRepositoryImpl` to use DTOs
+  - [x] Use GameDto for deserialization in refreshFeed()
+  - [x] Use GameDto for deserialization in getGameDetails()
+  - [x] Map DTOs to domain models with .toDomain()
+
+**Acceptance Criteria:**
+
+- ✅ Game DTOs created (13 classes in 1 file)
+- ✅ Domain Game model is annotation-free (0 @Serializable)
+- ✅ GameMapper functions work (145 lines, bidirectional)
+- ✅ GameRepositoryImpl uses DTOs for deserialization
+- ✅ Build successful ✅
+- ✅ All tests passing ✅
+- ✅ Clean Architecture compliance: 100%
+
+**Files Created:**
+1. data/dto/game/GameDto.kt (13 DTO classes)
+2. data/mapper/GameMapper.kt (26 mapper functions)
+
+**Files Modified:**
+1. domain/models/game/Game.kt (13 classes cleaned)
+2. data/repository/GameRepositoryImpl.kt (uses DTOs)
+
+---
 
 ## Task 1.13: Create DTOs - Other Models
 
@@ -1859,3 +1900,20 @@ See `docs/analysis/Why_Tests_Didnt_Catch_Bugs.md` for full analysis.
     - **Architecture:** Clean separation - domain models are pure, DTOs in data layer
     - **Time:** ~1 hour
     - **Next:** Task 1.12 - Game DTOs (Phase 2)
+
+- **Session 14** (Dec 7, 2025):
+    - 🎉 **Task 1.12: COMPLETE** - Game DTOs Created ✅
+    - ✅ DTOs: 13 classes in GameDto.kt (Game, Genre, Platform, ReleaseDate, Cover, Screenshot, Company, Keyword, InvolvedCompany, Artwork, Website, GameEngine, GameMode)
+    - ✅ Mapper: GameMapper.kt (145 lines, 26 functions - bidirectional)
+    - ✅ Domain: 0 @Serializable annotations in Game.kt (13 classes cleaned)
+    - ✅ Repository: GameRepositoryImpl uses GameDto for deserialization
+    - ✅ Build: SUCCESSFUL ✅ Tests: PASSING
+    - **Architecture:** Clean separation - domain models are pure, DTOs in data layer
+    - **Files Created:**
+      - data/dto/game/GameDto.kt (13 DTOs, 4.1 KB)
+      - data/mapper/GameMapper.kt (26 mapper functions, 5.5 KB)
+    - **Files Modified:**
+      - domain/models/game/Game.kt (removed all @Serializable and @SerialName)
+      - data/repository/GameRepositoryImpl.kt (uses GameDto.toDomain())
+    - **Time:** ~1.5 hours
+    - **Next:** Task 1.13 - Create DTOs for Other Models (Collection, User)
