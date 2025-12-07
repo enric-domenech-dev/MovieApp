@@ -1,7 +1,9 @@
 package org.lanzadera.proyectos.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -10,19 +12,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ExitToApp
 import androidx.compose.material.icons.automirrored.outlined.Send
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DrawerDefaults
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -49,18 +50,23 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 import kotlinx.coroutines.launch
+import movieapp.composeapp.generated.resources.Res
+import movieapp.composeapp.generated.resources.new_edge_logo
+import org.jetbrains.compose.resources.painterResource
 import org.lanzadera.proyectos.BuildConfig
-import org.lanzadera.proyectos.utils.Constants
+import org.lanzadera.proyectos.navigation.Screen
+import org.lanzadera.proyectos.utils.Constants.Dimensions.BOTTOM_NAV_BAR_HEIGHT
 import org.lanzadera.proyectos.utils.Strings
 
 @Composable
 fun DrawerAppBar(
-    navViewModel: NavHostController,
     drawerState: DrawerState,
     modifier: Modifier = Modifier,
-    drawerEnabled: Boolean = true,
+    drawerEnabled: Boolean = false,
+    onNavigateToSearch: () -> Unit,
+    onNavigateToSettings: () -> Unit,
+    onNavigateToLogin: () -> Unit,
     content: @Composable () -> Unit
 ) {
     var showDialog by remember { mutableStateOf(false) }
@@ -70,32 +76,36 @@ fun DrawerAppBar(
         ModalNavigationDrawer(
             modifier = modifier,
             drawerState = drawerState,
-            scrimColor = DrawerDefaults.scrimColor,
             drawerContent = {
                 Column(
                     modifier = Modifier
-                        .background(MaterialTheme.colorScheme.background)
+                        .background(MaterialTheme.colorScheme.surfaceContainer)
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
-                        .padding(bottom = Constants.Dimensions.BOTTOM_NAV_BAR_HEIGHT)
+                        .padding(bottom = BOTTOM_NAV_BAR_HEIGHT)
                 ) {
                     Column(
                         modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.AccountCircle,
-                            contentDescription = "Imagen de Usuario",
-                            modifier = Modifier.size(100.dp)
-                        )
-                        Text(
-                            "Nombre de Usuario".uppercase(),
-                            modifier = Modifier.padding(16.dp),
-                            style = MaterialTheme.typography.headlineSmall
-                        )
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .safeDrawingPadding()
+                                .padding(top = 16.dp)
+                                .padding(16.dp)
+                        ) {
+                                Image(
+                                    painter = painterResource(Res.drawable.new_edge_logo),
+                                    contentDescription = "App Logo",
+                                    modifier = Modifier
+                                        .size(264.dp)
+                                        .padding(12.dp),
+                                    contentScale = androidx.compose.ui.layout.ContentScale.Fit
+                                )
+                        }
                     }
-                    HorizontalDivider()
 
                     Column(
                         modifier = Modifier
@@ -103,9 +113,26 @@ fun DrawerAppBar(
                         verticalArrangement = Arrangement.SpaceAround,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        CustomBottomAppBar(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 16.dp)
+                        ) {
+                            Text(
+                                text = "v${BuildConfig.APP_VERSION}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier.align(Alignment.CenterHorizontally),
+                                fontSize = 16.sp,
+                                fontFamily = FontFamily.SansSerif,
+                            )
+                        }
                         DropdownMenuItem(
                             text = { Text(Strings.Menu.PROFILE) },
-                            onClick = { navViewModel.navigate(Constants.Screen.Search.route) },
+                            onClick = { onNavigateToSearch() },
                             leadingIcon = {
                                 Icon(Icons.Outlined.Person, contentDescription = null)
                             }
@@ -114,7 +141,7 @@ fun DrawerAppBar(
                         DropdownMenuItem(
                             text = { Text(Strings.Settings.THEME) },
                             onClick = {
-                                navViewModel.navigate(Constants.Screen.Settings.route)
+                                onNavigateToSettings()
                                 scope.launch { drawerState.close() }
                             },
                             leadingIcon = {
@@ -172,26 +199,8 @@ fun DrawerAppBar(
                     LogoutConfirmationDialog(
                         showDialog = showDialog,
                         onDismiss = { showDialog = false },
-                        onConfirm = { navViewModel.navigate(Constants.Screen.Login.route) }
+                        onConfirm = { onNavigateToLogin() }
                     )
-                    CustomBottomAppBar(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 16.dp)
-                    ) {
-                        Text(
-                            text = "v${BuildConfig.APP_VERSION}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.align(Alignment.CenterHorizontally),
-                            fontSize = 16.sp,
-                            fontFamily = FontFamily.SansSerif,
-                        )
-                    }
-
                 }
             },
             gesturesEnabled = true,

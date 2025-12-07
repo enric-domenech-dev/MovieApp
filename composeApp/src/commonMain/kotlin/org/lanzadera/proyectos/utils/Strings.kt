@@ -29,6 +29,8 @@ object Strings {
         const val BOOKS = "LIBROS"
         const val GAMES = "JUEGOS"
         const val FAVORITES = "FAVORITOS"
+        const val MOVIES = "PELÍCULAS"
+        const val SERIES = "SERIES"
     }
 
     // Movie Sections
@@ -127,4 +129,3 @@ object Strings {
         const val NO_MESSAGES = "Sin mensajes"
     }
 }
-

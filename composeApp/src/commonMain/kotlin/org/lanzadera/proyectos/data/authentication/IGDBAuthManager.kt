@@ -9,6 +9,7 @@ import kotlinx.datetime.Clock
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import org.lanzadera.proyectos.utils.Logger
 
 @Serializable
 data class IGDBAuthToken(
@@ -65,15 +66,15 @@ class IGDBAuthManager(
             val response = httpClient.post(url)
 
             val responseBody = response.bodyAsText()
-            println("SYNCRO IGDB Auth Response: $responseBody")
+            Logger.d("$responseBody", tag = "IGDBAuthManager")
 
             currentToken = json.decodeFromString<IGDBAuthToken>(responseBody)
             tokenExpirationTime = Clock.System.now().toEpochMilliseconds() +
                     (currentToken!!.expiresIn * 1000L)
 
-            println("SYNCRO IGDB Token refreshed, expires in ${currentToken!!.expiresIn} seconds")
+            Logger.d("IGDB Token refreshed, expires in ${currentToken!!.expiresIn} seconds", tag = "IGDBAuthManager")
         } catch (e: Exception) {
-            println("SYNCRO IGDB Auth Error: ${e.message}")
+            Logger.d("${e.message}", tag = "IGDBAuthManager")
             e.printStackTrace()
             throw RuntimeException("Failed to authenticate with IGDB", e)
         }

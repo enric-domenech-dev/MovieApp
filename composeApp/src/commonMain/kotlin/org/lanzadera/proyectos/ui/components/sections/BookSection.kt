@@ -25,8 +25,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
-import org.lanzadera.proyectos.domain.models.book.Book
+import org.lanzadera.proyectos.ui.models.BookUI
 import org.lanzadera.proyectos.ui.components.BookHeader
 import org.lanzadera.proyectos.ui.components.BookSubheader
 import org.lanzadera.proyectos.ui.components.dialogs.BookSectionDialog
@@ -35,8 +34,8 @@ import org.lanzadera.proyectos.ui.screens.home.SectionMode
 @Composable
 fun BookSection(
     title: String,
-    items: List<Book>,
-    nav: NavHostController,
+    items: List<BookUI>,
+    onBookClick: (bookId: String) -> Unit,
     sectionIndex: Int = 0,
     mode: SectionMode = SectionMode.HEADER
 ) {
@@ -95,22 +94,22 @@ fun BookSection(
                     when (mode) {
                         SectionMode.HEADER -> BookHeader(
                             modifier = itemModifier,
-                            nav = nav,
-                            book = book
+                            book = book,
+                            onBookClick = onBookClick
                         )
 
                         SectionMode.SUBHEADER_SHOW_META -> BookSubheader(
                             modifier = itemModifier,
-                            nav = nav,
                             book = book,
-                            showMeta = true
+                            showMeta = true,
+                            onBookClick = onBookClick
                         )
 
                         SectionMode.SUBHEADER_HIDE_META -> BookSubheader(
                             modifier = itemModifier,
-                            nav = nav,
                             book = book,
-                            showMeta = false
+                            showMeta = false,
+                            onBookClick = onBookClick
                         )
                     }
                 }
@@ -120,7 +119,7 @@ fun BookSection(
                 BookSectionDialog(
                     title = title,
                     items = items,
-                    nav = nav,
+                    onBookClick = onBookClick,
                     sectionIndex = sectionIndex,
                     dialogVisible = dialogContentVisible,
                     onRequestHideContent = { dialogContentVisible = false },

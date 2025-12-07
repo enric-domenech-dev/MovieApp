@@ -25,8 +25,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
-import org.lanzadera.proyectos.domain.models.movie.Movie
+import org.lanzadera.proyectos.ui.models.MovieUI
 import org.lanzadera.proyectos.ui.components.MovieHeader
 import org.lanzadera.proyectos.ui.components.MovieSubheader
 import org.lanzadera.proyectos.ui.components.dialogs.SectionDialog
@@ -35,8 +34,8 @@ import org.lanzadera.proyectos.ui.screens.home.SectionMode
 @Composable
 fun Section(
     title: String,
-    items: List<Movie>,
-    nav: NavHostController,
+    items: List<MovieUI>,
+    onMovieClick: (movieId: Int) -> Unit,
     sectionIndex: Int = 0,
     mode: SectionMode = SectionMode.HEADER
 ) {
@@ -92,22 +91,22 @@ fun Section(
                     when (mode) {
                         SectionMode.HEADER -> MovieHeader(
                             modifier = itemModifier,
-                            nav = nav,
-                            movie = movie
+                            movie = movie,
+                            onMovieClick = onMovieClick
                         )
 
                         SectionMode.SUBHEADER_SHOW_META -> MovieSubheader(
                             modifier = itemModifier,
-                            nav = nav,
                             movie = movie,
-                            showMeta = true
+                            showMeta = true,
+                            onMovieClick = onMovieClick
                         )
 
                         SectionMode.SUBHEADER_HIDE_META -> MovieSubheader(
                             modifier = itemModifier,
-                            nav = nav,
                             movie = movie,
-                            showMeta = false
+                            showMeta = false,
+                            onMovieClick = onMovieClick
                         )
                     }
                 }
@@ -117,7 +116,7 @@ fun Section(
                 SectionDialog(
                     title = title,
                     items = items,
-                    nav = nav,
+                    onMovieClick = onMovieClick,
                     sectionIndex = sectionIndex,
                     dialogVisible = dialogContentVisible,
                     onRequestHideContent = { dialogContentVisible = false },

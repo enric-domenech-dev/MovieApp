@@ -18,19 +18,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import org.lanzadera.proyectos.utils.Strings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingView(nav: NavHostController, vm: SettingsViewModel, modifier: Modifier = Modifier) {
+fun SettingView(
+    vm: SettingsViewModel,
+    onNavigateBack: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Scaffold(
         modifier = modifier.safeDrawingPadding(),
         topBar = {
             TopAppBar(
                 title = { Text(Strings.Settings.THEME) },
                 navigationIcon = {
-                    IconButton(onClick = { nav.popBackStack() }) {
+                    IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                             contentDescription = "Volver"
@@ -48,8 +51,7 @@ fun SettingView(nav: NavHostController, vm: SettingsViewModel, modifier: Modifie
             Icon(imageVector = Icons.Default.Settings, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(16.dp))
             Text(text = "Aquí se implementará la pantalla de Settings.", style = MaterialTheme.typography.bodyMedium)
 
-            // Use the nav and vm params minimally so they are not considered unused warnings
-            Text(text = "Ruta actual: ${nav.currentBackStackEntry?.destination?.route ?: "-"}", style = MaterialTheme.typography.bodySmall)
+            // VM reference to avoid unused warning
             Text(text = "VM: ${vm::class.simpleName}", style = MaterialTheme.typography.bodySmall)
         }
     }

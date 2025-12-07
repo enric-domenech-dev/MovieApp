@@ -5,9 +5,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.rememberNavController
 import coil3.ImageLoader
 import coil3.PlatformContext
@@ -36,9 +35,9 @@ internal fun App(
 ) {
 
     val colors: ColorScheme = when (selectedTheme) {
-        AppTheme.SYSTEM -> if (darkTheme) DarkColorPalette else LightColorPalette
-        AppTheme.LIGHT -> LightColorPalette
-        AppTheme.DARK -> DarkColorPalette
+        AppTheme.SYSTEM -> if (darkTheme) FilmWayDarkColorScheme else FilmWayLightColorScheme
+        AppTheme.LIGHT -> FilmWayLightColorScheme
+        AppTheme.DARK -> FilmWayDarkColorScheme
         AppTheme.NEON -> NeonColorPalette
         AppTheme.RETRO -> RetroColorPalette
     }

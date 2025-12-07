@@ -1,16 +1,14 @@
 package org.lanzadera.proyectos.domain.models.user
 
 import androidx.compose.ui.text.intl.Locale
-import kotlinx.serialization.Serializable
 
-@Serializable
 data class User(
     val email: String,
     val id: String = "",
     val password: String,
-    val register_date: String = "",
-    val user_name: String = "Guest",
-    val user_photo: String = ""
+    val registerDate: String = "",
+    val userName: String = "Guest",
+    val userPhoto: String = ""
 ) {
     init {
         require(email.contains("@")) { "El email debe ser válido" }

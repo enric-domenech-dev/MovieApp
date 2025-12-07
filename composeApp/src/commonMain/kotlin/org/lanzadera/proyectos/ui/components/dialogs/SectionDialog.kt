@@ -31,16 +31,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.navigation.NavHostController
 import kotlinx.coroutines.delay
-import org.lanzadera.proyectos.domain.models.movie.Movie
+import org.lanzadera.proyectos.ui.models.MovieUI
 import org.lanzadera.proyectos.ui.components.MovieItem
 
 @Composable
 fun SectionDialog(
     title: String,
-    items: List<Movie>,
-    nav: NavHostController,
+    items: List<MovieUI>,
+    onMovieClick: (movieId: Int) -> Unit,
     sectionIndex: Int,
     dialogVisible: Boolean,
     onRequestHideContent: () -> Unit,
@@ -82,7 +81,7 @@ fun SectionDialog(
                             val idPart = movie.id?.toString() ?: movie.hashCode().toString()
                             "s${sectionIndex}_${idPart}_$index"
                         }) { _, movie ->
-                            MovieItem(nav, movie)
+                            MovieItem(movie, onMovieClick)
                         }
                     }
                 }

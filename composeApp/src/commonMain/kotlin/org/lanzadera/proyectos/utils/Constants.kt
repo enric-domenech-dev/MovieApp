@@ -46,7 +46,7 @@ object Constants {
 
     // MENU OPTIONS
     object MenuOptions {
-        val topBarTitles = listOf("LIBROS", "PELÍCULAS", "SERIES", "JUEGOS", "<3")
+        val topBarTitles = listOf("SIGUIENDO", "LIBROS", "PELÍCULAS", "SERIES", "JUEGOS")
         val bottomBarTitles = listOf("Menu", "Buscar", "Inicio", "Chat", "Perfil")
         val bottomBarIcons = listOf(
             Icons.AutoMirrored.Outlined.List,
@@ -87,5 +87,101 @@ object Constants {
     const val DEFAULT_USERNAME = "admin@gmail.com"
     const val DEFAULT_PASSWORD = "1234"
 
+    /**
+     * Cache configuration constants.
+     * 
+     * These values control data caching behavior across repositories.
+     */
+    object Cache {
+        /**
+         * Default Time-To-Live for cached data: 2 minutes
+         */
+        const val DEFAULT_TTL_MS = 2 * 60 * 1000L
+        
+        /**
+         * Minimum interval between forced refreshes: 30 seconds
+         */
+        const val MIN_REFRESH_INTERVAL_MS = 30_000L
+        
+        /**
+         * Default maximum number of pages to fetch from paginated APIs
+         */
+        const val MAX_PAGES_DEFAULT = 5
+    }
 
+    /**
+     * Network configuration constants.
+     * 
+     * These values control HTTP client behavior.
+     */
+    object Network {
+        /**
+         * HTTP request timeout: 30 seconds
+         */
+        const val HTTP_TIMEOUT_MS = 30_000L
+        
+        /**
+         * Maximum number of retry attempts for failed requests
+         */
+        const val RETRY_COUNT = 3
+        
+        /**
+         * Maximum delay between retries: 5 seconds
+         */
+        const val MAX_RETRY_DELAY_MS = 5_000L
+        
+        /**
+         * Connect timeout: 15 seconds
+         */
+        const val CONNECT_TIMEOUT_MS = 15_000L
+        
+        /**
+         * Socket timeout: 30 seconds
+         */
+        const val SOCKET_TIMEOUT_MS = 30_000L
+    }
+
+    /**
+     * UI/Animation constants.
+     * 
+     * These values control UI behavior and animations.
+     */
+    object UI {
+        /**
+         * Standard animation duration: 300ms
+         */
+        const val ANIMATION_DURATION_MS = 300
+        
+        /**
+         * Fast animation duration: 150ms
+         */
+        const val ANIMATION_DURATION_FAST_MS = 150
+        
+        /**
+         * Slow animation duration: 500ms
+         */
+        const val ANIMATION_DURATION_SLOW_MS = 500
+        
+        /**
+         * Debounce delay for search inputs: 500ms
+         */
+        const val DEBOUNCE_MS = 500
+        
+        /**
+         * Default page size for pagination
+         */
+        const val DEFAULT_PAGE_SIZE = 20
+    }
+
+    /**
+     * API constants.
+     * 
+     * API-specific configuration values.
+     */
+    object Api {
+        /**
+         * IGDB token expiration buffer: 1 hour before actual expiration
+         */
+        const val TOKEN_EXPIRATION_BUFFER_MS = 60 * 60 * 1000L
+    }
 }

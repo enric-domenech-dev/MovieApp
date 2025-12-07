@@ -1,44 +1,41 @@
 package org.lanzadera.proyectos.domain.models.movie
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
 import org.lanzadera.proyectos.domain.models.tvshow.AggregateCredits
 import org.lanzadera.proyectos.domain.models.tvshow.Genre
 import org.lanzadera.proyectos.domain.models.tvshow.ProductionCompany
 import org.lanzadera.proyectos.domain.models.tvshow.ProductionCountry
 import org.lanzadera.proyectos.domain.models.tvshow.SpokenLanguage
 
-@Serializable
 data class Movie(
     val adult: Boolean? = null,
-    @SerialName("backdrop_path") val backdropPath: String? = null,
-    @SerialName("genre_ids") val genreIds: List<Int>? = null,
+    val backdropPath: String? = null,
+    val genreIds: List<Int>? = null,
     val id: Int? = null,
-    @SerialName("original_language") val originalLanguage: String? = null,
-    @SerialName("original_title") val originalTitle: String? = null,
+    val originalLanguage: String? = null,
+    val originalTitle: String? = null,
     val overview: String? = null,
     val popularity: Double? = null,
-    @SerialName("poster_path") val posterPath: String? = null,
-    @SerialName("release_date") val releaseDate: String? = null,
+    val posterPath: String? = null,
+    val releaseDate: String? = null,
     val title: String? = null,
     val video: Boolean? = null,
-    @SerialName("vote_average") private val voteAverageDouble: Double? = null,
-    @SerialName("vote_count") val voteCount: Int? = null,
-    @SerialName("media_type") val mediaType: String? = null,
-    // Campos adicionales del endpoint de detalle
+    val voteAverageDouble: Double? = null,
+    val voteCount: Int? = null,
+    val mediaType: String? = null,
+    // Detail endpoint additional fields
     val budget: Int? = null,
     val revenue: Int? = null,
     val runtime: Int? = null,
     val status: String? = null,
     val tagline: String? = null,
-    @SerialName("imdb_id") val imdbId: String? = null,
+    val imdbId: String? = null,
     val homepage: String? = null,
     val genres: List<Genre>? = null,
-    @SerialName("production_companies") val productionCompanies: List<ProductionCompany>? = null,
-    @SerialName("production_countries") val productionCountries: List<ProductionCountry>? = null,
-    @SerialName("spoken_languages") val spokenLanguages: List<SpokenLanguage>? = null,
-    @SerialName("belongs_to_collection") val belongsToCollection: Collection? = null,
-    @SerialName("aggregate_credits") val aggregateCredits: AggregateCredits? = null
+    val productionCompanies: List<ProductionCompany>? = null,
+    val productionCountries: List<ProductionCountry>? = null,
+    val spokenLanguages: List<SpokenLanguage>? = null,
+    val belongsToCollection: Collection? = null,
+    val aggregateCredits: AggregateCredits? = null
 ) {
     val voteAverage: String
         get() = voteAverageDouble?.let { (it * 10).toInt() / 10.0 }?.toString() ?: "N/A"
@@ -64,12 +61,11 @@ data class Movie(
     }
 }
 
-@Serializable
 data class Collection(
     val id: Int? = null,
     val name: String? = null,
-    @SerialName("poster_path") val posterPath: String? = null,
-    @SerialName("backdrop_path") val backdropPath: String? = null
+    val posterPath: String? = null,
+    val backdropPath: String? = null
 )
 
 

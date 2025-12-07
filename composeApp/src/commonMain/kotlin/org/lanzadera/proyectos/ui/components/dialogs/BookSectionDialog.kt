@@ -31,16 +31,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.navigation.NavHostController
 import kotlinx.coroutines.delay
-import org.lanzadera.proyectos.domain.models.book.Book
+import org.lanzadera.proyectos.ui.models.BookUI
 import org.lanzadera.proyectos.ui.components.BookItem
 
 @Composable
 fun BookSectionDialog(
     title: String,
-    items: List<Book>,
-    nav: NavHostController,
+    items: List<BookUI>,
+    onBookClick: (bookId: String) -> Unit,
     sectionIndex: Int,
     dialogVisible: Boolean,
     onRequestHideContent: () -> Unit,
@@ -85,7 +84,7 @@ fun BookSectionDialog(
                                 "s${sectionIndex}_${idPart}_$index"
                             }
                         ) { _, book ->
-                            BookItem(nav, book)
+                            BookItem(book, onBookClick)
                         }
                     }
                 }

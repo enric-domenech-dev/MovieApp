@@ -1,18 +1,19 @@
 package org.lanzadera.proyectos.navigation
 
-import org.lanzadera.proyectos.domain.models.book.Book
-import org.lanzadera.proyectos.domain.models.game.Game
-import org.lanzadera.proyectos.domain.models.movie.Movie
-import org.lanzadera.proyectos.domain.models.tvshow.TvShow
+import org.lanzadera.proyectos.ui.models.BookUI
 
 /**
- * Temporary in-memory store to pass complex objects between destinations when
- * serializing in the nav route is not desired. It's a simple compromise for this
- * project; for production prefer using IDs and fetching details in the target.
+ * Temporary store for Books only, as they don't have a detail endpoint.
+ * 
+ * ⚠️ PARTIALLY MIGRATED: Movies, TV Shows, and Games now use type-safe navigation.
+ * 
+ * ✅ Movies: Use Screen.MovieDetail(movieId)
+ * ✅ TV Shows: Use Screen.TvShowDetail(tvShowId)
+ * ✅ Games: Use Screen.GameDetail(gameId)
+ * ⚠️ Books: Still use NavigationStore.selectedBook (no detail endpoint available)
+ * 
+ * 🔄 TODO: When Google Books API supports detail by ID, migrate to Screen.BookDetail(bookId)
  */
 object NavigationStore {
-    var selectedMovie: Movie? = null
-    var selectedBook: Book? = null
-    var selectedTvShow: TvShow? = null
-    var selectedGame: Game? = null
+    var selectedBook: BookUI? = null
 }

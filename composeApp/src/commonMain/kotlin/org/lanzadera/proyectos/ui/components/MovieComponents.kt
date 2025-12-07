@@ -46,30 +46,30 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import kotlinx.datetime.LocalDate
 import movieapp.composeapp.generated.resources.Res
-import movieapp.composeapp.generated.resources.film
+import movieapp.composeapp.generated.resources.new_edge_logo
 import org.jetbrains.compose.resources.painterResource
-import org.lanzadera.proyectos.domain.models.movie.Movie
-import org.lanzadera.proyectos.navigation.NavigationStore
+import org.lanzadera.proyectos.ui.models.MovieUI
+import org.lanzadera.proyectos.ui.models.MovieWithReleaseInfoUI
+import org.lanzadera.proyectos.ui.models.MovieDetailUI
+import org.lanzadera.proyectos.ui.models.AggregateCastUI
+import org.lanzadera.proyectos.ui.models.AggregateCrewUI
+import org.lanzadera.proyectos.navigation.Screen
 import org.lanzadera.proyectos.utils.Constants
 
 @Composable
 fun MovieItem(
-    nav: NavHostController,
-    movie: Movie,
+    movie: MovieUI,
+    onMovieClick: (movieId: Int) -> Unit,
     modifier: Modifier = Modifier.wrapContentHeight(),
     showMeta: Boolean = true
 ) {
     Column(
         modifier = modifier
             .clickable {
-                NavigationStore.selectedMovie = movie
-                movie.id?.let { movieId ->
-                    nav.navigate(Constants.Screen.MovieDetail.createRoute(movieId))
-                }
+                onMovieClick(movie.id)
             }
     ) {
         Box(
@@ -78,26 +78,24 @@ fun MovieItem(
                 .clip(MaterialTheme.shapes.small)
         ) {
             AsyncImage(
-                model = "https://image.tmdb.org/t/p/w500${movie.posterPath}",
+                model = movie.posterUrl,
                 contentDescription = movie.title,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
-                placeholder = painterResource(Res.drawable.film)
+                error = painterResource(Res.drawable.new_edge_logo)
             )
         }
 
         if (showMeta) {
             Spacer(modifier = Modifier.height(6.dp))
-            movie.title?.let {
-                Text(
-                    text = it,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 15.sp,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
+            Text(
+                text = movie.displayTitle,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 15.sp,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
 
             val formattedDate = remember(movie.releaseDate) {
                 movie.releaseDate?.let {
@@ -117,14 +115,17 @@ fun MovieItem(
 }
 
 @Composable
-fun MovieHeader(modifier: Modifier = Modifier, nav: NavHostController, movie: Movie) {
+fun MovieHeader(
+    modifier: Modifier = Modifier,
+    movie: MovieUI,
+    onMovieClick: (movieId: Int) -> Unit
+) {
     Column(
         modifier = modifier
             .wrapContentHeight()
             .clickable {
-                NavigationStore.selectedMovie = movie
                 movie.id?.let { movieId ->
-                    nav.navigate(Constants.Screen.MovieDetail.createRoute(movieId))
+                    onMovieClick(movieId)
                 }
             }
     ) {
@@ -138,7 +139,7 @@ fun MovieHeader(modifier: Modifier = Modifier, nav: NavHostController, movie: Mo
                 contentDescription = movie.title,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
-                placeholder = painterResource(Res.drawable.film)
+                error = painterResource(Res.drawable.new_edge_logo)
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
@@ -163,14 +164,18 @@ fun MovieHeader(modifier: Modifier = Modifier, nav: NavHostController, movie: Mo
 }
 
 @Composable
-fun MovieSubheader(modifier: Modifier = Modifier, nav: NavHostController, movie: Movie, showMeta: Boolean) {
+fun MovieSubheader(
+    modifier: Modifier = Modifier,
+    movie: MovieUI,
+    showMeta: Boolean,
+    onMovieClick: (movieId: Int) -> Unit
+) {
     Column(
         modifier = modifier
             .wrapContentHeight()
             .clickable {
-                NavigationStore.selectedMovie = movie
                 movie.id?.let { movieId ->
-                    nav.navigate(Constants.Screen.MovieDetail.createRoute(movieId))
+                    onMovieClick(movieId)
                 }
             }
     ) {
@@ -184,7 +189,7 @@ fun MovieSubheader(modifier: Modifier = Modifier, nav: NavHostController, movie:
                 contentDescription = movie.title,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
-                placeholder = painterResource(Res.drawable.film)
+                error = painterResource(Res.drawable.new_edge_logo)
             )
         }
         if (showMeta) {
@@ -211,7 +216,7 @@ fun MovieSubheader(modifier: Modifier = Modifier, nav: NavHostController, movie:
 }
 
 @Composable
-fun MovieDetail(movie: Movie?, modifier: Modifier = Modifier) {
+fun MovieDetail(movie: MovieDetailUI?, modifier: Modifier = Modifier) {
     val isFavorite = rememberSaveable { mutableStateOf(false) }
     if (movie == null) return
 
@@ -227,7 +232,7 @@ fun MovieDetail(movie: Movie?, modifier: Modifier = Modifier) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 AsyncImage(
-                    model = "https://image.tmdb.org/t/p/w500${movie.backdropPath}",
+                    model = movie.backdropUrl,
                     contentDescription = movie.title,
                     contentScale = ContentScale.FillWidth,
                     modifier = Modifier
@@ -541,8 +546,8 @@ fun MovieDetail(movie: Movie?, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun CircularAvgVotes(movie: Movie) {
-    val votePercentage = (movie.voteAverage.toDouble() * 10).toInt()
+fun CircularAvgVotes(movie: MovieDetailUI) {
+    val votePercentage = movie.voteAverage.toDoubleOrNull()?.let { (it * 10).toInt() } ?: 0
     if (votePercentage == 0) return
     val borderColor = when {
         votePercentage < 40 -> Color.Red
@@ -567,7 +572,7 @@ fun CircularAvgVotes(movie: Movie) {
 }
 
 @Composable
-fun MovieCastMemberCard(actor: org.lanzadera.proyectos.domain.models.tvshow.AggregateCast) {
+fun MovieCastMemberCard(actor: AggregateCastUI) {
     Column(
         modifier = Modifier
             .width(120.dp)
@@ -594,7 +599,7 @@ fun MovieCastMemberCard(actor: org.lanzadera.proyectos.domain.models.tvshow.Aggr
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    painter = painterResource(Res.drawable.film),
+                    painter = painterResource(Res.drawable.new_edge_logo),
                     contentDescription = null,
                     modifier = Modifier.size(40.dp),
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
@@ -604,7 +609,7 @@ fun MovieCastMemberCard(actor: org.lanzadera.proyectos.domain.models.tvshow.Aggr
 
         // Nombre del actor
         Text(
-            text = actor.name ?: "Unknown",
+            text = actor.name,
             fontSize = 12.sp,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface,
@@ -631,7 +636,7 @@ fun MovieCastMemberCard(actor: org.lanzadera.proyectos.domain.models.tvshow.Aggr
 }
 
 @Composable
-fun MovieCrewMemberCard(crewMember: org.lanzadera.proyectos.domain.models.tvshow.AggregateCrew) {
+fun MovieCrewMemberCard(crewMember: AggregateCrewUI) {
     Column(
         modifier = Modifier
             .width(120.dp)
@@ -658,7 +663,7 @@ fun MovieCrewMemberCard(crewMember: org.lanzadera.proyectos.domain.models.tvshow
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    painter = painterResource(Res.drawable.film),
+                    painter = painterResource(Res.drawable.new_edge_logo),
                     contentDescription = null,
                     modifier = Modifier.size(40.dp),
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
@@ -668,7 +673,7 @@ fun MovieCrewMemberCard(crewMember: org.lanzadera.proyectos.domain.models.tvshow
 
         // Nombre
         Text(
-            text = crewMember.name ?: "Unknown",
+            text = crewMember.name,
             fontSize = 12.sp,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface,
@@ -695,7 +700,7 @@ fun MovieCrewMemberCard(crewMember: org.lanzadera.proyectos.domain.models.tvshow
 }
 
 @Composable
-fun MovieInfoTabContent(movie: Movie?, modifier: Modifier = Modifier) {
+fun MovieInfoTabContent(movie: MovieDetailUI?, modifier: Modifier = Modifier) {
     if (movie == null) return
 
     LazyColumn(
@@ -708,14 +713,12 @@ fun MovieInfoTabContent(movie: Movie?, modifier: Modifier = Modifier) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Title
-                movie.title?.let {
-                    Text(
-                        text = it,
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                Text(
+                    text = movie.title,
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Bold
+                )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -909,7 +912,7 @@ fun MovieInfoTabContent(movie: Movie?, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun MovieCreditsTab(movie: Movie?, modifier: Modifier = Modifier) {
+fun MovieCreditsTab(movie: MovieDetailUI?, modifier: Modifier = Modifier) {
     if (movie == null) return
 
     LazyColumn(
@@ -974,6 +977,62 @@ fun MovieCreditsTab(movie: Movie?, modifier: Modifier = Modifier) {
                 }
                 Spacer(modifier = Modifier.height(32.dp))
             }
+        }
+    }
+}
+
+@Composable
+fun MovieHeaderWithReleaseInfo(
+    modifier: Modifier = Modifier,
+    movieWithRelease: MovieWithReleaseInfoUI,
+    onMovieClick: (movieId: Int) -> Unit
+) {
+    val movie = movieWithRelease.movie
+    val releaseInfo = movieWithRelease.releaseInfo
+
+    Column(
+        modifier = modifier
+            .wrapContentHeight()
+            .clickable {
+                movie.id?.let { movieId ->
+                    onMovieClick(movieId)
+                }
+            }
+    ) {
+        Box(
+            modifier = Modifier
+                .aspectRatio(2f / 3f)
+                .clip(MaterialTheme.shapes.small)
+        ) {
+            AsyncImage(
+                model = "https://image.tmdb.org/t/p/w500${movie.posterPath}",
+                contentDescription = movie.title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+                error = painterResource(Res.drawable.new_edge_logo)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+        movie.title?.let {
+            Text(
+                text = it,
+                fontWeight = FontWeight.Bold,
+                fontSize = 17.sp,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        releaseInfo?.let { info ->
+            Text(
+                text = info.displayText,
+                fontSize = 14.sp,
+                color = if (info.isReleased) Color(0xFF4CAF50) else Color(0xFFFF9800),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
