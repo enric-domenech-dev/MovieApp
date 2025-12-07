@@ -126,35 +126,36 @@ fun HomeView(
                 HomeViewModel.HomeTab.FAVORITES -> {
                     FavoritesTabContent(
                         viewModel = favoritesVM,
-                        nav = nav,
+                        onMovieClick = onNavigateToMovieDetail,
+                        onTvShowClick = onNavigateToTvShowDetail,
                         paddingValues = paddingValues
                     )
                 }
                 HomeViewModel.HomeTab.BOOKS -> {
                     BooksTabContent(
                         viewModel = booksVM,
-                        nav = nav,
+                        onBookClick = onNavigateToBookDetail,
                         paddingValues = paddingValues
                     )
                 }
                 HomeViewModel.HomeTab.FILMS -> {
                     FilmsTabContent(
                         viewModel = filmsVM,
-                        nav = nav,
+                        onMovieClick = onNavigateToMovieDetail,
                         paddingValues = paddingValues
                     )
                 }
                 HomeViewModel.HomeTab.SERIES -> {
                     SeriesTabContent(
                         viewModel = seriesVM,
-                        nav = nav,
+                        onTvShowClick = onNavigateToTvShowDetail,
                         paddingValues = paddingValues
                     )
                 }
                 HomeViewModel.HomeTab.GAMES -> {
                     GamesTabContent(
                         viewModel = gamesVM,
-                        nav = nav,
+                        onGameClick = onNavigateToGameDetail,
                         paddingValues = paddingValues
                     )
                 }
@@ -166,7 +167,8 @@ fun HomeView(
 @Composable
 private fun FavoritesTabContent(
     viewModel: FavoritesTabViewModel,
-    nav: NavHostController,
+    onMovieClick: (movieId: Int) -> Unit,
+    onTvShowClick: (tvShowId: Int) -> Unit,
     paddingValues: PaddingValues
 ) {
     val favoritesWithInfo by viewModel.favoritesWithInfo.collectAsStateWithLifecycle()
@@ -182,7 +184,8 @@ private fun FavoritesTabContent(
     } else {
         FavoriteItemsGrid(
             items = favoritesWithInfo,
-            nav = nav,
+            onMovieClick = onMovieClick,
+            onTvShowClick = onTvShowClick,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
@@ -194,7 +197,7 @@ private fun FavoritesTabContent(
 @Composable
 private fun BooksTabContent(
     viewModel: BooksTabViewModel,
-    nav: NavHostController,
+    onBookClick: (bookId: String) -> Unit,
     paddingValues: PaddingValues
 ) {
     val fictionBooks by viewModel.fictionBooks.collectAsStateWithLifecycle()
@@ -259,7 +262,7 @@ private fun BooksTabContent(
                         0 -> BookSection(
                             sectionTitle,
                             sectionBooks,
-                            nav,
+                            onBookClick = onBookClick,
                             sectionIndex = idx,
                             mode = SectionMode.HEADER
                         )
@@ -267,7 +270,7 @@ private fun BooksTabContent(
                         1 -> BookSection(
                             sectionTitle,
                             sectionBooks,
-                            nav,
+                            onBookClick = onBookClick,
                             sectionIndex = idx,
                             mode = SectionMode.SUBHEADER_SHOW_META
                         )
@@ -275,7 +278,7 @@ private fun BooksTabContent(
                         else -> BookSection(
                             sectionTitle,
                             sectionBooks,
-                            nav,
+                            onBookClick = onBookClick,
                             sectionIndex = idx,
                             mode = SectionMode.SUBHEADER_HIDE_META
                         )
@@ -289,7 +292,7 @@ private fun BooksTabContent(
 @Composable
 private fun SeriesTabContent(
     viewModel: SeriesTabViewModel,
-    nav: NavHostController,
+    onTvShowClick: (tvShowId: Int) -> Unit,
     paddingValues: PaddingValues
 ) {
     val tvShows by viewModel.tvShows.collectAsStateWithLifecycle()
@@ -362,7 +365,7 @@ private fun SeriesTabContent(
                         0 -> TvShowSection(
                             sectionTitle,
                             sectionTvShows,
-                            nav,
+                            onTvShowClick = onTvShowClick,
                             sectionIndex = idx,
                             mode = SectionMode.HEADER
                         )
@@ -370,7 +373,7 @@ private fun SeriesTabContent(
                         1 -> TvShowSection(
                             sectionTitle,
                             sectionTvShows,
-                            nav,
+                            onTvShowClick = onTvShowClick,
                             sectionIndex = idx,
                             mode = SectionMode.SUBHEADER_SHOW_META
                         )
@@ -379,7 +382,7 @@ private fun SeriesTabContent(
                         else -> TvShowSection(
                             sectionTitle,
                             sectionTvShows,
-                            nav,
+                            onTvShowClick = onTvShowClick,
                             sectionIndex = idx,
                             mode = SectionMode.SUBHEADER_HIDE_META
                         )
@@ -393,7 +396,7 @@ private fun SeriesTabContent(
 @Composable
 private fun GamesTabContent(
     viewModel: GamesTabViewModel,
-    nav: NavHostController,
+    onGameClick: (gameId: Int) -> Unit,
     paddingValues: PaddingValues
 ) {
     val games by viewModel.games.collectAsStateWithLifecycle()
@@ -444,7 +447,7 @@ private fun GamesTabContent(
                         0 -> GameSection(
                             sectionTitle,
                             sectionGames,
-                            nav,
+                            onGameClick = onGameClick,
                             sectionIndex = idx,
                             mode = SectionMode.HEADER
                         )
@@ -452,7 +455,7 @@ private fun GamesTabContent(
                         1 -> GameSection(
                             sectionTitle,
                             sectionGames,
-                            nav,
+                            onGameClick = onGameClick,
                             sectionIndex = idx,
                             mode = SectionMode.SUBHEADER_SHOW_META
                         )
@@ -460,7 +463,7 @@ private fun GamesTabContent(
                         else -> GameSection(
                             sectionTitle,
                             sectionGames,
-                            nav,
+                            onGameClick = onGameClick,
                             sectionIndex = idx,
                             mode = SectionMode.SUBHEADER_HIDE_META
                         )
@@ -474,7 +477,7 @@ private fun GamesTabContent(
 @Composable
 private fun FilmsTabContent(
     viewModel: FilmsTabViewModel,
-    nav: NavHostController,
+    onMovieClick: (movieId: Int) -> Unit,
     paddingValues: PaddingValues
 ) {
     val popular by viewModel.popular.collectAsStateWithLifecycle()
@@ -519,7 +522,7 @@ private fun FilmsTabContent(
                         0 -> Section(
                             sectionTitle,
                             items,
-                            nav,
+                            onMovieClick = onMovieClick,
                             sectionIndex = idx,
                             mode = SectionMode.HEADER
                         )
@@ -527,7 +530,7 @@ private fun FilmsTabContent(
                         1 -> Section(
                             sectionTitle,
                             items,
-                            nav,
+                            onMovieClick = onMovieClick,
                             sectionIndex = idx,
                             mode = SectionMode.SUBHEADER_SHOW_META
                         )
@@ -535,7 +538,7 @@ private fun FilmsTabContent(
                         else -> Section(
                             sectionTitle,
                             items,
-                            nav,
+                            onMovieClick = onMovieClick,
                             sectionIndex = idx,
                             mode = SectionMode.SUBHEADER_HIDE_META
                         )

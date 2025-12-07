@@ -9,6 +9,7 @@ import kotlinx.coroutines.launch
 import org.lanzadera.proyectos.domain.models.Result
 import org.lanzadera.proyectos.domain.usecase.search.SearchMoviesUseCase
 import org.lanzadera.proyectos.domain.usecase.search.SearchTvShowsUseCase
+import org.lanzadera.proyectos.ui.mapper.toUI
 
 class SearchViewModel(
     private val searchMoviesUseCase: SearchMoviesUseCase,
@@ -54,29 +55,29 @@ class SearchViewModel(
                 return@launch
             }
             
-            // Extract data from results
-            val movies = when (moviesResult) {
-                is Result.Success -> moviesResult.data
+            // Extract data from results and map to UI models
+            val moviesUI = when (moviesResult) {
+                is Result.Success -> moviesResult.data.map { it.toUI() }
                 is Result.Error -> emptyList()
                 is Result.Loading -> emptyList()
             }
             
-            val tvShows = when (tvShowsResult) {
-                is Result.Success -> tvShowsResult.data
+            val tvShowsUI = when (tvShowsResult) {
+                is Result.Success -> tvShowsResult.data.map { it.toUI() }
                 is Result.Error -> emptyList()
                 is Result.Loading -> emptyList()
             }
 
             // Combine results alternating movies and TV shows
             val combinedResults = mutableListOf<Any>()
-            val maxSize = maxOf(movies.size, tvShows.size)
+            val maxSize = maxOf(moviesUI.size, tvShowsUI.size)
 
             for (i in 0 until maxSize) {
-                if (i < movies.size) {
-                    combinedResults.add(movies[i])
+                if (i < moviesUI.size) {
+                    combinedResults.add(moviesUI[i])
                 }
-                if (i < tvShows.size) {
-                    combinedResults.add(tvShows[i])
+                if (i < tvShowsUI.size) {
+                    combinedResults.add(tvShowsUI[i])
                 }
             }
 

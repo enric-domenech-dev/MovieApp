@@ -46,7 +46,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import kotlinx.datetime.LocalDate
 import movieapp.composeapp.generated.resources.Res
@@ -62,15 +61,15 @@ import org.lanzadera.proyectos.utils.Constants
 
 @Composable
 fun MovieItem(
-    nav: NavHostController,
     movie: MovieUI,
+    onMovieClick: (movieId: Int) -> Unit,
     modifier: Modifier = Modifier.wrapContentHeight(),
     showMeta: Boolean = true
 ) {
     Column(
         modifier = modifier
             .clickable {
-                nav.navigate(Screen.MovieDetail(movieId = movie.id))
+                onMovieClick(movie.id)
             }
     ) {
         Box(
@@ -116,13 +115,17 @@ fun MovieItem(
 }
 
 @Composable
-fun MovieHeader(modifier: Modifier = Modifier, nav: NavHostController, movie: MovieUI) {
+fun MovieHeader(
+    modifier: Modifier = Modifier,
+    movie: MovieUI,
+    onMovieClick: (movieId: Int) -> Unit
+) {
     Column(
         modifier = modifier
             .wrapContentHeight()
             .clickable {
                 movie.id?.let { movieId ->
-                    nav.navigate(Screen.MovieDetail(movieId = movieId))
+                    onMovieClick(movieId)
                 }
             }
     ) {
@@ -161,13 +164,18 @@ fun MovieHeader(modifier: Modifier = Modifier, nav: NavHostController, movie: Mo
 }
 
 @Composable
-fun MovieSubheader(modifier: Modifier = Modifier, nav: NavHostController, movie: MovieUI, showMeta: Boolean) {
+fun MovieSubheader(
+    modifier: Modifier = Modifier,
+    movie: MovieUI,
+    showMeta: Boolean,
+    onMovieClick: (movieId: Int) -> Unit
+) {
     Column(
         modifier = modifier
             .wrapContentHeight()
             .clickable {
                 movie.id?.let { movieId ->
-                    nav.navigate(Screen.MovieDetail(movieId = movieId))
+                    onMovieClick(movieId)
                 }
             }
     ) {
@@ -976,8 +984,8 @@ fun MovieCreditsTab(movie: MovieDetailUI?, modifier: Modifier = Modifier) {
 @Composable
 fun MovieHeaderWithReleaseInfo(
     modifier: Modifier = Modifier,
-    nav: NavHostController,
-    movieWithRelease: MovieWithReleaseInfoUI
+    movieWithRelease: MovieWithReleaseInfoUI,
+    onMovieClick: (movieId: Int) -> Unit
 ) {
     val movie = movieWithRelease.movie
     val releaseInfo = movieWithRelease.releaseInfo
@@ -987,7 +995,7 @@ fun MovieHeaderWithReleaseInfo(
             .wrapContentHeight()
             .clickable {
                 movie.id?.let { movieId ->
-                    nav.navigate(Screen.MovieDetail(movieId = movieId))
+                    onMovieClick(movieId)
                 }
             }
     ) {

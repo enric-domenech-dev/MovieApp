@@ -22,7 +22,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 import org.lanzadera.proyectos.ui.models.MovieWithReleaseInfoUI
 import org.lanzadera.proyectos.ui.components.MovieHeaderWithReleaseInfo
 import org.lanzadera.proyectos.ui.screens.home.SectionMode
@@ -31,7 +30,7 @@ import org.lanzadera.proyectos.ui.screens.home.SectionMode
 fun MovieWithReleaseInfoSection(
     title: String,
     items: List<MovieWithReleaseInfoUI>,
-    nav: NavHostController,
+    onMovieClick: (movieId: Int) -> Unit,
     sectionIndex: Int = 0,
     mode: SectionMode = SectionMode.HEADER,
     showTitle: Boolean = true
@@ -88,8 +87,8 @@ fun MovieWithReleaseInfoSection(
                 ) { _, item ->
                     MovieHeaderWithReleaseInfo(
                         modifier = Modifier.width(headerWidth),
-                        nav = nav,
-                        movieWithRelease = item
+                        movieWithRelease = item,
+                        onMovieClick = onMovieClick
                     )
                 }
             }

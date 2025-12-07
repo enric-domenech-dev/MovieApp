@@ -49,7 +49,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import kotlinx.datetime.LocalDate
 import movieapp.composeapp.generated.resources.Res
@@ -71,16 +70,15 @@ import org.lanzadera.proyectos.utils.Constants
 
 @Composable
 fun TvShowItem(
-    nav: NavHostController,
     tvShow: TvShowUI,
+    onTvShowClick: (tvShowId: Int) -> Unit,
     modifier: Modifier = Modifier.wrapContentHeight(),
     showMeta: Boolean = true
 ) {
     Column(
         modifier = modifier
             .clickable {
-                
-                nav.navigate(Screen.TvShowDetail(tvShowId = tvShow.id))
+                onTvShowClick(tvShow.id)
             }
     ) {
         Box(
@@ -132,14 +130,17 @@ fun TvShowItem(
 }
 
 @Composable
-fun TvShowHeader(modifier: Modifier = Modifier, nav: NavHostController, tvShow: TvShowUI) {
+fun TvShowHeader(
+    modifier: Modifier = Modifier,
+    tvShow: TvShowUI,
+    onTvShowClick: (tvShowId: Int) -> Unit
+) {
     Column(
         modifier = modifier
             .wrapContentHeight()
             .clickable {
-                
                 tvShow.id?.let { tvShowId ->
-                    nav.navigate(Screen.TvShowDetail(tvShowId = tvShowId))
+                    onTvShowClick(tvShowId)
                 }
             }
     ) {
@@ -178,14 +179,18 @@ fun TvShowHeader(modifier: Modifier = Modifier, nav: NavHostController, tvShow: 
 }
 
 @Composable
-fun TvShowSubheader(modifier: Modifier = Modifier, nav: NavHostController, tvShow: TvShowUI, showMeta: Boolean) {
+fun TvShowSubheader(
+    modifier: Modifier = Modifier,
+    tvShow: TvShowUI,
+    showMeta: Boolean,
+    onTvShowClick: (tvShowId: Int) -> Unit
+) {
     Column(
         modifier = modifier
             .wrapContentHeight()
             .clickable {
-                
                 tvShow.id?.let { tvShowId ->
-                    nav.navigate(Screen.TvShowDetail(tvShowId = tvShowId))
+                    onTvShowClick(tvShowId)
                 }
             }
     ) {
@@ -1018,8 +1023,8 @@ fun CrewMemberCardModern(crewMember: AggregateCrewUI) {
 @Composable
 fun TvShowHeaderWithNextEpisode(
     modifier: Modifier = Modifier,
-    nav: NavHostController,
-    tvShowWithNext: TvShowWithNextEpisodeUI
+    tvShowWithNext: TvShowWithNextEpisodeUI,
+    onTvShowClick: (tvShowId: Int) -> Unit
 ) {
     val tvShow = tvShowWithNext.tvShow
     val nextEpisode = tvShowWithNext.nextEpisode
@@ -1028,9 +1033,8 @@ fun TvShowHeaderWithNextEpisode(
         modifier = modifier
             .wrapContentHeight()
             .clickable {
-                
                 tvShow.id?.let { tvShowId ->
-                    nav.navigate(Screen.TvShowDetail(tvShowId = tvShowId))
+                    onTvShowClick(tvShowId)
                 }
             }
     ) {
@@ -1071,16 +1075,15 @@ fun TvShowHeaderWithNextEpisode(
 @Composable
 fun TvShowHeaderFinished(
     modifier: Modifier = Modifier,
-    nav: NavHostController,
-    tvShow: TvShowUI
+    tvShow: TvShowUI,
+    onTvShowClick: (tvShowId: Int) -> Unit
 ) {
     Column(
         modifier = modifier
             .wrapContentHeight()
             .clickable {
-                
                 tvShow.id?.let { tvShowId ->
-                    nav.navigate(Screen.TvShowDetail(tvShowId = tvShowId))
+                    onTvShowClick(tvShowId)
                 }
             }
     ) {

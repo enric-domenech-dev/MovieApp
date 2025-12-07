@@ -49,9 +49,8 @@ import coil3.compose.AsyncImage
 import movieapp.composeapp.generated.resources.Res
 import movieapp.composeapp.generated.resources.new_edge_logo
 import org.jetbrains.compose.resources.painterResource
-import org.lanzadera.proyectos.domain.models.movie.Movie
-import org.lanzadera.proyectos.domain.models.tvshow.TvShow
-import org.lanzadera.proyectos.navigation.Screen
+import org.lanzadera.proyectos.ui.models.MovieUI
+import org.lanzadera.proyectos.ui.models.TvShowUI
 import org.lanzadera.proyectos.utils.Constants.Dimensions.BOTTOM_NAV_BAR_HEIGHT
 import org.lanzadera.proyectos.utils.Strings
 
@@ -126,15 +125,15 @@ fun SearchView(
                             key = { index ->
                                 val item = results[index]
                                 when (item) {
-                                    is Movie -> "movie_${item.id}"
-                                    is TvShow -> "tv_${item.id}"
+                                    is MovieUI -> "movie_${item.id}"
+                                    is TvShowUI -> "tv_${item.id}"
                                     else -> "unknown_$index"
                                 }
                             }
                         ) { index ->
                             val item = results[index]
                             when (item) {
-                                is Movie -> MovieCard(
+                                is MovieUI -> MovieCard(
                                     movie = item,
                                     onClick = {
                                         item.id?.let { movieId ->
@@ -143,7 +142,7 @@ fun SearchView(
                                     }
                                 )
 
-                                is TvShow -> TvShowCard(
+                                is TvShowUI -> TvShowCard(
                                     tvShow = item,
                                     onClick = {
                                         item.id?.let { tvShowId ->
@@ -227,7 +226,7 @@ fun SearchView(
 
 @Composable
 fun MovieCard(
-    movie: Movie,
+    movie: MovieUI,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -332,14 +331,7 @@ fun MovieCard(
                         color = MaterialTheme.colorScheme.tertiary
                     )
 
-                    if (movie.adult == true) {
-                        Text(
-                            text = "⚠️ +18",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
+                    // Note: adult property not available in MovieUI
                 }
             }
         }
@@ -348,7 +340,7 @@ fun MovieCard(
 
 @Composable
 fun TvShowCard(
-    tvShow: TvShow,
+    tvShow: TvShowUI,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {

@@ -27,7 +27,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import movieapp.composeapp.generated.resources.Res
 import movieapp.composeapp.generated.resources.new_edge_logo
@@ -40,8 +39,8 @@ import org.lanzadera.proyectos.utils.Constants
 
 @Composable
 fun BookItem(
-    nav: NavHostController,
     book: BookUI,
+    onBookClick: (bookId: String) -> Unit,
     modifier: Modifier = Modifier.wrapContentHeight(),
     showMeta: Boolean = true
 ) {
@@ -50,7 +49,7 @@ fun BookItem(
             .clickable {
                 NavigationStore.selectedBook = book
                 Logger.d("clicking book, thumbnail=${book.thumbnail}", tag = "BookComponents")
-                nav.navigate(Screen.BookDetail(bookId = book.id))
+                onBookClick(book.id)
             }
     ) {
         Box(
@@ -136,13 +135,17 @@ fun BookDetail(book: BookUI?) {
 }
 
 @Composable
-fun BookHeader(modifier: Modifier = Modifier, nav: NavHostController, book: BookUI) {
+fun BookHeader(
+    modifier: Modifier = Modifier,
+    book: BookUI,
+    onBookClick: (bookId: String) -> Unit
+) {
     Column(
         modifier = modifier
             .wrapContentHeight()
             .clickable {
                 NavigationStore.selectedBook = book
-                nav.navigate(Screen.BookDetail(bookId = book.id))
+                onBookClick(book.id)
             }
     ) {
         Box(
@@ -180,13 +183,18 @@ fun BookHeader(modifier: Modifier = Modifier, nav: NavHostController, book: Book
 }
 
 @Composable
-fun BookSubheader(modifier: Modifier = Modifier, nav: NavHostController, book: BookUI, showMeta: Boolean) {
+fun BookSubheader(
+    modifier: Modifier = Modifier,
+    book: BookUI,
+    showMeta: Boolean,
+    onBookClick: (bookId: String) -> Unit
+) {
     Column(
         modifier = modifier
             .wrapContentHeight()
             .clickable {
                 NavigationStore.selectedBook = book
-                nav.navigate(Screen.BookDetail(bookId = book.id))
+                onBookClick(book.id)
             }
     ) {
         Box(

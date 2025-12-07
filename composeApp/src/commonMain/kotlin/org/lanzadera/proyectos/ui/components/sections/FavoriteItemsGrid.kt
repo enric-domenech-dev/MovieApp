@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import org.lanzadera.proyectos.ui.models.FavoriteItemWithInfoUI
 import org.lanzadera.proyectos.ui.components.MovieHeader
 import org.lanzadera.proyectos.ui.components.MovieHeaderWithReleaseInfo
@@ -18,7 +17,8 @@ import org.lanzadera.proyectos.ui.components.TvShowHeaderWithNextEpisode
 @Composable
 fun FavoriteItemsGrid(
     items: List<FavoriteItemWithInfoUI>,
-    nav: NavHostController,
+    onMovieClick: (movieId: Int) -> Unit,
+    onTvShowClick: (tvShowId: Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyVerticalGrid(
@@ -40,29 +40,29 @@ fun FavoriteItemsGrid(
             when (item) {
                 is FavoriteItemWithInfoUI.MovieItem -> {
                     MovieHeaderWithReleaseInfo(
-                        nav = nav,
-                        movieWithRelease = item.movieWithRelease
+                        movieWithRelease = item.movieWithRelease,
+                        onMovieClick = onMovieClick
                     )
                 }
 
                 is FavoriteItemWithInfoUI.TvShowItem -> {
                     TvShowHeaderWithNextEpisode(
-                        nav = nav,
-                        tvShowWithNext = item.tvShowWithNext
+                        tvShowWithNext = item.tvShowWithNext,
+                        onTvShowClick = onTvShowClick
                     )
                 }
 
                 is FavoriteItemWithInfoUI.WatchedMovieItem -> {
                     MovieHeader(
-                        nav = nav,
-                        movie = item.movie
+                        movie = item.movie,
+                        onMovieClick = onMovieClick
                     )
                 }
 
                 is FavoriteItemWithInfoUI.FinishedSeriesItem -> {
                     TvShowHeaderFinished(
-                        nav = nav,
-                        tvShow = item.tvShow
+                        tvShow = item.tvShow,
+                        onTvShowClick = onTvShowClick
                     )
                 }
             }

@@ -28,7 +28,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import movieapp.composeapp.generated.resources.Res
 import movieapp.composeapp.generated.resources.new_edge_logo
@@ -38,14 +37,17 @@ import org.lanzadera.proyectos.navigation.Screen
 import org.lanzadera.proyectos.utils.Constants
 
 @Composable
-fun GameHeader(modifier: Modifier = Modifier, nav: NavHostController, game: GameUI) {
+fun GameHeader(
+    modifier: Modifier = Modifier,
+    game: GameUI,
+    onGameClick: (gameId: Int) -> Unit
+) {
     Column(
         modifier = modifier
             .wrapContentHeight()
             .clickable {
-                
                 game.id?.let { gameId ->
-                    nav.navigate(Screen.GameDetail(gameId = gameId))
+                    onGameClick(gameId)
                 }
             }
     ) {
@@ -79,14 +81,18 @@ fun GameHeader(modifier: Modifier = Modifier, nav: NavHostController, game: Game
 }
 
 @Composable
-fun GameSubheader(modifier: Modifier = Modifier, nav: NavHostController, game: GameUI, showMeta: Boolean) {
+fun GameSubheader(
+    modifier: Modifier = Modifier,
+    game: GameUI,
+    showMeta: Boolean,
+    onGameClick: (gameId: Int) -> Unit
+) {
     Column(
         modifier = modifier
             .wrapContentHeight()
             .clickable {
-                
                 game.id?.let { gameId ->
-                    nav.navigate(Screen.GameDetail(gameId = gameId))
+                    onGameClick(gameId)
                 }
             }
     ) {

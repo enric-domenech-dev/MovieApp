@@ -74,7 +74,7 @@ fun MovieDetailView(
                 CustomTopAppBar(
                     title = "Cargando...",
                     navigationIcon = {
-                        IconButton(onClick = { nav.popBackStack() }) {
+                        IconButton(onClick = onNavigateBack) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                                 contentDescription = "Volver",
@@ -107,7 +107,7 @@ fun MovieDetailView(
                 CustomTopAppBar(
                     title = Strings.Detail.NO_DATA,
                     navigationIcon = {
-                        IconButton(onClick = { nav.popBackStack() }) {
+                        IconButton(onClick = onNavigateBack) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                                 contentDescription = "Volver",
@@ -140,7 +140,7 @@ fun MovieDetailView(
             CustomTopAppBar(
                 title = movieDetail?.title ?: "",
                 navigationIcon = {
-                    IconButton(onClick = { nav.popBackStack() }) {
+                    IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                             contentDescription = "Volver",

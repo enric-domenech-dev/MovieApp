@@ -199,7 +199,7 @@ fun DrawerAppBar(
                     LogoutConfirmationDialog(
                         showDialog = showDialog,
                         onDismiss = { showDialog = false },
-                        onConfirm = { navViewModel.navigate(Screen.Login) }
+                        onConfirm = { onNavigateToLogin() }
                     )
                 }
             },

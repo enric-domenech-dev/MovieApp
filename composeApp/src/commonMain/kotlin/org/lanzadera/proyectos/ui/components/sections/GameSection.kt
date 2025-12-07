@@ -22,7 +22,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 import org.lanzadera.proyectos.ui.models.GameUI
 import org.lanzadera.proyectos.ui.components.GameHeader
 import org.lanzadera.proyectos.ui.components.GameSubheader
@@ -32,7 +31,7 @@ import org.lanzadera.proyectos.ui.screens.home.SectionMode
 fun GameSection(
     title: String,
     items: List<GameUI>,
-    nav: NavHostController,
+    onGameClick: (gameId: Int) -> Unit,
     sectionIndex: Int = 0,
     mode: SectionMode = SectionMode.HEADER
 ) {
@@ -86,22 +85,22 @@ fun GameSection(
                     when (mode) {
                         SectionMode.HEADER -> GameHeader(
                             modifier = itemModifier,
-                            nav = nav,
-                            game = game
+                            game = game,
+                            onGameClick = onGameClick
                         )
 
                         SectionMode.SUBHEADER_SHOW_META -> GameSubheader(
                             modifier = itemModifier,
-                            nav = nav,
                             game = game,
-                            showMeta = true
+                            showMeta = true,
+                            onGameClick = onGameClick
                         )
 
                         SectionMode.SUBHEADER_HIDE_META -> GameSubheader(
                             modifier = itemModifier,
-                            nav = nav,
                             game = game,
-                            showMeta = false
+                            showMeta = false,
+                            onGameClick = onGameClick
                         )
                     }
                 }
