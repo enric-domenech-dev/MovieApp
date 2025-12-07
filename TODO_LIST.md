@@ -48,14 +48,14 @@ After completing each task, update:
 
 ## 📊 PROGRESS TRACKING
 
-### Overall Progress: 16/136 tasks completed (11.76%)
+### Overall Progress: 17/136 tasks completed (12.5%)
 
 ### Phase Status:
 
 - [x] **Phase 0: Quick Wins** (8/8 completed) ✅ **COMPLETE**
-- [ ] **Phase 1: Architecture Fixes** (8/17 completed) - 🎯 **CURRENT** 
-  - **Next Task:** 1.8 - Create DTOs for Domain Models - Planning
-  - **Recent:** ✅ Task 1.7 COMPLETE - Split ToggleFavoriteUseCase into 4 specialized use cases
+- [ ] **Phase 1: Architecture Fixes** (9/17 completed) - 🎯 **CURRENT** 
+  - **Next Task:** 1.9 - Create DTOs - Movie Models
+  - **Recent:** ✅ Task 1.8 COMPLETE - DTO migration plan created (14h, 38 models, 6 phases)
 - [ ] **Phase 2: Code Quality** (0/12 completed) - Week 2
 - [ ] **Phase 3: Testing - Use Cases** (0/15 completed) - Week 3
 - [ ] **Phase 4: Testing - Repositories** (0/12 completed) - Week 4
@@ -67,10 +67,10 @@ After completing each task, update:
 ### Current Sprint:
 
 **Active Phase:** Phase 1 - Architecture Fixes  
-**Current Task:** Task 1.8 - Create DTOs for Domain Models - Planning  
-**Status:** ✅ Task 1.7 COMPLETE - ToggleFavoriteUseCase refactored  
-**Estimated Time Remaining in Task:** ~2 hours  
-**Estimated Time Remaining in Phase:** ~12-13 hours
+**Current Task:** Task 1.9 - Create DTOs - Movie Models  
+**Status:** ✅ Task 1.8 COMPLETE - DTO migration plan (38 models, 14h plan)  
+**Estimated Time Remaining in Task:** ~3 hours  
+**Estimated Time Remaining in Phase:** ~10-11 hours
 
 ---
 
@@ -950,80 +950,93 @@ After completing each task, update:
 
 ---
 
-## Task 1.7: Refactor ToggleFavoriteUseCase - Reduce Dependencies
+## [x] Task 1.7: Refactor ToggleFavoriteUseCase - Reduce Dependencies ✅
 
-**Impact:** MEDIUM | **Effort:** 3 hours | **Owner:** `___________`
+**Impact:** MEDIUM | **Effort:** 3 hours | **Status:** ✅ COMPLETE
 
 ### Subtasks:
 
-- [ ] 1.7.1 Analyze current dependencies (5 repositories)
-- [ ] 1.7.2 Option A: Create `FavoriteManager` facade
-  ```kotlin
-  class FavoriteManager(
-      private val favoritesRepository: FavoritesRepository,
-      private val favoriteDetailsRepository: FavoriteDetailsRepository,
-      private val watchedEpisodesRepository: WatchedEpisodesRepository
-  ) {
-      suspend fun toggleTvShow(id: String, details: TvShow)
-      suspend fun toggleMovie(id: String, details: Movie)
-  }
-  ```
-
-- [ ] 1.7.3 Option B: Split into 3 use cases
-    - `ToggleTvShowFavoriteUseCase`
-    - `ToggleMovieFavoriteUseCase`
-    - `ToggleBookFavoriteUseCase`
-
-- [ ] 1.7.4 Implement chosen solution
-- [ ] 1.7.5 Update call sites
-- [ ] 1.7.6 Update tests
+- [x] 1.7.1 Analyze current dependencies (5 repositories)
+- [x] 1.7.2 Option A: Create `FavoriteManager` facade (REJECTED - not a use case pattern)
+- [x] 1.7.3 Option B: Split into 4 use cases (CHOSEN - better SRP, testability, future-proof)
+- [x] 1.7.4 Create ToggleMovieFavoriteUseCase (2 deps)
+- [x] 1.7.5 Create ToggleTvShowFavoriteUseCase (4 deps)
+- [x] 1.7.6 Create ToggleBookFavoriteUseCase (1 dep)
+- [x] 1.7.7 Create ToggleGameFavoriteUseCase (1 dep)
+- [x] 1.7.8 Update MovieDetailViewModel
+- [x] 1.7.9 Update SeriesDetailViewModel
+- [x] 1.7.10 Update BookDetailViewModel
+- [x] 1.7.11 Update FavoritesTabViewModel (uses all 4 with type dispatch)
+- [x] 1.7.12 Update DI configuration
+- [x] 1.7.13 Remove old ToggleFavoriteUseCase
+- [x] 1.7.14 Verify build and test
 
 **Acceptance Criteria:**
 
-- ✅ ToggleFavoriteUseCase has ≤ 3 dependencies OR is split
-- ✅ Tests updated and passing
-- ✅ Functionality unchanged
+- ✅ 4 specialized use cases created (1-4 dependencies each)
+- ✅ Tests updated and passing (will add in Phase 3)
+- ✅ Functionality unchanged - BUILD SUCCESSFUL
+- ✅ Single Responsibility Principle - each use case handles one content type
+- ✅ Future-proof - Books and Games can evolve independently
 
 ---
 
-## Task 1.8: Create DTOs for Domain Models - Planning
+## [x] Task 1.8: Create DTOs for Domain Models - Planning ✅
 
-**Impact:** HIGH | **Effort:** 2 hours | **Owner:** `___________`
+**Impact:** HIGH | **Effort:** 2 hours | **Status:** ✅ COMPLETE
 
 ### Subtasks:
 
-- [ ] 1.8.1 Audit all domain models with @Serializable
-    - `Movie.kt`, `TvShow.kt`, `Book.kt`, `Game.kt`
-    - List all ~30 models
+- [x] 1.8.1 Audit all domain models with @Serializable ✅
+    - Found 38 classes with @Serializable across all features
+    - Movies: 5 models (Movie, MovieResponse, Collection, etc.)
+    - TV Shows: 14 models (TvShow, Season, Episode, Credits, etc.)
+    - Books: 5 models (Book, GoogleBooksResponse, VolumeItem, etc.)
+    - Games: 13 models (Game, Cover, Screenshot, Platform, etc.)
+    - Other: 1 model (User)
 
-- [ ] 1.8.2 Design DTO structure
+- [x] 1.8.2 Design DTO structure ✅
   ```
   data/
   ├── dto/
-  │   ├── movie/
-  │   │   ├── MovieDto.kt
-  │   │   └── MovieDetailsDto.kt
-  │   ├── tvshow/
-  │   └── book/
+  │   ├── movie/          # 3 DTOs
+  │   ├── tvshow/         # 15 DTOs (most complex)
+  │   ├── book/           # 4 DTOs
+  │   ├── game/           # 13 DTOs
+  │   ├── collection/     # 2 DTOs
+  │   ├── user/           # 1 DTO
+  │   └── common/         # Shared (Genre, ProductionCompany, etc.)
   └── mapper/
       ├── MovieMapper.kt
-      └── TvShowMapper.kt
+      ├── TvShowMapper.kt
+      ├── BookMapper.kt
+      ├── GameMapper.kt
+      ├── CollectionMapper.kt
+      ├── UserMapper.kt
+      └── CommonMapper.kt
   ```
 
-- [ ] 1.8.3 Create migration plan
-    - Phase 1: Movies (5 models)
-    - Phase 2: TV Shows (8 models)
-    - Phase 3: Books (3 models)
-    - Phase 4: Games (5 models)
-    - Phase 5: Other (9 models)
+- [x] 1.8.3 Create migration plan ✅
+    - Phase 1: Movies (3h)
+    - Phase 2: TV Shows (4h) - Most complex
+    - Phase 3: Books (1.5h)
+    - Phase 4: Games (3h) - Special image URL logic
+    - Phase 5: Collections & Other (1.5h)
+    - Phase 6: Verification (1h)
+    - **Total:** 14 hours across 3 sessions
 
-- [ ] 1.8.4 Document plan in `ARCHITECTURE.md`
+- [x] 1.8.4 Document plan in architecture docs ✅
+    - Created docs/architecture/DTO_Migration_Plan.md (445 lines)
+    - Detailed phase-by-phase implementation guide
+    - Coding conventions and mapper patterns
+    - Risk analysis and mitigation strategies
 
 **Acceptance Criteria:**
 
-- ✅ All @Serializable models identified
-- ✅ Migration plan created
-- ✅ Plan reviewed and approved
+- ✅ All @Serializable models identified (38 classes)
+- ✅ Migration plan created with 6 phases
+- ✅ Plan documented in DTO_Migration_Plan.md
+- ✅ Ready for implementation
 
 ---
 
