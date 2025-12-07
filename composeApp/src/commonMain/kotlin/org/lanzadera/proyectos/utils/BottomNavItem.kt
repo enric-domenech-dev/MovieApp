@@ -1,23 +1,34 @@
 package org.lanzadera.proyectos.utils
 
+import org.lanzadera.proyectos.navigation.Screen
+
 /**
  * Enum representing bottom navigation items to avoid magic indices across the codebase.
- * Each entry carries an index and the navigation route (from `Constants.Screen`).
+ * Each entry carries an index and can be matched against Screen routes.
  *
  * Contract / Usage:
  * - Use `BottomNavItem.items` to iterate in the UI.
  * - Use `BottomNavItem.fromRoute(route)` to map the current NavHost route to an item.
- * - The `route` value is the same route used by your NavHost composable destinations.
  */
-enum class BottomNavItem(val index: Int, val route: String) {
-    MENU(0, Constants.Screen.Settings.route),
-    SEARCH(1, Constants.Screen.Search.route),
-    HOME(2, Constants.Screen.Home.route),
-    CHAT(3, Constants.Screen.Chat.route),
-    PROFILE(4, Constants.Screen.Profile.route);
+enum class BottomNavItem(val index: Int) {
+    MENU(0),
+    SEARCH(1),
+    HOME(2),
+    CHAT(3),
+    PROFILE(4);
 
     companion object {
-        fun fromRoute(route: String?): BottomNavItem? = entries.firstOrNull { it.route == route }
+        fun fromRoute(route: String?): BottomNavItem? {
+            return when {
+                route?.contains("Home") == true -> HOME
+                route?.contains("Search") == true -> SEARCH
+                route?.contains("Chat") == true -> CHAT
+                route?.contains("Profile") == true -> PROFILE
+                route?.contains("Settings") == true -> MENU
+                else -> null
+            }
+        }
+        
         fun fromIndex(index: Int): BottomNavItem? = entries.firstOrNull { it.index == index }
         val items: List<BottomNavItem> = entries.toList()
     }

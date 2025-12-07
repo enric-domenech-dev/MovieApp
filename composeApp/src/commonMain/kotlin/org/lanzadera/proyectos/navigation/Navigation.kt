@@ -177,7 +177,15 @@ private fun NavigationBottomBar(
             }
         } else {
             scope.launch { drawerState.close() }
-            navHost.navigate(item.route) {
+            // Map BottomNavItem to Screen
+            val destination = when (item) {
+                BottomNavItem.HOME -> Screen.Home
+                BottomNavItem.SEARCH -> Screen.Search
+                BottomNavItem.CHAT -> Screen.Chat
+                BottomNavItem.PROFILE -> Screen.Profile
+                BottomNavItem.MENU -> return@AppBottomBar // Already handled above
+            }
+            navHost.navigate(destination) {
                 launchSingleTop = true
                 restoreState = true
                 popUpTo(navHost.graph.startDestinationId) {

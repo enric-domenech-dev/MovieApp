@@ -56,7 +56,8 @@ import movieapp.composeapp.generated.resources.Res
 import movieapp.composeapp.generated.resources.new_edge_logo
 import org.jetbrains.compose.resources.painterResource
 import org.lanzadera.proyectos.BuildConfig
-import org.lanzadera.proyectos.utils.Constants
+import org.lanzadera.proyectos.navigation.Screen
+import org.lanzadera.proyectos.utils.Constants.Dimensions.BOTTOM_NAV_BAR_HEIGHT
 import org.lanzadera.proyectos.utils.Strings
 
 @Composable
@@ -80,7 +81,7 @@ fun DrawerAppBar(
                         .background(MaterialTheme.colorScheme.surfaceContainer)
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
-                        .padding(bottom = Constants.Dimensions.BOTTOM_NAV_BAR_HEIGHT)
+                        .padding(bottom = BOTTOM_NAV_BAR_HEIGHT)
                 ) {
                     Column(
                         modifier = Modifier.fillMaxSize(),
@@ -130,7 +131,7 @@ fun DrawerAppBar(
                         }
                         DropdownMenuItem(
                             text = { Text(Strings.Menu.PROFILE) },
-                            onClick = { navViewModel.navigate(Constants.Screen.Search.route) },
+                            onClick = { navViewModel.navigate(Screen.Search) },
                             leadingIcon = {
                                 Icon(Icons.Outlined.Person, contentDescription = null)
                             }
@@ -139,7 +140,7 @@ fun DrawerAppBar(
                         DropdownMenuItem(
                             text = { Text(Strings.Settings.THEME) },
                             onClick = {
-                                navViewModel.navigate(Constants.Screen.Settings.route)
+                                navViewModel.navigate(Screen.Settings)
                                 scope.launch { drawerState.close() }
                             },
                             leadingIcon = {
@@ -197,7 +198,7 @@ fun DrawerAppBar(
                     LogoutConfirmationDialog(
                         showDialog = showDialog,
                         onDismiss = { showDialog = false },
-                        onConfirm = { navViewModel.navigate(Constants.Screen.Login.route) }
+                        onConfirm = { navViewModel.navigate(Screen.Login) }
                     )
                 }
             },

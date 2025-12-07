@@ -52,7 +52,7 @@ import movieapp.composeapp.generated.resources.new_edge_logo
 import org.jetbrains.compose.resources.painterResource
 import org.lanzadera.proyectos.domain.models.movie.Movie
 import org.lanzadera.proyectos.domain.models.tvshow.TvShow
-import org.lanzadera.proyectos.utils.Constants
+import org.lanzadera.proyectos.navigation.Screen
 import org.lanzadera.proyectos.utils.Constants.Dimensions.BOTTOM_NAV_BAR_HEIGHT
 import org.lanzadera.proyectos.utils.Strings
 
@@ -138,7 +138,7 @@ fun SearchView(
                                     movie = item,
                                     onClick = {
                                         item.id?.let { movieId ->
-                                            navController.navigate(Constants.Screen.MovieDetail.createRoute(movieId))
+                                            navController.navigate(Screen.MovieDetail(movieId))
                                         }
                                     }
                                 )
@@ -147,7 +147,7 @@ fun SearchView(
                                     tvShow = item,
                                     onClick = {
                                         item.id?.let { tvShowId ->
-                                            navController.navigate(Constants.Screen.SeriesDetail.createRoute(tvShowId))
+                                            navController.navigate(Screen.TvShowDetail(tvShowId))
                                         }
                                     }
                                 )

@@ -21,7 +21,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
 import org.lanzadera.proyectos.AppTheme
-import org.lanzadera.proyectos.utils.Constants
+import org.lanzadera.proyectos.navigation.Screen
 
 @OptIn(KoinExperimentalAPI::class)
 @Composable
@@ -36,8 +36,8 @@ fun SplashView(
     LaunchedEffect(key1 = isLoadingComplete) {
         if (isLoadingComplete) {
             // Navigate to Home Screen
-            nav.navigate(Constants.Screen.Home.route) {
-                popUpTo(Constants.Screen.SplashScreen.route) { inclusive = true }
+            nav.navigate(Screen.Home) {
+                popUpTo<Screen.SplashScreen> { inclusive = true }
             }
         }
     }

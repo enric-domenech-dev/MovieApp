@@ -31,6 +31,7 @@ import movieapp.composeapp.generated.resources.new_edge_logo
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.lanzadera.proyectos.AppTheme
+import org.lanzadera.proyectos.navigation.Screen
 import org.lanzadera.proyectos.ui.components.DevelopingDialog
 import org.lanzadera.proyectos.ui.components.EmailInput
 import org.lanzadera.proyectos.ui.components.FingerPrintAuthentication
@@ -61,7 +62,7 @@ fun LoginView(
     // Observa el estado de login y navega cuando se haya realizado correctamente
     LaunchedEffect(isLoginSuccessful) {
         if (isLoginSuccessful == true) {
-            nav.navigate(Constants.Screen.Home.route)
+            nav.navigate(Screen.Home)
         } else {
             // Si el login falla, incrementar el contador de intentos fallidos
             if (failedAttempts < 3) {
