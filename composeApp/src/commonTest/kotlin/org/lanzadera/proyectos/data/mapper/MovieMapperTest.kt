@@ -1,6 +1,5 @@
 package org.lanzadera.proyectos.data.mapper
 
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.lanzadera.proyectos.data.dto.movie.MovieDto
 import org.lanzadera.proyectos.data.dto.movie.MovieResponseDto

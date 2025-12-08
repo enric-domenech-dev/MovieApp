@@ -1,7 +1,17 @@
 package org.lanzadera.proyectos.data.mapper
 
-import org.lanzadera.proyectos.data.dto.tvshow.*
-import org.lanzadera.proyectos.domain.models.tvshow.*
+import org.lanzadera.proyectos.data.dto.tvshow.CreatedByDto
+import org.lanzadera.proyectos.data.dto.tvshow.EpisodeDto
+import org.lanzadera.proyectos.data.dto.tvshow.NetworkDto
+import org.lanzadera.proyectos.data.dto.tvshow.SeasonDto
+import org.lanzadera.proyectos.data.dto.tvshow.TvShowDto
+import org.lanzadera.proyectos.data.dto.tvshow.TvShowResponseDto
+import org.lanzadera.proyectos.domain.models.tvshow.CreatedBy
+import org.lanzadera.proyectos.domain.models.tvshow.Episode
+import org.lanzadera.proyectos.domain.models.tvshow.Network
+import org.lanzadera.proyectos.domain.models.tvshow.Season
+import org.lanzadera.proyectos.domain.models.tvshow.TvShow
+import org.lanzadera.proyectos.domain.models.tvshow.TvShowResponse
 
 fun TvShowDto.toDomain(): TvShow = TvShow(
     id = id,

@@ -1,9 +1,9 @@
 package org.lanzadera.proyectos.ui.components.navComponents
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import org.lanzadera.proyectos.utils.BottomNavItem
 import org.lanzadera.proyectos.utils.Constants.MenuOptions.bottomBarIcons
 import org.lanzadera.proyectos.utils.Constants.MenuOptions.bottomBarSelectedIcons

@@ -1,10 +1,17 @@
 package org.lanzadera.proyectos.ui.mapper
 
-import org.lanzadera.proyectos.domain.models.movie.*
-import org.lanzadera.proyectos.domain.models.tvshow.AggregateCredits
-import org.lanzadera.proyectos.domain.models.tvshow.AggregateCast
-import org.lanzadera.proyectos.domain.models.tvshow.AggregateCrew
-import org.lanzadera.proyectos.ui.models.*
+import org.lanzadera.proyectos.domain.models.movie.Movie
+import org.lanzadera.proyectos.ui.models.AggregateCastUI
+import org.lanzadera.proyectos.ui.models.AggregateCreditsUI
+import org.lanzadera.proyectos.ui.models.AggregateCrewUI
+import org.lanzadera.proyectos.ui.models.CastRoleUI
+import org.lanzadera.proyectos.ui.models.CollectionUI
+import org.lanzadera.proyectos.ui.models.CrewJobUI
+import org.lanzadera.proyectos.ui.models.GenreUI
+import org.lanzadera.proyectos.ui.models.MovieDetailUI
+import org.lanzadera.proyectos.ui.models.ProductionCompanyUI
+import org.lanzadera.proyectos.ui.models.ProductionCountryUI
+import org.lanzadera.proyectos.ui.models.SpokenLanguageUI
 
 /**
  * Maps domain Movie (with full details) to UI MovieDetailUI.

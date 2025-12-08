@@ -1,16 +1,13 @@
 package org.lanzadera.proyectos.ui.screens.detail
 
-import app.cash.turbine.test
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.lanzadera.proyectos.domain.models.favorite.FavoriteItem
-import org.lanzadera.proyectos.domain.models.favorite.FavoriteType
-import org.lanzadera.proyectos.domain.models.movie.Movie
 import org.lanzadera.proyectos.domain.models.WatchedMovie
+import org.lanzadera.proyectos.domain.models.movie.Movie
 import org.lanzadera.proyectos.domain.usecase.favorites.ObserveFavoritesUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.ToggleMovieFavoriteUseCase
 import org.lanzadera.proyectos.domain.usecase.movies.GetMovieDetailsUseCase

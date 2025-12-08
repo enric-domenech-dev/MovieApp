@@ -2,19 +2,17 @@ package org.lanzadera.proyectos.data.repository
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.lanzadera.proyectos.data.dto.tvshow.SeasonDto
+import org.lanzadera.proyectos.data.mapper.toDomain
+import org.lanzadera.proyectos.data.mapper.toDto
 import org.lanzadera.proyectos.data.storage.room.FavoriteMovieDao
 import org.lanzadera.proyectos.data.storage.room.FavoriteMovieEntity
 import org.lanzadera.proyectos.data.storage.room.FavoriteTvShowDao
 import org.lanzadera.proyectos.data.storage.room.FavoriteTvShowEntity
 import org.lanzadera.proyectos.domain.models.movie.Movie
-import org.lanzadera.proyectos.domain.models.tvshow.Season
 import org.lanzadera.proyectos.domain.models.tvshow.TvShow
 import org.lanzadera.proyectos.domain.repository.FavoriteDetailsRepository
-import org.lanzadera.proyectos.data.dto.tvshow.SeasonDto
-import org.lanzadera.proyectos.data.mapper.toDto
-import org.lanzadera.proyectos.data.mapper.toDomain
 
 class FavoriteDetailsRepositoryImpl(
     private val tvShowDao: FavoriteTvShowDao,

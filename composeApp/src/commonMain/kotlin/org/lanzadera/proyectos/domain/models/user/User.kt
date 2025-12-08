@@ -1,7 +1,5 @@
 package org.lanzadera.proyectos.domain.models.user
 
-import androidx.compose.ui.text.intl.Locale
-
 data class User(
     val email: String,
     val id: String = "",
