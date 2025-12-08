@@ -48,7 +48,7 @@ After completing each task, update:
 
 ## 📊 PROGRESS TRACKING
 
-### Overall Progress: 41/141 tasks completed (29.08%)
+### Overall Progress: 43/141 tasks completed (30.50%)
 
 ### Phase Status:
 
@@ -57,7 +57,7 @@ After completing each task, update:
 - [x] **Phase 1.5: Navigation Lambda Refactoring** (1/1 completed) ✅ **COMPLETE**
 - [x] **Phase 2: Code Quality** (6/6 completed) ✅ **COMPLETE**
 - [x] **Phase 3: Testing - Use Cases & DTOs** (4/4 completed) ✅ **COMPLETE** - Week 3
-- [ ] **Phase 4: Testing - Repositories & Integration** (4/15 completed) - Week 4
+- [ ] **Phase 4: Testing - Repositories & Integration** (6/15 completed) - Week 4
 - [ ] **Phase 5: Testing - ViewModels** (0/22 completed) - Weeks 5-6
 - [ ] **Phase 6: UI Testing** (0/18 completed) - Week 7
 - [ ] **Phase 7: Integration & Polish** (0/15 completed) - Week 8
@@ -66,12 +66,12 @@ After completing each task, update:
 ### Current Sprint:
 
 **Active Phase:** Phase 4 - Repository & Integration Testing 🚀  
-**Current Task:** Task 4.4 - SearchRepository Tests ✅ **COMPLETE**  
-**Last Completed:** Task 4.4 - Added 10 SearchRepository integration tests ✅  
-**Status:** 🟢 4 tasks complete (4.1, 4.2, 4.3, 4.4)  
-**Phase 4 Status:** 4/15 tasks (26.67%)  
-**Tests Added:** 38 tests total (8 regression + 10 books + 10 games + 10 search) ✅
-**Next Task:** Continue Phase 4 - More repository tests (4.5+)
+**Current Task:** Task 4.6 - WatchedEpisodesRepository Tests ✅ **COMPLETE**  
+**Last Completed:** Task 4.5, 4.6 - Added 22 repository tests (WatchedMovies + WatchedEpisodes) ✅  
+**Status:** 🟢 6 tasks complete (4.1, 4.2, 4.3, 4.4, 4.5, 4.6)  
+**Phase 4 Status:** 6/15 tasks (40.00%)  
+**Tests Added:** 60 tests total (8 regression + 10 books + 10 games + 10 search + 10 watched movies + 12 watched episodes) ✅
+**Next Task:** Continue Phase 4 - More repository tests (4.7+)
 
 ---
 
@@ -248,6 +248,51 @@ After completing each task, update:
        - TV show search API deserialization (TvShowResponseDto)
        - Multiple results handling
        - Query parameter validation
+     - 🛡️ **Error Handling:**
+       - Network errors → empty list (graceful degradation)
+       - Empty results handling
+       - Missing fields handling
+     - ✅ **Field Preservation:**
+       - All critical movie fields preserved (title, vote_average, etc.)
+       - All critical TV show fields preserved (name, first_air_date, etc.)
+       - Vote average correctly mapped to voteAverageDouble
+     - 📊 **Results:**
+       - 10 integration tests created
+       - All tests passing: 10/10 ✅
+       - Verifies TMDB search API integration
+       - Tests both movie and TV show search
+     - 🚀 **Phase 4 Progress:** 4/15 tasks complete (26.67%)
+     - **Time:** ~20 minutes
+     - **Next:** Continue Phase 4 - WatchedMovies/Episodes tests
+
+- **Session 31** (Dec 8, 2025 - 16:22-17:00):
+     - 🎉 **Task 4.5: COMPLETE** - WatchedMoviesRepository Tests ✅
+     - 🎉 **Task 4.6: COMPLETE** - WatchedEpisodesRepository Tests ✅
+     - ✅ Created WatchedMoviesRepositoryImplTest.kt (10 comprehensive tests)
+     - ✅ Created WatchedEpisodesRepositoryImplTest.kt (12 comprehensive tests)
+     - ✅ Created FakeWatchedMoviesDataSource
+     - ✅ Created FakeWatchedEpisodesDataSource
+     - 🎬 **WatchedMovies Tests:**
+       - Toggle watched/unwatched status
+       - Multiple movies tracking
+       - Flow emissions on state changes
+       - isMovieWatched validation
+       - Empty state handling
+     - 📺 **WatchedEpisodes Tests:**
+       - Toggle episode watched/unwatched
+       - Filter by tvShowId (observeWatchedEpisodes)
+       - Observe all episodes across shows
+       - deleteAllForTvShow functionality
+       - Episode ID format validation (show-S#E#)
+       - Multiple episodes per show tracking
+     - 📊 **Results:**
+       - 22 new tests created (10 movies + 12 episodes)
+       - All tests passing: 22/22 ✅
+       - 2 new fake implementations
+       - Complete repository layer coverage
+     - 🚀 **Phase 4 Progress:** 6/15 tasks complete (40.00%)
+     - **Time:** ~38 minutes
+     - **Next:** Continue Phase 4 - More repository tests
      - 🛡️ **Error Handling:**
        - Network errors → empty list (graceful degradation)
        - Empty results handling
@@ -2471,7 +2516,128 @@ suspend operator fun invoke(...): Result<T> {
 
 ---
 
-## Task 4.4-4.X: [Continue with existing Phase 4 tasks]
+## [x] Task 4.4: Add SearchRepository Integration Tests ✅
+
+**Impact:** HIGH | **Effort:** 1 hour | **Status:** ✅ COMPLETE
+
+**Context:** Test TMDB Search API integration with movie and TV show searches
+
+### Subtasks:
+
+- [x] 4.4.1 Create `SearchRepositoryImplTest.kt` ✅
+  - ✅ Created comprehensive test file (10 tests)
+  - ✅ TMDB search API tests for movies and TV shows
+  - ✅ Multiple results handling
+  - ✅ Query parameter validation
+  - ✅ Error handling (network errors, empty results, missing fields)
+  - ✅ Field preservation (vote_average correctly mapped)
+
+- [x] 4.4.2 Verify all tests pass ✅
+  - All 10 integration tests passing ✅
+  - Build successful ✅
+
+**Acceptance Criteria:**
+
+- ✅ SearchRepositoryImpl has comprehensive integration tests (10 tests)
+- ✅ Tests verify TMDB search API integration
+- ✅ Tests cover both movie and TV show search
+- ✅ All tests passing (10/10) ✅
+
+**Files Created:**
+- SearchRepositoryImplTest.kt (10 comprehensive integration tests)
+
+**Time:** ~20 minutes
+**Next:** Task 4.5 - WatchedMoviesRepository Tests
+
+---
+
+## [x] Task 4.5: Add WatchedMoviesRepository Tests ✅
+
+**Impact:** HIGH | **Effort:** 45 min | **Status:** ✅ COMPLETE
+
+**Context:** Test watched movies tracking with Room persistence logic
+
+### Subtasks:
+
+- [x] 4.5.1 Create `WatchedMoviesRepositoryImplTest.kt` ✅
+  - ✅ Created comprehensive test file (10 tests)
+  - ✅ Toggle watched/unwatched functionality
+  - ✅ Multiple movies tracking
+  - ✅ Flow emissions on state changes
+  - ✅ isMovieWatched validation
+  - ✅ Empty state handling
+  - ✅ Late collector receives current state
+
+- [x] 4.5.2 Create `FakeWatchedMoviesDataSource` ✅
+  - ✅ In-memory implementation
+  - ✅ StateFlow-based reactive updates
+  - ✅ All interface methods implemented
+
+- [x] 4.5.3 Verify all tests pass ✅
+  - All 10 tests passing ✅
+  - Build successful ✅
+
+**Acceptance Criteria:**
+
+- ✅ WatchedMoviesRepositoryImpl has comprehensive tests (10 tests)
+- ✅ Tests verify toggle functionality and flow emissions
+- ✅ Fake data source created and working
+- ✅ All tests passing (10/10) ✅
+
+**Files Created:**
+- WatchedMoviesRepositoryImplTest.kt (10 tests)
+- FakeWatchedMoviesDataSource.kt
+
+**Time:** ~20 minutes
+**Next:** Task 4.6 - WatchedEpisodesRepository Tests
+
+---
+
+## [x] Task 4.6: Add WatchedEpisodesRepository Tests ✅
+
+**Impact:** HIGH | **Effort:** 45 min | **Status:** ✅ COMPLETE
+
+**Context:** Test watched episodes tracking with Room persistence logic
+
+### Subtasks:
+
+- [x] 4.6.1 Create `WatchedEpisodesRepositoryImplTest.kt` ✅
+  - ✅ Created comprehensive test file (12 tests)
+  - ✅ Toggle episode watched/unwatched
+  - ✅ Filter by tvShowId (observeWatchedEpisodes)
+  - ✅ Observe all episodes across shows
+  - ✅ deleteAllForTvShow functionality
+  - ✅ Episode ID format validation (show-S#E#)
+  - ✅ Multiple episodes per show tracking
+  - ✅ Late collector receives current state
+
+- [x] 4.6.2 Create `FakeWatchedEpisodesDataSource` ✅
+  - ✅ In-memory implementation
+  - ✅ StateFlow-based reactive updates with filtering
+  - ✅ All interface methods implemented
+
+- [x] 4.6.3 Verify all tests pass ✅
+  - All 12 tests passing ✅
+  - Build successful ✅
+
+**Acceptance Criteria:**
+
+- ✅ WatchedEpisodesRepositoryImpl has comprehensive tests (12 tests)
+- ✅ Tests verify filtering by show ID
+- ✅ Tests verify deleteAllForTvShow functionality
+- ✅ Fake data source created and working
+- ✅ All tests passing (12/12) ✅
+
+**Files Created:**
+- WatchedEpisodesRepositoryImplTest.kt (12 tests)
+- FakeWatchedEpisodesDataSource.kt
+
+**Time:** ~18 minutes
+**Next:** Continue Phase 4 - More repository tests
+
+---
+
+## Task 4.7-4.X: [Continue with remaining Phase 4 tasks]
 
 [... Continue with existing Phase 4 repository tests ...]
 
