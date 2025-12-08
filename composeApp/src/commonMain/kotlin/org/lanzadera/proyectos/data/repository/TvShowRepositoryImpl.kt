@@ -5,6 +5,7 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
 import org.lanzadera.proyectos.data.dto.tvshow.SeasonDto
@@ -23,25 +24,25 @@ class TvShowRepositoryImpl(
 ) : TvShowRepository {
 
     private val _tvShows = MutableStateFlow<List<TvShow>>(emptyList())
-    override val tvShowsFlow: StateFlow<List<TvShow>> = _tvShows
+    override val tvShowsFlow: StateFlow<List<TvShow>> = _tvShows.asStateFlow()
 
     private val _popularTvShows = MutableStateFlow<List<TvShow>>(emptyList())
-    override val popularTvShowsFlow: StateFlow<List<TvShow>> = _popularTvShows
+    override val popularTvShowsFlow: StateFlow<List<TvShow>> = _popularTvShows.asStateFlow()
 
     private val _topRatedTvShows = MutableStateFlow<List<TvShow>>(emptyList())
-    override val topRatedTvShowsFlow: StateFlow<List<TvShow>> = _topRatedTvShows
+    override val topRatedTvShowsFlow: StateFlow<List<TvShow>> = _topRatedTvShows.asStateFlow()
 
     private val _onAirTvShows = MutableStateFlow<List<TvShow>>(emptyList())
-    override val onAirTvShowsFlow: StateFlow<List<TvShow>> = _onAirTvShows
+    override val onAirTvShowsFlow: StateFlow<List<TvShow>> = _onAirTvShows.asStateFlow()
 
     private val _trendingTvShows = MutableStateFlow<List<TvShow>>(emptyList())
-    override val trendingTvShowsFlow: StateFlow<List<TvShow>> = _trendingTvShows
+    override val trendingTvShowsFlow: StateFlow<List<TvShow>> = _trendingTvShows.asStateFlow()
 
     private val _airingTodayTvShows = MutableStateFlow<List<TvShow>>(emptyList())
-    override val airingTodayTvShowsFlow: StateFlow<List<TvShow>> = _airingTodayTvShows
+    override val airingTodayTvShowsFlow: StateFlow<List<TvShow>> = _airingTodayTvShows.asStateFlow()
 
     private val _trendingTvShowsWeek = MutableStateFlow<List<TvShow>>(emptyList())
-    override val trendingTvShowsWeekFlow: StateFlow<List<TvShow>> = _trendingTvShowsWeek
+    override val trendingTvShowsWeekFlow: StateFlow<List<TvShow>> = _trendingTvShowsWeek.asStateFlow()
 
     private val lastUpdated = mutableMapOf<MutableStateFlow<List<TvShow>>, Long>()
     private val ttl = Constants.Cache.DEFAULT_TTL_MS
@@ -66,20 +67,26 @@ class TvShowRepositoryImpl(
         lastUpdated: MutableMap<MutableStateFlow<List<TvShow>>, Long>,
         crossinline fetch: suspend () -> List<TvShow>
     ) {
-        val now = Clock.System.now().toEpochMilliseconds()
-        val last = lastUpdated[state] ?: 0L
-        val freshEnough = ttlMillis > 0 && (now - last) < ttlMillis
+        try {
+            val now = Clock.System.now().toEpochMilliseconds()
+            val last = lastUpdated[state] ?: 0L
+            val freshEnough = ttlMillis > 0 && (now - last) < ttlMillis
 
-        Logger.d("force=$force, state.size=${state.value.size}, freshEnough=$freshEnough")
-        if (!force && (state.value.isNotEmpty() || freshEnough)) {
-            Logger.d("skipping fetch, cache is fresh")
-            return
+            Logger.d("force=$force, state.size=${state.value.size}, freshEnough=$freshEnough", tag = "TvShowRepository")
+            if (!force && (state.value.isNotEmpty() || freshEnough)) {
+                Logger.d("skipping fetch, cache is fresh", tag = "TvShowRepository")
+                return
+            }
+            Logger.d("fetching new data", tag = "TvShowRepository")
+            val data = fetch()
+            state.value = data
+            lastUpdated[state] = now
+            Logger.d("updated state with ${data.size} tv shows", tag = "TvShowRepository")
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Logger.e("Error refreshing TV show feed", tag = "TvShowRepository", throwable = e)
         }
-        Logger.d("fetching new data")
-        val data = fetch()
-        state.value = data
-        lastUpdated[state] = now
-        Logger.d("updated state with ${data.size} tv shows")
     }
 
     override suspend fun refreshTvShows(force: Boolean) =
@@ -104,7 +111,6 @@ class TvShowRepositoryImpl(
         refreshFeed(_trendingTvShowsWeek, force, ttl, lastUpdated) { fetchTrendingTvShowsWeek() }
 
     override suspend fun getTvShowDetails(tvShowId: Int): TvShow? {
-        // Intenta cache primero
         if (tvShowDetailsCache.containsKey(tvShowId)) {
             return tvShowDetailsCache[tvShowId]
         }
@@ -119,7 +125,6 @@ class TvShowRepositoryImpl(
             val tvShowDto: TvShowDto = json.decodeFromString(text)
             var tvShow: TvShow = tvShowDto.toDomain()
 
-            // Cargar episodios para cada temporada
             tvShow = tvShow.copy(
                 seasons = tvShow.seasons?.mapNotNull { season ->
                     try {
@@ -130,17 +135,21 @@ class TvShowRepositoryImpl(
                         }.bodyAsText()
                         val seasonDto: SeasonDto = json.decodeFromString(seasonText)
                         seasonDto.toDomain()
+                    } catch (e: kotlinx.coroutines.CancellationException) {
+                        throw e
                     } catch (e: Exception) {
-                        Logger.d("error fetching season ${season.seasonNumber}: ${e.message}")
-                        season // Devuelve la temporada sin episodios si falla
+                        Logger.e("Error fetching season ${season.seasonNumber} for TV show $tvShowId", tag = "TvShowRepository", throwable = e)
+                        season
                     }
                 }
             )
 
             tvShowDetailsCache[tvShowId] = tvShow
             tvShow
-        } catch (t: Throwable) {
-            Logger.d("error fetching tv show details: ${t.message}")
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Logger.e("Error fetching TV show details for ID $tvShowId", tag = "TvShowRepository", throwable = e)
             null
         }
     }
@@ -173,24 +182,31 @@ class TvShowRepositoryImpl(
         )
 
     private suspend fun fetchPaged(path: String, baseParams: Map<String, String>): List<TvShow> {
-        val acc = mutableListOf<TvShow>()
-        for (page in 1..maxPages) {
-            val text = client.get(path) {
-                url {
-                    baseParams.forEach { (k, v) -> parameters.append(k, v) }
-                    parameters.append("page", page.toString())
-                }
-            }.bodyAsText()
+        return try {
+            val acc = mutableListOf<TvShow>()
+            for (page in 1..maxPages) {
+                val text = client.get(path) {
+                    url {
+                        baseParams.forEach { (k, v) -> parameters.append(k, v) }
+                        parameters.append("page", page.toString())
+                    }
+                }.bodyAsText()
 
-            val dto: TvShowResponseDto = json.decodeFromString(text)
-            val valid = dto.results.map { it.toDomain() }.filter(::isValidTvShow)
+                val dto: TvShowResponseDto = json.decodeFromString(text)
+                val valid = dto.results.map { it.toDomain() }.filter(::isValidTvShow)
 
-            if (valid.isEmpty()) break
-            acc += valid
-            Logger.d("page $page, downloaded ${valid.size} tv shows, total so far: ${acc.size}")
+                if (valid.isEmpty()) break
+                acc += valid
+                Logger.d("page $page, downloaded ${valid.size} tv shows, total so far: ${acc.size}", tag = "TvShowRepository")
+            }
+            Logger.d("finished, total tv shows downloaded: ${acc.size}", tag = "TvShowRepository")
+            acc
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Logger.e("Error fetching paged TV shows from $path", tag = "TvShowRepository", throwable = e)
+            emptyList()
         }
-        Logger.d("finished, total tv shows downloaded: ${acc.size}")
-        return acc
     }
 }
 

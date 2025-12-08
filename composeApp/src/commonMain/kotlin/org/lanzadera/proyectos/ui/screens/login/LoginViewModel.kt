@@ -9,6 +9,7 @@ import io.ktor.client.statement.request
 import io.ktor.utils.io.InternalAPI
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.lanzadera.proyectos.domain.models.user.User
@@ -19,13 +20,13 @@ class LoginViewModel : ViewModel() {
     private val client = HttpClient()
 
     private val _userState = MutableStateFlow<User?>(null)
-    val userState: StateFlow<User?> = _userState
+    val userState: StateFlow<User?> = _userState.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    private val _isLoginSuccessful = MutableStateFlow<Boolean?>(null) // null = no se ha intentado
-    val isLoginSuccessful: StateFlow<Boolean?> = _isLoginSuccessful
+    private val _isLoginSuccessful = MutableStateFlow<Boolean?>(null)
+    val isLoginSuccessful: StateFlow<Boolean?> = _isLoginSuccessful.asStateFlow()
 
     fun login(email: String, password: String) {
         viewModelScope.launch {
