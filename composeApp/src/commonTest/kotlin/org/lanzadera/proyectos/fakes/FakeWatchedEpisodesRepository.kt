@@ -9,12 +9,15 @@ class FakeWatchedEpisodesRepository : WatchedEpisodesRepository {
     
     private val watchedEpisodes = mutableMapOf<String, MutableList<WatchedEpisode>>()
     private val allEpisodesFlow = MutableStateFlow<List<WatchedEpisode>>(emptyList())
+    private val showEpisodesFlows = mutableMapOf<String, MutableStateFlow<List<WatchedEpisode>>>()
     
     var shouldFail = false
     var failureException = Exception("Test failure")
     
     override fun observeWatchedEpisodes(tvShowId: String): Flow<List<WatchedEpisode>> {
-        return MutableStateFlow(watchedEpisodes[tvShowId] ?: emptyList())
+        return showEpisodesFlows.getOrPut(tvShowId) {
+            MutableStateFlow(watchedEpisodes[tvShowId] ?: emptyList())
+        }
     }
     
     override fun observeAllWatchedEpisodes(): Flow<List<WatchedEpisode>> = allEpisodesFlow
@@ -30,13 +33,13 @@ class FakeWatchedEpisodesRepository : WatchedEpisodesRepository {
         } else {
             episodes.removeAll { it.id == episode.id }
         }
-        updateAllEpisodes()
+        updateFlows(episode.tvShowId)
     }
     
     override suspend fun deleteAllForTvShow(tvShowId: String) {
         if (shouldFail) throw failureException
         watchedEpisodes.remove(tvShowId)
-        updateAllEpisodes()
+        updateFlows(tvShowId)
     }
     
     fun hasWatchedEpisode(tvShowId: String, episodeNum: Int): Boolean {
@@ -53,10 +56,13 @@ class FakeWatchedEpisodesRepository : WatchedEpisodesRepository {
         if (!episodes.any { it.id == episode.id }) {
             episodes.add(episode)
         }
-        updateAllEpisodes()
+        updateFlows(tvShowId)
     }
     
-    private fun updateAllEpisodes() {
+    private fun updateFlows(tvShowId: String) {
+        // Update show-specific flow
+        showEpisodesFlows[tvShowId]?.value = watchedEpisodes[tvShowId] ?: emptyList()
+        // Update all episodes flow
         allEpisodesFlow.value = watchedEpisodes.values.flatten()
     }
 }

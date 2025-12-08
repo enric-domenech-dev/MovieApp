@@ -8,7 +8,7 @@ import org.lanzadera.proyectos.domain.repository.LoadInitialData
 /**
  * Fake implementation of LoadInitialData for testing.
  */
-class FakeLoadInitialDataRepository : LoadInitialData {
+open class FakeLoadInitialDataRepository : LoadInitialData {
     
     private val _moviesFlow = MutableStateFlow<List<Movie>>(emptyList())
     override val moviesFlow: StateFlow<List<Movie>> = _moviesFlow
@@ -37,15 +37,15 @@ class FakeLoadInitialDataRepository : LoadInitialData {
     private val _inCinemasTodayFlow = MutableStateFlow<List<Movie>>(emptyList())
     override val inCinemasTodayFlow: StateFlow<List<Movie>> = _inCinemasTodayFlow
     
-    override suspend fun refreshMovies(force: Boolean) {}
-    override suspend fun refreshTrendingMovies(force: Boolean) {}
-    override suspend fun refreshPopularMovies(force: Boolean) {}
-    override suspend fun refreshTopRatedMovies(force: Boolean) {}
-    override suspend fun refreshUpcomingMovies(force: Boolean) {}
-    override suspend fun refreshDiscoverMovies(force: Boolean) {}
-    override suspend fun refreshHeroMovies(force: Boolean) {}
-    override suspend fun refreshTrendingMoviesDaily(force: Boolean) {}
-    override suspend fun refreshInCinemasToday(force: Boolean) {}
+    open override suspend fun refreshMovies(force: Boolean) {}
+    open override suspend fun refreshTrendingMovies(force: Boolean) {}
+    open override suspend fun refreshPopularMovies(force: Boolean) {}
+    open override suspend fun refreshTopRatedMovies(force: Boolean) {}
+    open override suspend fun refreshUpcomingMovies(force: Boolean) {}
+    open override suspend fun refreshDiscoverMovies(force: Boolean) {}
+    open override suspend fun refreshHeroMovies(force: Boolean) {}
+    open override suspend fun refreshTrendingMoviesDaily(force: Boolean) {}
+    open override suspend fun refreshInCinemasToday(force: Boolean) {}
     
     // Helper methods for testing
     fun addTestMovies(count: Int) {
