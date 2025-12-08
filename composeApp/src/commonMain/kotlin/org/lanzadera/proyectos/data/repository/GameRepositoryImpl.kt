@@ -9,6 +9,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
 import org.lanzadera.proyectos.BuildConfig
@@ -28,19 +29,19 @@ class GameRepositoryImpl(
 ) : GameRepository {
 
     private val _games = MutableStateFlow<List<Game>>(emptyList())
-    override val gamesFlow: StateFlow<List<Game>> = _games
+    override val gamesFlow: StateFlow<List<Game>> = _games.asStateFlow()
 
     private val _popularGames = MutableStateFlow<List<Game>>(emptyList())
-    override val popularGamesFlow: StateFlow<List<Game>> = _popularGames
+    override val popularGamesFlow: StateFlow<List<Game>> = _popularGames.asStateFlow()
 
     private val _topRatedGames = MutableStateFlow<List<Game>>(emptyList())
-    override val topRatedGamesFlow: StateFlow<List<Game>> = _topRatedGames
+    override val topRatedGamesFlow: StateFlow<List<Game>> = _topRatedGames.asStateFlow()
 
     private val _upcomingGames = MutableStateFlow<List<Game>>(emptyList())
-    override val upcomingGamesFlow: StateFlow<List<Game>> = _upcomingGames
+    override val upcomingGamesFlow: StateFlow<List<Game>> = _upcomingGames.asStateFlow()
 
     private val _trendingGames = MutableStateFlow<List<Game>>(emptyList())
-    override val trendingGamesFlow: StateFlow<List<Game>> = _trendingGames
+    override val trendingGamesFlow: StateFlow<List<Game>> = _trendingGames.asStateFlow()
 
     private val lastUpdated = mutableMapOf<MutableStateFlow<List<Game>>, Long>()
     private val ttl = Constants.Cache.DEFAULT_TTL_MS
@@ -54,14 +55,15 @@ class GameRepositoryImpl(
         state: MutableStateFlow<List<Game>>,
         query: String
     ) {
-        val now = Clock.System.now().toEpochMilliseconds()
-        val last = lastUpdated[state] ?: 0L
-
-        if ((now - last) < ttl && state.value.isNotEmpty()) {
-            return
-        }
-
         try {
+            val now = Clock.System.now().toEpochMilliseconds()
+            val last = lastUpdated[state] ?: 0L
+
+            if ((now - last) < ttl && state.value.isNotEmpty()) {
+                Logger.d("Cache is fresh, skipping refresh", tag = "GameRepository")
+                return
+            }
+
             val accessToken = authManager.getAccessToken()
             val clientId = BuildConfig.IGDB_CLIENT_ID
 
@@ -84,9 +86,11 @@ class GameRepositoryImpl(
 
             state.value = validGames
             lastUpdated[state] = now
+            Logger.d("Updated feed with ${validGames.size} games", tag = "GameRepository")
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
         } catch (e: Exception) {
-            Logger.d("Error - ${e.message}", tag = "GameRepository")
-            e.printStackTrace()
+            Logger.e("Error refreshing game feed with query: $query", tag = "GameRepository", throwable = e)
         }
     }
 
@@ -144,10 +148,14 @@ class GameRepositoryImpl(
 
             if (game != null) {
                 gameDetailsCache[gameId] = game
+                Logger.d("Cached game details for ID $gameId", tag = "GameRepository")
             }
 
             game
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
         } catch (e: Exception) {
+            Logger.e("Error fetching game details for ID $gameId", tag = "GameRepository", throwable = e)
             null
         }
     }

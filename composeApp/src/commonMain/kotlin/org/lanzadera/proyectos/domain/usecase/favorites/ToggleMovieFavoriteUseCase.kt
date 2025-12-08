@@ -10,11 +10,29 @@ import org.lanzadera.proyectos.domain.repository.MovieRepository
 import org.lanzadera.proyectos.utils.Logger
 import kotlin.coroutines.cancellation.CancellationException
 
+/**
+ * Toggles favorite status for a movie.
+ *
+ * When marking as favorite, fetches full movie details from TMDB
+ * and saves to Room database for offline access.
+ * When unmarking, removes from both favorites list and Room.
+ *
+ * @property favoritesRepository Repository for managing favorite IDs
+ * @property favoriteDetailsRepository Repository for storing full movie details
+ * @property movieRepository Repository for fetching movie data from TMDB
+ */
 class ToggleMovieFavoriteUseCase(
     private val favoritesRepository: FavoritesRepository,
     private val favoriteDetailsRepository: FavoriteDetailsRepository,
     private val movieRepository: MovieRepository
 ) {
+    /**
+     * Toggles favorite status for a movie item.
+     *
+     * @param item The favorite item (must be of type MOVIE)
+     * @return Result.Success on success, Result.Error on failure
+     * @throws IllegalArgumentException if item is not of type MOVIE
+     */
     suspend operator fun invoke(item: FavoriteItem): Result<Unit> {
         require(item.type == FavoriteType.MOVIE) {
             "Item must be of type MOVIE, got ${item.type}"

@@ -4,6 +4,36 @@ This file provides guidance to Copilot when working with code in this repository
 
 ---
 
+## 🚨 ATTENTION COPILOT: READ THIS FIRST! 🚨
+
+**When the user types: "Let's continue - initialize session"**
+
+You MUST immediately execute these commands IN PARALLEL (single response):
+
+```bash
+cat README.md
+cat COPILOT.md  
+cat TODO_LIST.md
+cat AUDIT_REPORT.md
+cat PHASE_1_SUMMARY.md
+cat PHASE_2_SUMMARY.md
+cat docs/architecture/ADR-001-Clean-Architecture.md
+cat docs/architecture/ADR-002-Use-Case-Layer.md
+cat docs/architecture/ADR-003-Repository-Pattern.md
+cat docs/architecture/ADR-004-DTO-vs-Domain-Models.md
+cat copilot/TESTING_STRATEGY.md
+cat copilot/TESTING_COVERAGE.md
+cat copilot/copilot-instructions.md
+grep -A 3 "Next Task:" TODO_LIST.md
+grep "Overall Progress:" TODO_LIST.md
+```
+
+**Then provide a summary of current status before asking what to do.**
+
+**DO NOT skip this. DO NOT assume you remember. ALWAYS execute ALL commands.**
+
+---
+
 ## 🚀 SESSION INITIALIZATION PROTOCOL
 
 ### ⚡ MANDATORY - Read ALL Documentation Before Starting
@@ -19,20 +49,26 @@ cat README.md                    # Project overview and quick start
 cat COPILOT.md                   # This file - architecture rules
 cat TODO_LIST.md                 # Current progress and next task
 cat AUDIT_REPORT.md              # Code audit findings
+cat PHASE_1_SUMMARY.md           # Phase 1 completion summary
+cat PHASE_2_SUMMARY.md           # Phase 2 completion summary
 
 # ═══════════════════════════════════════════════════════════
 # 🏗️ STEP 2: Read Architecture Decision Records (REQUIRED)
 # ═══════════════════════════════════════════════════════════
 
+# Read ALL files in docs/architecture/
 cat docs/architecture/ADR-001-Clean-Architecture.md
 cat docs/architecture/ADR-002-Use-Case-Layer.md
 cat docs/architecture/ADR-003-Repository-Pattern.md
 cat docs/architecture/ADR-004-DTO-vs-Domain-Models.md
+cat docs/architecture/Navigation_Lambda_Refactoring.md
+cat docs/architecture/Navigation-Options.md
 
 # ═══════════════════════════════════════════════════════════
 # 🧪 STEP 3: Read Testing Documentation (REQUIRED)
 # ═══════════════════════════════════════════════════════════
 
+# Read ALL files in copilot/
 cat copilot/TESTING_STRATEGY.md
 cat copilot/TESTING_COVERAGE.md
 cat copilot/copilot-instructions.md
@@ -44,6 +80,12 @@ cat copilot/copilot-instructions.md
 grep -A 3 "Next Task:" TODO_LIST.md
 grep "Overall Progress:" TODO_LIST.md
 grep -A 5 "Current Sprint:" TODO_LIST.md
+```
+
+**💡 TIP:** Use this single command to discover all documentation:
+```bash
+# List all documentation files
+find docs copilot -name "*.md" -type f 2>/dev/null | sort
 ```
 
 ### Why This Is MANDATORY
@@ -58,15 +100,47 @@ Reading all documentation ensures:
 
 ### Session Start Protocol
 
-**📝 User says:**
+**📝 When user says:**
 > "Let's continue - initialize session"
 
-**🤖 Copilot MUST:**
-1. ✅ Execute ALL commands above to read documentation
-2. ✅ Identify the current phase and next task from TODO_LIST.md
-3. ✅ Confirm understanding of the task
-4. ✅ Ask for clarification if needed
-5. ✅ Only then proceed with implementation
+**🤖 Copilot MUST do this FIRST (in a single response with parallel tool calls):**
+
+```
+1. Execute ALL cat commands from STEP 1-3 in PARALLEL using bash tool
+2. Execute grep commands from STEP 4 to identify current task
+3. Read the documentation content (not just execute commands)
+4. Provide a summary confirming:
+   - ✅ Current Phase and Task number
+   - ✅ Last completed task
+   - ✅ Next task to work on
+   - ✅ Understanding of architectural constraints
+```
+
+**⚠️ CRITICAL RULES:**
+- **USE PARALLEL TOOL CALLS** - Call all `cat` commands in ONE response
+- **READ THE CONTENT** - Don't just execute, actually parse the documentation
+- **DON'SKIP** - Must execute ALL commands before asking "what to do next?"
+- **NO SHORTCUTS** - Don't assume you remember from previous sessions
+
+**Example of correct initialization:**
+```
+User: "Let's continue - initialize session"
+
+Copilot: [Executes 10+ cat commands in parallel]
+         [Reads all documentation]
+         [Provides summary]:
+         
+         ✅ Documentation read complete
+         📊 Current Status:
+         - Phase: 3 (Testing)
+         - Current Task: 3.2 - Repository Integration Tests
+         - Last Completed: 3.1 - DTO Serialization Tests
+         - Progress: 33/141 (23.40%)
+         
+         🎯 Next Steps: Task 3.2 requires...
+         
+         Ready to proceed?
+```
 
 ### ⚠️ DO NOT START CODING WITHOUT READING DOCS
 
@@ -83,19 +157,25 @@ Reading all documentation ensures:
 ### Core Files (MUST READ EVERY SESSION)
 1. [README.md](./README.md) - Project overview, structure, quick start
 2. [COPILOT.md](./COPILOT.md) - This file - architecture rules and conventions
-3. [TODO_LIST.md](./TODO_LIST.md) - Detailed task list (140 tasks)
+3. [TODO_LIST.md](./TODO_LIST.md) - Detailed task list with progress tracking
 4. [AUDIT_REPORT.md](./AUDIT_REPORT.md) - Code audit with identified issues
+5. [PHASE_1_SUMMARY.md](./PHASE_1_SUMMARY.md) - Phase 1: Architecture Fixes summary
+6. [PHASE_2_SUMMARY.md](./PHASE_2_SUMMARY.md) - Phase 2: Code Quality summary
 
 ### Architecture Decision Records (MUST READ EVERY SESSION)
-5. [ADR-001: Clean Architecture](docs/architecture/ADR-001-Clean-Architecture.md)
-6. [ADR-002: Use Case Layer](docs/architecture/ADR-002-Use-Case-Layer.md)
-7. [ADR-003: Repository Pattern](docs/architecture/ADR-003-Repository-Pattern.md)
-8. [ADR-004: DTO vs Domain Models](docs/architecture/ADR-004-DTO-vs-Domain-Models.md)
+📁 **Directory:** `docs/architecture/`
+- [ADR-001: Clean Architecture](docs/architecture/ADR-001-Clean-Architecture.md)
+- [ADR-002: Use Case Layer](docs/architecture/ADR-002-Use-Case-Layer.md)
+- [ADR-003: Repository Pattern](docs/architecture/ADR-003-Repository-Pattern.md)
+- [ADR-004: DTO vs Domain Models](docs/architecture/ADR-004-DTO-vs-Domain-Models.md)
+- [Navigation Lambda Refactoring](docs/architecture/Navigation_Lambda_Refactoring.md)
+- [Navigation Options Analysis](docs/architecture/Navigation-Options.md)
 
 ### Testing Documentation (MUST READ EVERY SESSION)
-9. [TESTING_STRATEGY.md](copilot/TESTING_STRATEGY.md) - Testing approach and guidelines
-10. [TESTING_COVERAGE.md](copilot/TESTING_COVERAGE.md) - Coverage configuration
-11. [copilot-instructions.md](copilot/copilot-instructions.md) - How to work with Copilot
+📁 **Directory:** `copilot/`
+- [TESTING_STRATEGY.md](copilot/TESTING_STRATEGY.md) - Testing approach and guidelines
+- [TESTING_COVERAGE.md](copilot/TESTING_COVERAGE.md) - Coverage configuration
+- [copilot-instructions.md](copilot/copilot-instructions.md) - How to work with Copilot
 
 ### Reference Documentation (READ AS NEEDED)
 - [DTO_Migration_Plan.md](docs/architecture/DTO_Migration_Plan.md) - DTO migration guide
@@ -476,7 +556,9 @@ Logger.e("Failed to fetch movies", tag = "MovieRepository", throwable = exceptio
 
 ## Testing
 
-Tests use **Turbine** for Flow testing and **Truth** for assertions:
+### Testing Strategy
+
+Tests use **Turbine** for Flow testing and **kotlin.test** for assertions:
 
 ```kotlin
 // Flow testing pattern
@@ -485,7 +567,74 @@ repository.observeFavorites().test {
 }
 ```
 
-Fake implementations exist in `commonTest/` (e.g., `FakeFavoritesRepository`).
+### Test Types
+
+1. **Unit Tests (with Fakes)** - `commonTest/`
+   - ViewModels: Test business logic with fake repositories
+   - Use Cases: Test use case logic with fakes
+   - Example: `FakeFavoritesRepository`, `FakeMovieRepository`
+
+2. **DTO Serialization Tests** - `commonTest/data/mapper/`
+   - **CRITICAL:** Prevent serialization bugs (Task 1.9, 1.10)
+   - Test JSON round-trip: DTO → JSON → DTO
+   - Test domain mapping: DTO → Domain
+   - Test field preservation: No data loss
+   - Example: `MovieMapperTest`, `TvShowMapperTest`
+
+3. **Integration Tests** - Coming in Phase 3
+   - Test real repository implementations
+   - Test HTTP deserialization
+   - Test Room persistence
+
+### DTO Testing Pattern (MANDATORY for All DTOs)
+
+```kotlin
+@Test
+fun `DTO can be serialized and deserialized`() {
+    // Given
+    val dto = MyDto(id = 1, name = "Test")
+    
+    // When - Serialize to JSON
+    val jsonString = json.encodeToString(dto)
+    
+    // Then - Deserialize back
+    val decoded = json.decodeFromString<MyDto>(jsonString)
+    assertEquals(dto.id, decoded.id)
+}
+
+@Test
+fun `DTO to Domain mapping preserves all fields`() {
+    // Given
+    val dto = MyDto(id = 1, name = "Test")
+    
+    // When
+    val domain = dto.toDomain()
+    
+    // Then - Verify all fields mapped
+    assertEquals(dto.id, domain.id)
+    assertEquals(dto.name, domain.name)
+}
+```
+
+**Why This Matters:** These tests catch bugs where:
+- Removing `@Serializable` breaks serialization
+- Field mappings lose data (e.g., `voteAverage` → `voteAverageDouble`)
+- Complex nested objects fail to serialize (e.g., Season with episodes)
+
+### Running Tests
+
+```bash
+# Run all tests
+./gradlew composeApp:testDebugUnitTest
+
+# Run specific test class
+./gradlew composeApp:testDebugUnitTest --tests "*MapperTest"
+
+# Run with coverage
+./gradlew composeApp:koverHtmlReport
+```
+
+Fake implementations exist in `commonTest/fakes/` and `commonTest/domain/`.
 
 ## Feature Organization
 
@@ -507,3 +656,58 @@ Favorites and watched tracking work across all content types via `FavoriteType` 
 5. Register in `AppModule.kt`
 6. Create screen + ViewModel in `ui/screens/`
 7. Create DTO to represent domain models in presentation layer '`ui/`
+
+---
+
+## 🔄 StateFlow Pattern - ALWAYS Use .asStateFlow()
+
+### Rule: ALL Exposed StateFlows MUST Use .asStateFlow()
+
+**WHY:** `.asStateFlow()` provides encapsulation and prevents external callers from casting back to `MutableStateFlow`.
+
+### Pattern in Repositories:
+
+```kotlin
+// ✅ CORRECT
+class MovieRepositoryImpl : MovieRepository {
+    private val _movies = MutableStateFlow<List<Movie>>(emptyList())
+    override val moviesFlow: StateFlow<List<Movie>> = _movies.asStateFlow()
+}
+
+// ❌ WRONG - Direct assignment allows external modification
+class MovieRepositoryImpl : MovieRepository {
+    private val _movies = MutableStateFlow<List<Movie>>(emptyList())
+    override val moviesFlow: StateFlow<List<Movie>> = _movies  // ❌ BAD
+}
+```
+
+### Pattern in ViewModels:
+
+```kotlin
+// ✅ CORRECT
+class HomeViewModel : ViewModel() {
+    private val _selectedTab = MutableStateFlow(HomeTab.FAVORITES)
+    val selectedTab: StateFlow<HomeTab> = _selectedTab.asStateFlow()
+}
+
+// ❌ WRONG
+class HomeViewModel : ViewModel() {
+    private val _selectedTab = MutableStateFlow(HomeTab.FAVORITES)
+    val selectedTab: StateFlow<HomeTab> = _selectedTab  // ❌ BAD
+}
+```
+
+### Required Import:
+
+```kotlin
+import kotlinx.coroutines.flow.asStateFlow
+```
+
+### Benefits:
+
+1. **Immutability:** External code cannot modify the flow
+2. **Encapsulation:** Implementation details hidden
+3. **Type Safety:** Prevents casting to MutableStateFlow
+4. **Best Practice:** Kotlin official recommendation
+
+---

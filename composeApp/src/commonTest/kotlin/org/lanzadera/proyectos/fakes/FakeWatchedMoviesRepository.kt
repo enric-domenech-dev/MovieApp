@@ -36,4 +36,10 @@ class FakeWatchedMoviesRepository : WatchedMoviesRepository {
     fun setWatchedMovies(movieIds: Set<String>) {
         _watchedMovies.value = movieIds.map { WatchedMovie(movieId = it) }
     }
+    
+    fun addWatchedMovie(watchedMovie: WatchedMovie) {
+        val current = _watchedMovies.value.toMutableList()
+        current.add(watchedMovie)
+        _watchedMovies.value = current
+    }
 }

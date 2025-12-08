@@ -51,26 +51,32 @@ class SeriesDetailViewModel(
 
     fun loadTvShowDetails(tvShowId: Int) {
         viewModelScope.launch {
-            try {
-                _isLoading.value = true
-                _error.value = null
-                val details = getTvShowDetailsUseCase.execute(tvShowId)
-                _tvShowDetailDomain.value = details
-                if (details == null) {
-                    _error.value = "No se pudieron cargar los detalles de la serie"
-                } else {
-                    // Observar episodios vistos en un Job separado
-                    viewModelScope.launch {
-                        observeWatchedEpisodesUseCase(tvShowId.toString())
-                            .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-                            .collect { _watchedEpisodes.value = it }
+            _isLoading.value = true
+            _error.value = null
+            
+            when (val result = getTvShowDetailsUseCase(tvShowId)) {
+                is org.lanzadera.proyectos.domain.models.Result.Success -> {
+                    _tvShowDetailDomain.value = result.data
+                    if (result.data == null) {
+                        _error.value = "No se pudieron cargar los detalles de la serie"
+                    } else {
+                        // Observar episodios vistos en un Job separado
+                        viewModelScope.launch {
+                            observeWatchedEpisodesUseCase(tvShowId.toString())
+                                .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+                                .collect { _watchedEpisodes.value = it }
+                        }
                     }
                 }
-            } catch (e: Exception) {
-                _error.value = "Error: ${e.message}"
-            } finally {
-                _isLoading.value = false
+                is org.lanzadera.proyectos.domain.models.Result.Error -> {
+                    _error.value = result.message ?: "Error al cargar los detalles"
+                }
+                is org.lanzadera.proyectos.domain.models.Result.Loading -> {
+                    // Not used in this use case
+                }
             }
+            
+            _isLoading.value = false
         }
     }
 
@@ -137,7 +143,7 @@ class SeriesDetailViewModel(
 
                 // Marcar todos los episodios recopilados
                 episodesToMark.forEach { episode ->
-                    toggleEpisodeWatchedUseCase(episode, true)
+                    toggleEpisodeWatchedUseCase(episode, true) // Result ignored - errors logged in use case
                 }
             } else {
                 // Al desmarcar, desmarcar este episodio y todos los posteriores
@@ -178,7 +184,7 @@ class SeriesDetailViewModel(
 
                 // Desmarcar todos los episodios recopilados
                 episodesToUnmark.forEach { episode ->
-                    toggleEpisodeWatchedUseCase(episode, false)
+                    toggleEpisodeWatchedUseCase(episode, false) // Result ignored - errors logged in use case
                 }
             }
         }

@@ -6,6 +6,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import org.lanzadera.proyectos.domain.repository.LoadInitialData
@@ -16,7 +17,7 @@ class SplashViewModel(
 ) : ViewModel() {
 
     private val _isLoadingComplete = MutableStateFlow(false)
-    val isLoadingComplete: StateFlow<Boolean> = _isLoadingComplete
+    val isLoadingComplete: StateFlow<Boolean> = _isLoadingComplete.asStateFlow()
 
     init {
         // Inicia la carga de todos los datos en paralelo

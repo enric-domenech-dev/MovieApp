@@ -5,6 +5,7 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
 import org.lanzadera.proyectos.data.dto.movie.MovieDto
@@ -22,19 +23,19 @@ class MovieRepositoryImpl(
 ) : MovieRepository {
 
     private val _movies = MutableStateFlow<List<Movie>>(emptyList())
-    override val moviesFlow: StateFlow<List<Movie>> = _movies
+    override val moviesFlow: StateFlow<List<Movie>> = _movies.asStateFlow()
 
     private val _popularMovies = MutableStateFlow<List<Movie>>(emptyList())
-    override val popularMoviesFlow: StateFlow<List<Movie>> = _popularMovies
+    override val popularMoviesFlow: StateFlow<List<Movie>> = _popularMovies.asStateFlow()
 
     private val _topRatedMovies = MutableStateFlow<List<Movie>>(emptyList())
-    override val topRatedMoviesFlow: StateFlow<List<Movie>> = _topRatedMovies
+    override val topRatedMoviesFlow: StateFlow<List<Movie>> = _topRatedMovies.asStateFlow()
 
     private val _upcomingMovies = MutableStateFlow<List<Movie>>(emptyList())
-    override val upcomingMoviesFlow: StateFlow<List<Movie>> = _upcomingMovies
+    override val upcomingMoviesFlow: StateFlow<List<Movie>> = _upcomingMovies.asStateFlow()
 
     private val _trendingMovies = MutableStateFlow<List<Movie>>(emptyList())
-    override val trendingMoviesFlow: StateFlow<List<Movie>> = _trendingMovies
+    override val trendingMoviesFlow: StateFlow<List<Movie>> = _trendingMovies.asStateFlow()
 
     private val lastUpdated = mutableMapOf<MutableStateFlow<List<Movie>>, Long>()
     private val ttl = Constants.Cache.DEFAULT_TTL_MS
@@ -59,20 +60,26 @@ class MovieRepositoryImpl(
         lastUpdated: MutableMap<MutableStateFlow<List<Movie>>, Long>,
         crossinline fetch: suspend () -> List<Movie>
     ) {
-        val now = Clock.System.now().toEpochMilliseconds()
-        val last = lastUpdated[state] ?: 0L
-        val freshEnough = ttlMillis > 0 && (now - last) < ttlMillis
+        try {
+            val now = Clock.System.now().toEpochMilliseconds()
+            val last = lastUpdated[state] ?: 0L
+            val freshEnough = ttlMillis > 0 && (now - last) < ttlMillis
 
-        Logger.d("force=$force, state.size=${state.value.size}, freshEnough=$freshEnough", tag = "MovieRepository")
-        if (!force && (state.value.isNotEmpty() || freshEnough)) {
-            Logger.d("skipping fetch, cache is fresh", tag = "MovieRepository")
-            return
+            Logger.d("force=$force, state.size=${state.value.size}, freshEnough=$freshEnough", tag = "MovieRepository")
+            if (!force && (state.value.isNotEmpty() || freshEnough)) {
+                Logger.d("skipping fetch, cache is fresh", tag = "MovieRepository")
+                return
+            }
+            Logger.d("fetching new data", tag = "MovieRepository")
+            val data = fetch()
+            state.value = data
+            lastUpdated[state] = now
+            Logger.d("updated state with ${data.size} movies", tag = "MovieRepository")
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Logger.e("Error refreshing movie feed", tag = "MovieRepository", throwable = e)
         }
-        Logger.d("fetching new data", tag = "MovieRepository")
-        val data = fetch()
-        state.value = data
-        lastUpdated[state] = now
-        Logger.d("updated state with ${data.size} movies", tag = "MovieRepository")
     }
 
     override suspend fun refreshMovies(force: Boolean) =
@@ -135,25 +142,32 @@ class MovieRepositoryImpl(
         )
 
     private suspend fun fetchPaged(path: String, baseParams: Map<String, String>): List<Movie> {
-        val acc = mutableListOf<Movie>()
-        for (page in 1..maxPages) {
-            val text = client.get(path) {
-                url {
-                    baseParams.forEach { (k, v) -> parameters.append(k, v) }
-                    parameters.append("page", page.toString())
-                }
-            }.bodyAsText()
+        return try {
+            val acc = mutableListOf<Movie>()
+            for (page in 1..maxPages) {
+                val text = client.get(path) {
+                    url {
+                        baseParams.forEach { (k, v) -> parameters.append(k, v) }
+                        parameters.append("page", page.toString())
+                    }
+                }.bodyAsText()
 
-            val dto: MovieResponseDto = json.decodeFromString(text)
-            val domainMovies = dto.results.map { it.toDomain() }
-            val valid = domainMovies.filter(::isValidMovie)
+                val dto: MovieResponseDto = json.decodeFromString(text)
+                val domainMovies = dto.results.map { it.toDomain() }
+                val valid = domainMovies.filter(::isValidMovie)
 
-            if (valid.isEmpty()) break
-            acc += valid
-            Logger.d("page $page, downloaded ${valid.size} movies, total so far: ${acc.size}", tag = "MovieRepository")
+                if (valid.isEmpty()) break
+                acc += valid
+                Logger.d("page $page, downloaded ${valid.size} movies, total so far: ${acc.size}", tag = "MovieRepository")
+            }
+            Logger.d("finished, total movies downloaded: ${acc.size}", tag = "MovieRepository")
+            acc
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Logger.e("Error fetching paged movies from $path", tag = "MovieRepository", throwable = e)
+            emptyList()
         }
-        Logger.d("finished, total movies downloaded: ${acc.size}", tag = "MovieRepository")
-        return acc
     }
 }
 

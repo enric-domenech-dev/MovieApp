@@ -102,26 +102,32 @@ class SeriesTabViewModel(
 
         Logger.d("Loading TV shows for all categories", tag = "SeriesTabViewModel")
         viewModelScope.launch {
-            try {
-                _isRefreshing.value = true
-                supervisorScope {
-                    awaitAll(
-                        async { refreshTvShowsUseCase.refreshTvShows(force = false) },
-                        async { refreshTvShowsUseCase.refreshPopularTvShows(force = false) },
-                        async { refreshTvShowsUseCase.refreshTopRatedTvShows(force = false) },
-                        async { refreshTvShowsUseCase.refreshOnAirTvShows(force = false) },
-                        async { refreshTvShowsUseCase.refreshTrendingTvShows(force = false) },
-                        async { refreshTvShowsUseCase.refreshAiringTodayTvShows(force = false) },
-                        async { refreshTvShowsUseCase.refreshTrendingTvShowsWeek(force = false) }
-                    )
+            _isRefreshing.value = true
+            var hasError = false
+            
+            supervisorScope {
+                val results = awaitAll(
+                    async { refreshTvShowsUseCase.refreshTvShows(force = false) },
+                    async { refreshTvShowsUseCase.refreshPopularTvShows(force = false) },
+                    async { refreshTvShowsUseCase.refreshTopRatedTvShows(force = false) },
+                    async { refreshTvShowsUseCase.refreshOnAirTvShows(force = false) },
+                    async { refreshTvShowsUseCase.refreshTrendingTvShows(force = false) },
+                    async { refreshTvShowsUseCase.refreshAiringTodayTvShows(force = false) },
+                    async { refreshTvShowsUseCase.refreshTrendingTvShowsWeek(force = false) }
+                )
+                
+                results.forEach { result ->
+                    if (result is org.lanzadera.proyectos.domain.models.Result.Error) {
+                        hasError = true
+                        _error.value = result.message ?: "Error fetching tv shows"
+                    }
                 }
-                Logger.d("TV shows loaded successfully, total: ${tvShows.value.size}", tag = "SeriesTabViewModel")
-            } catch (t: Throwable) {
-                _error.value = t.message ?: "Error fetching tv shows"
-                Logger.e("Error refreshing tv shows", tag = "SeriesTabViewModel", throwable = t)
-            } finally {
-                _isRefreshing.value = false
             }
+            
+            if (!hasError) {
+                Logger.d("TV shows loaded successfully, total: ${tvShows.value.size}", tag = "SeriesTabViewModel")
+            }
+            _isRefreshing.value = false
         }
     }
 
@@ -133,25 +139,32 @@ class SeriesTabViewModel(
 
         Logger.d("Force refreshing TV shows", tag = "SeriesTabViewModel")
         viewModelScope.launch {
-            try {
-                _isRefreshing.value = true
-                supervisorScope {
-                    awaitAll(
-                        async { refreshTvShowsUseCase.refreshTvShows(force = true) },
-                        async { refreshTvShowsUseCase.refreshPopularTvShows(force = true) },
-                        async { refreshTvShowsUseCase.refreshTopRatedTvShows(force = true) },
-                        async { refreshTvShowsUseCase.refreshOnAirTvShows(force = true) },
-                        async { refreshTvShowsUseCase.refreshTrendingTvShows(force = true) },
-                        async { refreshTvShowsUseCase.refreshAiringTodayTvShows(force = true) },
-                        async { refreshTvShowsUseCase.refreshTrendingTvShowsWeek(force = true) }
-                    )
+            _isRefreshing.value = true
+            var hasError = false
+            
+            supervisorScope {
+                val results = awaitAll(
+                    async { refreshTvShowsUseCase.refreshTvShows(force = true) },
+                    async { refreshTvShowsUseCase.refreshPopularTvShows(force = true) },
+                    async { refreshTvShowsUseCase.refreshTopRatedTvShows(force = true) },
+                    async { refreshTvShowsUseCase.refreshOnAirTvShows(force = true) },
+                    async { refreshTvShowsUseCase.refreshTrendingTvShows(force = true) },
+                    async { refreshTvShowsUseCase.refreshAiringTodayTvShows(force = true) },
+                    async { refreshTvShowsUseCase.refreshTrendingTvShowsWeek(force = true) }
+                )
+                
+                results.forEach { result ->
+                    if (result is org.lanzadera.proyectos.domain.models.Result.Error) {
+                        hasError = true
+                        _error.value = result.message ?: "Error fetching tv shows"
+                    }
                 }
-            } catch (t: Throwable) {
-                _error.value = t.message ?: "Error fetching tv shows"
-                Logger.e("Error force refreshing tv shows", tag = "SeriesTabViewModel", throwable = t)
-            } finally {
-                _isRefreshing.value = false
             }
+            
+            if (!hasError) {
+                Logger.d("TV shows force refreshed successfully", tag = "SeriesTabViewModel")
+            }
+            _isRefreshing.value = false
         }
     }
 
