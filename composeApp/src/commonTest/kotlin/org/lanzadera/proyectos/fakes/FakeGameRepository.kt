@@ -61,4 +61,10 @@ class FakeGameRepository : GameRepository {
     fun setGameDetails(gameId: Int, game: Game) {
         gameDetails[gameId] = game
     }
+    
+    fun setGameDetails(game: Game?) {
+        game?.let { 
+            it.id?.let { id -> gameDetails[id] = it }
+        }
+    }
 }
