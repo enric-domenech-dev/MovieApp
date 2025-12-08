@@ -4,6 +4,36 @@ This file provides guidance to Copilot when working with code in this repository
 
 ---
 
+## 🚨 ATTENTION COPILOT: READ THIS FIRST! 🚨
+
+**When the user types: "Let's continue - initialize session"**
+
+You MUST immediately execute these commands IN PARALLEL (single response):
+
+```bash
+cat README.md
+cat COPILOT.md  
+cat TODO_LIST.md
+cat AUDIT_REPORT.md
+cat PHASE_1_SUMMARY.md
+cat PHASE_2_SUMMARY.md
+cat docs/architecture/ADR-001-Clean-Architecture.md
+cat docs/architecture/ADR-002-Use-Case-Layer.md
+cat docs/architecture/ADR-003-Repository-Pattern.md
+cat docs/architecture/ADR-004-DTO-vs-Domain-Models.md
+cat copilot/TESTING_STRATEGY.md
+cat copilot/TESTING_COVERAGE.md
+cat copilot/copilot-instructions.md
+grep -A 3 "Next Task:" TODO_LIST.md
+grep "Overall Progress:" TODO_LIST.md
+```
+
+**Then provide a summary of current status before asking what to do.**
+
+**DO NOT skip this. DO NOT assume you remember. ALWAYS execute ALL commands.**
+
+---
+
 ## 🚀 SESSION INITIALIZATION PROTOCOL
 
 ### ⚡ MANDATORY - Read ALL Documentation Before Starting
@@ -70,15 +100,47 @@ Reading all documentation ensures:
 
 ### Session Start Protocol
 
-**📝 User says:**
+**📝 When user says:**
 > "Let's continue - initialize session"
 
-**🤖 Copilot MUST:**
-1. ✅ Execute ALL commands above to read documentation
-2. ✅ Identify the current phase and next task from TODO_LIST.md
-3. ✅ Confirm understanding of the task
-4. ✅ Ask for clarification if needed
-5. ✅ Only then proceed with implementation
+**🤖 Copilot MUST do this FIRST (in a single response with parallel tool calls):**
+
+```
+1. Execute ALL cat commands from STEP 1-3 in PARALLEL using bash tool
+2. Execute grep commands from STEP 4 to identify current task
+3. Read the documentation content (not just execute commands)
+4. Provide a summary confirming:
+   - ✅ Current Phase and Task number
+   - ✅ Last completed task
+   - ✅ Next task to work on
+   - ✅ Understanding of architectural constraints
+```
+
+**⚠️ CRITICAL RULES:**
+- **USE PARALLEL TOOL CALLS** - Call all `cat` commands in ONE response
+- **READ THE CONTENT** - Don't just execute, actually parse the documentation
+- **DON'SKIP** - Must execute ALL commands before asking "what to do next?"
+- **NO SHORTCUTS** - Don't assume you remember from previous sessions
+
+**Example of correct initialization:**
+```
+User: "Let's continue - initialize session"
+
+Copilot: [Executes 10+ cat commands in parallel]
+         [Reads all documentation]
+         [Provides summary]:
+         
+         ✅ Documentation read complete
+         📊 Current Status:
+         - Phase: 3 (Testing)
+         - Current Task: 3.2 - Repository Integration Tests
+         - Last Completed: 3.1 - DTO Serialization Tests
+         - Progress: 33/141 (23.40%)
+         
+         🎯 Next Steps: Task 3.2 requires...
+         
+         Ready to proceed?
+```
 
 ### ⚠️ DO NOT START CODING WITHOUT READING DOCS
 
