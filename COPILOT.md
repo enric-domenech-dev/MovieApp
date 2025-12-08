@@ -19,20 +19,26 @@ cat README.md                    # Project overview and quick start
 cat COPILOT.md                   # This file - architecture rules
 cat TODO_LIST.md                 # Current progress and next task
 cat AUDIT_REPORT.md              # Code audit findings
+cat PHASE_1_SUMMARY.md           # Phase 1 completion summary
+cat PHASE_2_SUMMARY.md           # Phase 2 completion summary
 
 # ═══════════════════════════════════════════════════════════
 # 🏗️ STEP 2: Read Architecture Decision Records (REQUIRED)
 # ═══════════════════════════════════════════════════════════
 
+# Read ALL files in docs/architecture/
 cat docs/architecture/ADR-001-Clean-Architecture.md
 cat docs/architecture/ADR-002-Use-Case-Layer.md
 cat docs/architecture/ADR-003-Repository-Pattern.md
 cat docs/architecture/ADR-004-DTO-vs-Domain-Models.md
+cat docs/architecture/Navigation_Lambda_Refactoring.md
+cat docs/architecture/Navigation-Options.md
 
 # ═══════════════════════════════════════════════════════════
 # 🧪 STEP 3: Read Testing Documentation (REQUIRED)
 # ═══════════════════════════════════════════════════════════
 
+# Read ALL files in copilot/
 cat copilot/TESTING_STRATEGY.md
 cat copilot/TESTING_COVERAGE.md
 cat copilot/copilot-instructions.md
@@ -44,6 +50,12 @@ cat copilot/copilot-instructions.md
 grep -A 3 "Next Task:" TODO_LIST.md
 grep "Overall Progress:" TODO_LIST.md
 grep -A 5 "Current Sprint:" TODO_LIST.md
+```
+
+**💡 TIP:** Use this single command to discover all documentation:
+```bash
+# List all documentation files
+find docs copilot -name "*.md" -type f 2>/dev/null | sort
 ```
 
 ### Why This Is MANDATORY
@@ -83,19 +95,25 @@ Reading all documentation ensures:
 ### Core Files (MUST READ EVERY SESSION)
 1. [README.md](./README.md) - Project overview, structure, quick start
 2. [COPILOT.md](./COPILOT.md) - This file - architecture rules and conventions
-3. [TODO_LIST.md](./TODO_LIST.md) - Detailed task list (140 tasks)
+3. [TODO_LIST.md](./TODO_LIST.md) - Detailed task list with progress tracking
 4. [AUDIT_REPORT.md](./AUDIT_REPORT.md) - Code audit with identified issues
+5. [PHASE_1_SUMMARY.md](./PHASE_1_SUMMARY.md) - Phase 1: Architecture Fixes summary
+6. [PHASE_2_SUMMARY.md](./PHASE_2_SUMMARY.md) - Phase 2: Code Quality summary
 
 ### Architecture Decision Records (MUST READ EVERY SESSION)
-5. [ADR-001: Clean Architecture](docs/architecture/ADR-001-Clean-Architecture.md)
-6. [ADR-002: Use Case Layer](docs/architecture/ADR-002-Use-Case-Layer.md)
-7. [ADR-003: Repository Pattern](docs/architecture/ADR-003-Repository-Pattern.md)
-8. [ADR-004: DTO vs Domain Models](docs/architecture/ADR-004-DTO-vs-Domain-Models.md)
+📁 **Directory:** `docs/architecture/`
+- [ADR-001: Clean Architecture](docs/architecture/ADR-001-Clean-Architecture.md)
+- [ADR-002: Use Case Layer](docs/architecture/ADR-002-Use-Case-Layer.md)
+- [ADR-003: Repository Pattern](docs/architecture/ADR-003-Repository-Pattern.md)
+- [ADR-004: DTO vs Domain Models](docs/architecture/ADR-004-DTO-vs-Domain-Models.md)
+- [Navigation Lambda Refactoring](docs/architecture/Navigation_Lambda_Refactoring.md)
+- [Navigation Options Analysis](docs/architecture/Navigation-Options.md)
 
 ### Testing Documentation (MUST READ EVERY SESSION)
-9. [TESTING_STRATEGY.md](copilot/TESTING_STRATEGY.md) - Testing approach and guidelines
-10. [TESTING_COVERAGE.md](copilot/TESTING_COVERAGE.md) - Coverage configuration
-11. [copilot-instructions.md](copilot/copilot-instructions.md) - How to work with Copilot
+📁 **Directory:** `copilot/`
+- [TESTING_STRATEGY.md](copilot/TESTING_STRATEGY.md) - Testing approach and guidelines
+- [TESTING_COVERAGE.md](copilot/TESTING_COVERAGE.md) - Coverage configuration
+- [copilot-instructions.md](copilot/copilot-instructions.md) - How to work with Copilot
 
 ### Reference Documentation (READ AS NEEDED)
 - [DTO_Migration_Plan.md](docs/architecture/DTO_Migration_Plan.md) - DTO migration guide
