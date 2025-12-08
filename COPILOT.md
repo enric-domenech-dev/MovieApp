@@ -476,7 +476,9 @@ Logger.e("Failed to fetch movies", tag = "MovieRepository", throwable = exceptio
 
 ## Testing
 
-Tests use **Turbine** for Flow testing and **Truth** for assertions:
+### Testing Strategy
+
+Tests use **Turbine** for Flow testing and **kotlin.test** for assertions:
 
 ```kotlin
 // Flow testing pattern
@@ -485,7 +487,74 @@ repository.observeFavorites().test {
 }
 ```
 
-Fake implementations exist in `commonTest/` (e.g., `FakeFavoritesRepository`).
+### Test Types
+
+1. **Unit Tests (with Fakes)** - `commonTest/`
+   - ViewModels: Test business logic with fake repositories
+   - Use Cases: Test use case logic with fakes
+   - Example: `FakeFavoritesRepository`, `FakeMovieRepository`
+
+2. **DTO Serialization Tests** - `commonTest/data/mapper/`
+   - **CRITICAL:** Prevent serialization bugs (Task 1.9, 1.10)
+   - Test JSON round-trip: DTO → JSON → DTO
+   - Test domain mapping: DTO → Domain
+   - Test field preservation: No data loss
+   - Example: `MovieMapperTest`, `TvShowMapperTest`
+
+3. **Integration Tests** - Coming in Phase 3
+   - Test real repository implementations
+   - Test HTTP deserialization
+   - Test Room persistence
+
+### DTO Testing Pattern (MANDATORY for All DTOs)
+
+```kotlin
+@Test
+fun `DTO can be serialized and deserialized`() {
+    // Given
+    val dto = MyDto(id = 1, name = "Test")
+    
+    // When - Serialize to JSON
+    val jsonString = json.encodeToString(dto)
+    
+    // Then - Deserialize back
+    val decoded = json.decodeFromString<MyDto>(jsonString)
+    assertEquals(dto.id, decoded.id)
+}
+
+@Test
+fun `DTO to Domain mapping preserves all fields`() {
+    // Given
+    val dto = MyDto(id = 1, name = "Test")
+    
+    // When
+    val domain = dto.toDomain()
+    
+    // Then - Verify all fields mapped
+    assertEquals(dto.id, domain.id)
+    assertEquals(dto.name, domain.name)
+}
+```
+
+**Why This Matters:** These tests catch bugs where:
+- Removing `@Serializable` breaks serialization
+- Field mappings lose data (e.g., `voteAverage` → `voteAverageDouble`)
+- Complex nested objects fail to serialize (e.g., Season with episodes)
+
+### Running Tests
+
+```bash
+# Run all tests
+./gradlew composeApp:testDebugUnitTest
+
+# Run specific test class
+./gradlew composeApp:testDebugUnitTest --tests "*MapperTest"
+
+# Run with coverage
+./gradlew composeApp:koverHtmlReport
+```
+
+Fake implementations exist in `commonTest/fakes/` and `commonTest/domain/`.
 
 ## Feature Organization
 
