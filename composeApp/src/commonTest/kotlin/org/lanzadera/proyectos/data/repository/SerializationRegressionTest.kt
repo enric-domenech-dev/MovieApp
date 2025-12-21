@@ -9,15 +9,13 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.lanzadera.proyectos.data.dto.movie.MovieDto
 import org.lanzadera.proyectos.data.dto.movie.MovieResponseDto
 import org.lanzadera.proyectos.data.dto.tvshow.EpisodeDto
 import org.lanzadera.proyectos.data.dto.tvshow.SeasonDto
-import org.lanzadera.proyectos.data.mapper.toDto
 import org.lanzadera.proyectos.data.mapper.toDomain
-import org.lanzadera.proyectos.domain.models.movie.Movie
+import org.lanzadera.proyectos.data.mapper.toDto
 import org.lanzadera.proyectos.domain.models.tvshow.Episode
 import org.lanzadera.proyectos.domain.models.tvshow.Season
 import org.lanzadera.proyectos.domain.models.tvshow.TvShow

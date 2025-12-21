@@ -20,7 +20,6 @@ import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
 import org.lanzadera.proyectos.AppTheme
-import org.lanzadera.proyectos.navigation.Screen
 
 @OptIn(KoinExperimentalAPI::class)
 @Composable

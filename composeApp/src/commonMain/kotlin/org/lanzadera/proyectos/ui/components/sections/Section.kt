@@ -25,10 +25,10 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.lanzadera.proyectos.ui.models.MovieUI
 import org.lanzadera.proyectos.ui.components.MovieHeader
 import org.lanzadera.proyectos.ui.components.MovieSubheader
 import org.lanzadera.proyectos.ui.components.dialogs.SectionDialog
+import org.lanzadera.proyectos.ui.models.MovieUI
 import org.lanzadera.proyectos.ui.screens.home.SectionMode
 
 @Composable

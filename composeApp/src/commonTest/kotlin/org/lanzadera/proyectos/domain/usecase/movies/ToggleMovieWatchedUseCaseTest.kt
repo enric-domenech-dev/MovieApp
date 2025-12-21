@@ -1,6 +1,5 @@
 package org.lanzadera.proyectos.domain.usecase.movies
 
-import app.cash.turbine.test
 import kotlinx.coroutines.test.runTest
 import org.lanzadera.proyectos.base.UseCaseTest
 import org.lanzadera.proyectos.fakes.FakeWatchedMoviesRepository

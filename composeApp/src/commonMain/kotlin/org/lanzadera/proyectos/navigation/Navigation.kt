@@ -42,7 +42,6 @@ import org.lanzadera.proyectos.ui.screens.settings.SettingView
 import org.lanzadera.proyectos.ui.screens.settings.SettingsViewModel
 import org.lanzadera.proyectos.ui.screens.splash.SplashView
 import org.lanzadera.proyectos.utils.BottomNavItem
-import org.lanzadera.proyectos.navigation.NavigationStore
 
 @Composable
 fun Navigation(

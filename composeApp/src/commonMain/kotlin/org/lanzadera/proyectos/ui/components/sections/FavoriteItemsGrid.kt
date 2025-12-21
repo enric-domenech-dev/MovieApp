@@ -8,11 +8,11 @@ import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.lanzadera.proyectos.ui.models.FavoriteItemWithInfoUI
 import org.lanzadera.proyectos.ui.components.MovieHeader
 import org.lanzadera.proyectos.ui.components.MovieHeaderWithReleaseInfo
 import org.lanzadera.proyectos.ui.components.TvShowHeaderFinished
 import org.lanzadera.proyectos.ui.components.TvShowHeaderWithNextEpisode
+import org.lanzadera.proyectos.ui.models.FavoriteItemWithInfoUI
 
 @Composable
 fun FavoriteItemsGrid(

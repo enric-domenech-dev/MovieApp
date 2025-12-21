@@ -55,7 +55,6 @@ import movieapp.composeapp.generated.resources.Res
 import movieapp.composeapp.generated.resources.new_edge_logo
 import org.jetbrains.compose.resources.painterResource
 import org.lanzadera.proyectos.BuildConfig
-import org.lanzadera.proyectos.navigation.Screen
 import org.lanzadera.proyectos.utils.Constants.Dimensions.BOTTOM_NAV_BAR_HEIGHT
 import org.lanzadera.proyectos.utils.Strings
 

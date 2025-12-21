@@ -1,7 +1,5 @@
 package org.lanzadera.proyectos.utils
 
-import org.lanzadera.proyectos.navigation.Screen
-
 /**
  * Enum representing bottom navigation items to avoid magic indices across the codebase.
  * Each entry carries an index and can be matched against Screen routes.

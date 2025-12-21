@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.viewmodel.koinViewModel
 import org.lanzadera.proyectos.ui.components.PlaceholderScreen
 import org.lanzadera.proyectos.ui.components.sections.BookSection
 import org.lanzadera.proyectos.ui.components.sections.FavoriteItemsGrid
@@ -40,17 +41,16 @@ import org.lanzadera.proyectos.ui.components.sections.TvShowSection
 import org.lanzadera.proyectos.ui.components.tabs.NiaTab
 import org.lanzadera.proyectos.ui.components.tabs.NiaTabRow
 import org.lanzadera.proyectos.ui.models.BookUI
+import org.lanzadera.proyectos.ui.models.GameUI
 import org.lanzadera.proyectos.ui.models.MovieUI
 import org.lanzadera.proyectos.ui.models.TvShowUI
-import org.lanzadera.proyectos.ui.models.GameUI
-import org.lanzadera.proyectos.ui.screens.home.tabs.FavoritesTabViewModel
 import org.lanzadera.proyectos.ui.screens.home.tabs.BooksTabViewModel
+import org.lanzadera.proyectos.ui.screens.home.tabs.FavoritesTabViewModel
 import org.lanzadera.proyectos.ui.screens.home.tabs.FilmsTabViewModel
-import org.lanzadera.proyectos.ui.screens.home.tabs.SeriesTabViewModel
 import org.lanzadera.proyectos.ui.screens.home.tabs.GamesTabViewModel
+import org.lanzadera.proyectos.ui.screens.home.tabs.SeriesTabViewModel
 import org.lanzadera.proyectos.utils.Constants.MenuOptions.topBarTitles
 import org.lanzadera.proyectos.utils.Strings
-import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 @Preview

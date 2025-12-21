@@ -54,19 +54,13 @@ import kotlinx.datetime.LocalDate
 import movieapp.composeapp.generated.resources.Res
 import movieapp.composeapp.generated.resources.new_edge_logo
 import org.jetbrains.compose.resources.painterResource
-import org.lanzadera.proyectos.domain.models.tvshow.AggregateCast
-import org.lanzadera.proyectos.domain.models.tvshow.AggregateCrew
-import org.lanzadera.proyectos.domain.models.tvshow.Episode
-import org.lanzadera.proyectos.domain.models.tvshow.Season
-import org.lanzadera.proyectos.ui.models.TvShowUI
-import org.lanzadera.proyectos.ui.models.TvShowWithNextEpisodeUI
-import org.lanzadera.proyectos.ui.models.TvShowDetailUI
-import org.lanzadera.proyectos.ui.models.SeasonUI
-import org.lanzadera.proyectos.ui.models.EpisodeUI
 import org.lanzadera.proyectos.ui.models.AggregateCastUI
 import org.lanzadera.proyectos.ui.models.AggregateCrewUI
-import org.lanzadera.proyectos.navigation.Screen
-import org.lanzadera.proyectos.utils.Constants
+import org.lanzadera.proyectos.ui.models.EpisodeUI
+import org.lanzadera.proyectos.ui.models.SeasonUI
+import org.lanzadera.proyectos.ui.models.TvShowDetailUI
+import org.lanzadera.proyectos.ui.models.TvShowUI
+import org.lanzadera.proyectos.ui.models.TvShowWithNextEpisodeUI
 
 @Composable
 fun TvShowItem(

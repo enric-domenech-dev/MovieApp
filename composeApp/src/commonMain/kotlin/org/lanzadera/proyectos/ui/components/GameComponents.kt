@@ -33,8 +33,6 @@ import movieapp.composeapp.generated.resources.Res
 import movieapp.composeapp.generated.resources.new_edge_logo
 import org.jetbrains.compose.resources.painterResource
 import org.lanzadera.proyectos.ui.models.GameUI
-import org.lanzadera.proyectos.navigation.Screen
-import org.lanzadera.proyectos.utils.Constants
 
 @Composable
 fun GameHeader(

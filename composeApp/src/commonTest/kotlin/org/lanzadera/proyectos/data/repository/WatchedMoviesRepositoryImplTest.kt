@@ -2,7 +2,6 @@ package org.lanzadera.proyectos.data.repository
 
 import app.cash.turbine.test
 import kotlinx.coroutines.test.runTest
-import org.lanzadera.proyectos.domain.models.WatchedMovie
 import org.lanzadera.proyectos.fakes.FakeWatchedMoviesDataSource
 import kotlin.test.BeforeTest
 import kotlin.test.Test

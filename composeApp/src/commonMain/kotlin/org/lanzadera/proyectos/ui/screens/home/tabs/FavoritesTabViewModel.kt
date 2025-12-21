@@ -3,18 +3,18 @@ package org.lanzadera.proyectos.ui.screens.home.tabs
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import org.lanzadera.proyectos.domain.models.WatchedEpisode
-import org.lanzadera.proyectos.domain.models.favorite.FavoriteItem as DomainFavoriteItem
 import org.lanzadera.proyectos.domain.models.favorite.FavoriteItemWithInfo
-import org.lanzadera.proyectos.domain.models.favorite.FavoriteType as DomainFavoriteType
 import org.lanzadera.proyectos.domain.models.movie.Movie
 import org.lanzadera.proyectos.domain.models.movie.MovieWithReleaseInfo
 import org.lanzadera.proyectos.domain.models.movie.ReleaseInfo
@@ -25,10 +25,10 @@ import org.lanzadera.proyectos.domain.models.tvshow.TvShowWithNextEpisode
 import org.lanzadera.proyectos.domain.usecase.episodes.ObserveAllWatchedEpisodesUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.GetFavoriteDetailsUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.ObserveFavoritesUseCase
-import org.lanzadera.proyectos.domain.usecase.favorites.ToggleMovieFavoriteUseCase
-import org.lanzadera.proyectos.domain.usecase.favorites.ToggleTvShowFavoriteUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.ToggleBookFavoriteUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.ToggleGameFavoriteUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.ToggleMovieFavoriteUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.ToggleTvShowFavoriteUseCase
 import org.lanzadera.proyectos.domain.usecase.movies.ObserveWatchedMoviesUseCase
 import org.lanzadera.proyectos.ui.mapper.toUI
 import org.lanzadera.proyectos.ui.models.FavoriteItemUI
@@ -37,7 +37,8 @@ import org.lanzadera.proyectos.ui.models.FavoriteTypeUI
 import org.lanzadera.proyectos.utils.DateUtils
 import org.lanzadera.proyectos.utils.Logger
 import kotlin.coroutines.cancellation.CancellationException
-import kotlinx.coroutines.flow.SharingStarted
+import org.lanzadera.proyectos.domain.models.favorite.FavoriteItem as DomainFavoriteItem
+import org.lanzadera.proyectos.domain.models.favorite.FavoriteType as DomainFavoriteType
 
 /**
  * ViewModel for the Favorites (Following) tab.
@@ -177,7 +178,7 @@ class FavoritesTabViewModel(
                 movieWithRelease = movieWithRelease,
                 id = movieWithRelease.movie.id?.toString() ?: "",
                 posterUrl = movieWithRelease.movie.posterPath,
-                updatedAt = System.currentTimeMillis()
+                updatedAt = Clock.System.now().toEpochMilliseconds()
             )
         }
 
@@ -186,7 +187,7 @@ class FavoritesTabViewModel(
                 tvShowWithNext = tvShowWithNext,
                 id = tvShowWithNext.tvShow.id?.toString() ?: "",
                 posterUrl = tvShowWithNext.tvShow.posterPath,
-                updatedAt = System.currentTimeMillis()
+                updatedAt = Clock.System.now().toEpochMilliseconds()
             )
         }
 
@@ -195,7 +196,7 @@ class FavoritesTabViewModel(
                 movie = movie,
                 id = movie.id?.toString() ?: "",
                 posterUrl = movie.posterPath,
-                updatedAt = System.currentTimeMillis()
+                updatedAt = Clock.System.now().toEpochMilliseconds()
             )
         }
 
@@ -204,7 +205,7 @@ class FavoritesTabViewModel(
                 tvShow = tvShow,
                 id = tvShow.id?.toString() ?: "",
                 posterUrl = tvShow.posterPath,
-                updatedAt = System.currentTimeMillis()
+                updatedAt = Clock.System.now().toEpochMilliseconds()
             )
         }
 

@@ -2,10 +2,10 @@ package org.lanzadera.proyectos.ui.screens.home.tabs
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.SharingStarted
 import org.lanzadera.proyectos.domain.usecase.load_initial_data.GetInitialDataUseCase
 import org.lanzadera.proyectos.ui.mapper.toUI
 import org.lanzadera.proyectos.ui.models.MovieUI

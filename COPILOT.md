@@ -459,6 +459,127 @@ fun HomeView(
 
 ---
 
+## ⚠️ CRITICAL: Multiplatform Compatibility Issues (Session 38 - Dec 8, 2025)
+
+### 🚨 BLOQUEANTE: JVM-Only Functions NOT Available in Kotlin/Native (iOS)
+
+When writing code in `commonMain/`, you **MUST** avoid JVM-specific functions that don't exist in Kotlin/Native:
+
+#### ❌ FORBIDDEN in commonMain/:
+
+**1. `MutableList.removeIf { }`** - Does NOT exist in Kotlin/Native
+```kotlin
+// ❌ WRONG (JVM only)
+val current = list.toMutableList()
+current.removeIf { it.id == targetId }
+
+// ✅ CORRECT (Multiplatform)
+val current = list.filterNot { it.id == targetId }.toMutableList()
+```
+
+**2. `String.format()`** - Does NOT exist in Kotlin/Native
+```kotlin
+// ❌ WRONG (JVM only)
+val text = "%.1f".format(rating)
+
+// ✅ CORRECT (Multiplatform)
+val rounded = (rating * 10).toInt() / 10.0
+val text = "$rounded"
+```
+
+**3. `System.currentTimeMillis()`** - Does NOT exist in Kotlin/Native
+```kotlin
+// ❌ WRONG (JVM only)
+import java.lang.System
+val timestamp = System.currentTimeMillis()
+
+// ✅ CORRECT (Multiplatform)
+import kotlinx.datetime.Clock
+val timestamp = Clock.System.now().toEpochMilliseconds()
+```
+
+### 🔧 Platform-Specific Implementations (expect/actual)
+
+**Every `expect` function in `commonMain` MUST have `actual` implementations for ALL platforms:**
+
+- `androidMain/` - Android implementation (uses Room, JVM APIs)
+- `desktopMain/` - Desktop/JVM implementation
+- `iosMain/` - iOS implementation (uses in-memory, no Room)
+
+**Example:**
+```kotlin
+// commonMain/kotlin/.../WatchedMoviesDataSourceProvider.kt
+expect fun createWatchedMoviesDataSource(): WatchedMoviesDataSource
+
+// androidMain/.../WatchedMoviesDataSourceProvider.android.kt
+actual fun createWatchedMoviesDataSource(): WatchedMoviesDataSource {
+    return RoomWatchedMoviesDataSource()  // Uses Room
+}
+
+// desktopMain/.../WatchedMoviesDataSourceProvider.desktop.kt
+actual fun createWatchedMoviesDataSource(): WatchedMoviesDataSource {
+    return InMemoryWatchedMoviesDataSource()  // In-memory
+}
+
+// iosMain/.../WatchedMoviesDataSourceProvider.ios.kt
+actual fun createWatchedMoviesDataSource(): WatchedMoviesDataSource {
+    return InMemoryWatchedMoviesDataSource()  // In-memory
+}
+```
+
+### 📋 Multiplatform Build Order (Simple → Complex)
+
+1. **Desktop (JVM)** - Simplest, similar to Android
+   ```bash
+   ./gradlew :composeApp:desktopJar
+   ```
+
+2. **Android** - Well supported, Room database
+   ```bash
+   ./gradlew :composeApp:assembleDebug
+   ```
+
+3. **iOS Simulator (Arm64)** - Requires Xcode, Kotlin/Native
+   ```bash
+   ./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
+   ```
+
+4. **iOS Device** - Most complex, needs provisioning
+   ```bash
+   ./gradlew :composeApp:linkDebugFrameworkIosArm64
+   ```
+
+### ✅ Multiplatform-Safe Alternatives
+
+| JVM Function | Multiplatform Alternative |
+|--------------|---------------------------|
+| `removeIf { }` | `filterNot { }.toMutableList()` |
+| `String.format()` | String interpolation `"$value"` |
+| `System.currentTimeMillis()` | `Clock.System.now().toEpochMilliseconds()` |
+| `java.util.Date` | `kotlinx.datetime.Instant` |
+| `SimpleDateFormat` | `kotlinx.datetime` formatters |
+| `File` operations | `okio` library (multiplatform) |
+
+### 🐛 Common Build Errors
+
+**Error:** `Unresolved reference 'removeIf'`
+- **Cause:** Using JVM-only function in commonMain
+- **Fix:** Replace with `filterNot { }.toMutableList()`
+
+**Error:** `Unresolved reference 'System'`
+- **Cause:** Using `System.currentTimeMillis()` in commonMain
+- **Fix:** Use `Clock.System.now().toEpochMilliseconds()`
+
+**Error:** `Expected X has no actual declaration in module for Native`
+- **Cause:** Missing `actual` implementation in iosMain/
+- **Fix:** Create corresponding .ios.kt file with `actual` function
+
+**Error:** `Conflicting overloads`
+- **Cause:** Both `nativeMain` and `iosMain` defining same function
+- **Fix:** Remove from `nativeMain` (iosMain is more specific)
+
+---
+
 ## Build & Run Commands
 
 ```bash

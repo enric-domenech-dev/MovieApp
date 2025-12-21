@@ -30,13 +30,11 @@ import movieapp.composeapp.generated.resources.new_edge_logo
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.lanzadera.proyectos.AppTheme
-import org.lanzadera.proyectos.navigation.Screen
 import org.lanzadera.proyectos.ui.components.DevelopingDialog
 import org.lanzadera.proyectos.ui.components.EmailInput
 import org.lanzadera.proyectos.ui.components.FingerPrintAuthentication
 import org.lanzadera.proyectos.ui.components.PasswordInput
 import org.lanzadera.proyectos.ui.components.PrimaryButton
-import org.lanzadera.proyectos.utils.Constants
 import org.lanzadera.proyectos.utils.Strings
 
 @Composable
