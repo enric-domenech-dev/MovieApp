@@ -22,7 +22,6 @@ abstract class FavoritesDatabase : RoomDatabase() {
     abstract fun watchedMovieDao(): WatchedMovieDao
     abstract fun favoriteTvShowDao(): FavoriteTvShowDao
     abstract fun favoriteMovieDao(): FavoriteMovieDao
-    abstract fun favoriteItemDao(): FavoriteItemDao
 
     companion object {
         val instance: FavoritesDatabase by lazy {
