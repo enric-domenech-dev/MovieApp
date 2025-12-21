@@ -15,9 +15,14 @@ import org.lanzadera.proyectos.domain.usecase.favorites.ToggleGameFavoriteUseCas
 import org.lanzadera.proyectos.domain.usecase.favorites.ToggleMovieFavoriteUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.ToggleTvShowFavoriteUseCase
 import org.lanzadera.proyectos.domain.usecase.movies.ObserveWatchedMoviesUseCase
+import org.lanzadera.proyectos.domain.usecase.settings.ObserveMoviesFiltersUseCase
+import org.lanzadera.proyectos.domain.usecase.settings.ObserveSeriesFiltersUseCase
+import org.lanzadera.proyectos.domain.usecase.settings.UpdateMoviesFiltersUseCase
+import org.lanzadera.proyectos.domain.usecase.settings.UpdateSeriesFiltersUseCase
 import org.lanzadera.proyectos.fakes.FakeFavoriteDetailsRepository
 import org.lanzadera.proyectos.fakes.FakeFavoritesRepository
 import org.lanzadera.proyectos.fakes.FakeMovieRepository
+import org.lanzadera.proyectos.fakes.FakeSettingsRepository
 import org.lanzadera.proyectos.fakes.FakeTvShowRepository
 import org.lanzadera.proyectos.fakes.FakeWatchedEpisodesRepository
 import org.lanzadera.proyectos.fakes.FakeWatchedMoviesRepository
@@ -36,6 +41,7 @@ class FavoritesTabViewModelTest : ViewModelTest() {
     private lateinit var fakeDetailsRepository: FakeFavoriteDetailsRepository
     private lateinit var fakeWatchedEpisodesRepository: FakeWatchedEpisodesRepository
     private lateinit var fakeWatchedMoviesRepository: FakeWatchedMoviesRepository
+    private lateinit var fakeSettingsRepository: FakeSettingsRepository
     
     @BeforeTest
     override fun setup() {
@@ -45,6 +51,7 @@ class FavoritesTabViewModelTest : ViewModelTest() {
         fakeDetailsRepository = FakeFavoriteDetailsRepository()
         fakeWatchedEpisodesRepository = FakeWatchedEpisodesRepository()
         fakeWatchedMoviesRepository = FakeWatchedMoviesRepository()
+        fakeSettingsRepository = FakeSettingsRepository()
         
         val observeFavoritesUseCase = ObserveFavoritesUseCase(fakeFavoritesRepository)
         val toggleMovieFavoriteUseCase = ToggleMovieFavoriteUseCase(
@@ -67,6 +74,10 @@ class FavoritesTabViewModelTest : ViewModelTest() {
         val observeAllWatchedEpisodesUseCase = ObserveAllWatchedEpisodesUseCase(fakeWatchedEpisodesRepository)
         val getFavoriteDetailsUseCase = GetFavoriteDetailsUseCase(fakeDetailsRepository)
         val observeWatchedMoviesUseCase = ObserveWatchedMoviesUseCase(fakeWatchedMoviesRepository)
+        val observeSeriesFiltersUseCase = ObserveSeriesFiltersUseCase(fakeSettingsRepository)
+        val observeMoviesFiltersUseCase = ObserveMoviesFiltersUseCase(fakeSettingsRepository)
+        val updateSeriesFiltersUseCase = UpdateSeriesFiltersUseCase(fakeSettingsRepository)
+        val updateMoviesFiltersUseCase = UpdateMoviesFiltersUseCase(fakeSettingsRepository)
         
         viewModel = FavoritesTabViewModel(
             observeFavoritesUseCase = observeFavoritesUseCase,
@@ -76,7 +87,11 @@ class FavoritesTabViewModelTest : ViewModelTest() {
             toggleGameFavoriteUseCase = toggleGameFavoriteUseCase,
             observeAllWatchedEpisodesUseCase = observeAllWatchedEpisodesUseCase,
             getFavoriteDetailsUseCase = getFavoriteDetailsUseCase,
-            observeWatchedMoviesUseCase = observeWatchedMoviesUseCase
+            observeWatchedMoviesUseCase = observeWatchedMoviesUseCase,
+            observeSeriesFiltersUseCase = observeSeriesFiltersUseCase,
+            observeMoviesFiltersUseCase = observeMoviesFiltersUseCase,
+            updateSeriesFiltersUseCase = updateSeriesFiltersUseCase,
+            updateMoviesFiltersUseCase = updateMoviesFiltersUseCase
         )
     }
     
