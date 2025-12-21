@@ -165,11 +165,11 @@ kotlin {
 
 android {
     namespace = "org.lanzadera.proyectos"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
+    compileSdk = libs.versions.androidCompileSdk.get().toInt()
     defaultConfig {
         applicationId = "org.lanzadera.proyectos"
-        minSdk = libs.versions.android.minSdk.get().toInt()
-        targetSdk = libs.versions.android.targetSdk.get().toInt()
+        minSdk = libs.versions.androidMinSdk.get().toInt()
+        targetSdk = libs.versions.androidTargetSdk.get().toInt()
         versionCode = 1
         versionName = "1.1"
 
@@ -205,9 +205,6 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.fragment.ktx)
-    implementation(libs.androidx.core.i18n)
     debugImplementation(compose.uiTooling)
     ksp(libs.androidx.room.compiler)
     add("kspCommonMainMetadata", libs.androidx.room.compiler)
