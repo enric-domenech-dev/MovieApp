@@ -33,29 +33,28 @@ kotlin {
 
     jvm("desktop")
 
-//    @OptIn(ExperimentalWasmDsl::class) wasmJs {
-//        moduleName = "composeApp"
-//        browser {
-//            val rootDirPath = project.rootDir.path
-//            val projectDirPath = project.projectDir.path
-//            commonWebpackConfig {
-//                outputFileName = "composeApp.js"
-//                devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
-//                    static = (static ?: mutableListOf()).apply {
-//                        // Serve sources to debug inside browser
-//                        add(rootDirPath)
-//                        add(projectDirPath)
-//                    }
-//                }
-//            }
-//        }
-//        binaries.executable()
-//    }
+    wasmJs {
+        browser {
+            commonWebpackConfig {
+                outputFileName = "composeApp.js"
+            }
+        }
+        binaries.executable()
+    }
+
+    // Exclude old kotlin-stdlib-wasm to avoid conflicts
+    configurations.all {
+        exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib-wasm")
+    }
 
     sourceSets {
-//        val desktopMain by getting
+        val desktopMain by getting
 
         androidMain.dependencies {
+
+            // Room
+            implementation(libs.androidx.room.runtime)
+            implementation(libs.androidx.sqlite.bundled)
 
             // Koin
             implementation(libs.koin.android)
@@ -71,10 +70,6 @@ kotlin {
             implementation(libs.androidx.room.ktx)
         }
         commonMain.dependencies {
-
-            // Room
-            implementation(libs.androidx.room.runtime)
-            implementation(libs.androidx.sqlite.bundled)
 
             // Koin
             implementation(project.dependencies.platform(libs.koin.bom))
@@ -104,15 +99,19 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.kotlinx.datetime)
         }
-//        desktopMain.dependencies {
-//            implementation(libs.ktor.client.okhttp)
-//            implementation(compose.desktop.currentOs)
-//            implementation(libs.kotlinx.coroutines.swing)
-//        }
-//        wasmJsMain.dependencies {
-//            implementation(libs.ktor.client.js)
-//        }
+        desktopMain.dependencies {
+            implementation(libs.androidx.room.runtime)
+            implementation(libs.androidx.sqlite.bundled)
+            implementation(libs.ktor.client.okhttp)
+            implementation(compose.desktop.currentOs)
+            implementation(libs.kotlinx.coroutines.swing)
+        }
+        wasmJsMain.dependencies {
+            implementation(libs.ktor.client.js)
+        }
         iosMain.dependencies {
+            implementation(libs.androidx.room.runtime)
+            implementation(libs.androidx.sqlite.bundled)
             implementation(libs.ktor.client.darwin)
         }
 
@@ -223,9 +222,14 @@ compose.desktop {
 }
 
 tasks.withType(KotlinCompilationTask::class.java).configureEach {
-    if (name != "kspCommonMainKotlinMetadata") {
+    if (name != "kspCommonMainKotlinMetadata" && !name.contains("WasmJs")) {
         dependsOn("kspCommonMainKotlinMetadata")
     }
+}
+
+// Disable KSP for WasmJs since Room is not supported
+tasks.matching { it.name == "kspKotlinWasmJs" }.configureEach {
+    enabled = false
 }
 
 room {
