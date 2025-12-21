@@ -226,6 +226,34 @@ class FavoritesTabViewModel(
         sortedDomainItems.map { it.toUI() }
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
+    // Filter states
+    private val _showMovies = MutableStateFlow(false)
+    val showMovies: StateFlow<Boolean> = _showMovies.asStateFlow()
+    
+    private val _showSeries = MutableStateFlow(true)
+    val showSeries: StateFlow<Boolean> = _showSeries.asStateFlow()
+
+    // Filtered favorites based on active filters
+    val filteredFavoritesWithInfo: StateFlow<List<FavoriteItemWithInfoUI>> = combine(
+        favoritesWithInfo,
+        showMovies,
+        showSeries
+    ) { items, moviesEnabled, seriesEnabled ->
+        when {
+            !moviesEnabled && !seriesEnabled -> emptyList() // No filters active
+            moviesEnabled && seriesEnabled -> items // All items
+            moviesEnabled -> items.filter { 
+                it is FavoriteItemWithInfoUI.MovieItem || 
+                it is FavoriteItemWithInfoUI.WatchedMovieItem 
+            }
+            seriesEnabled -> items.filter { 
+                it is FavoriteItemWithInfoUI.TvShowItem || 
+                it is FavoriteItemWithInfoUI.FinishedSeriesItem 
+            }
+            else -> emptyList()
+        }
+    }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
     // Loading and error states
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
@@ -273,6 +301,20 @@ class FavoritesTabViewModel(
      */
     fun clearError() {
         _error.value = null
+    }
+
+    /**
+     * Toggle movies filter.
+     */
+    fun toggleMoviesFilter() {
+        _showMovies.value = !_showMovies.value
+    }
+
+    /**
+     * Toggle series filter.
+     */
+    fun toggleSeriesFilter() {
+        _showSeries.value = !_showSeries.value
     }
 
     /**

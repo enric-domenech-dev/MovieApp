@@ -171,27 +171,26 @@ private fun FavoritesTabContent(
     onTvShowClick: (tvShowId: Int) -> Unit,
     paddingValues: PaddingValues
 ) {
-    val favoritesWithInfo by viewModel.favoritesWithInfo.collectAsStateWithLifecycle()
+    val filteredFavorites by viewModel.filteredFavoritesWithInfo.collectAsStateWithLifecycle()
+    val allFavorites by viewModel.favoritesWithInfo.collectAsStateWithLifecycle()
+    val showMovies by viewModel.showMovies.collectAsStateWithLifecycle()
+    val showSeries by viewModel.showSeries.collectAsStateWithLifecycle()
 
-    if (favoritesWithInfo.isEmpty()) {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(paddingValues),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            PlaceholderScreen(title = "No hay contenido por seguir")
-        }
-    } else {
-        FavoriteItemsGrid(
-            items = favoritesWithInfo,
-            onMovieClick = onMovieClick,
-            onTvShowClick = onTvShowClick,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .navigationBarsPadding()
-        )
-    }
+    // Always show the grid with chips, even when empty
+    FavoriteItemsGrid(
+        items = filteredFavorites,
+        showMovies = showMovies,
+        showSeries = showSeries,
+        onMoviesFilterToggle = { viewModel.toggleMoviesFilter() },
+        onSeriesFilterToggle = { viewModel.toggleSeriesFilter() },
+        onMovieClick = onMovieClick,
+        onTvShowClick = onTvShowClick,
+        hasNoFavorites = allFavorites.isEmpty(),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+            .navigationBarsPadding()
+    )
 }
 
 @Composable
