@@ -1,11 +1,10 @@
 [versions]
 accompanistPermissionsVersion = "0.37.0"
 agp = "8.9.3"
-android-compileSdk = "36"
-android-minSdk = "24"
-android-targetSdk = "35"
+androidCompileSdk = "36"
+androidMinSdk = "24"
+androidTargetSdk = "35"
 androidx-activityCompose = "1.12.1"
-androidx-appcompat = "1.7.1"
 androidx-lifecycle = "2.9.5"
 biometric = "1.1.0"
 compose-multiplatform = "1.7.1"
@@ -17,10 +16,7 @@ kotlinxCoroutinesTest = "1.10.1"
 kotlinxDatetime = "0.6.0"
 kotlinxSerializationJson = "1.8.1"
 navigationCompose = "2.9.1"
-fragmentKtx = "1.8.9"
 ktor = "3.0.2"
-coroutines = "1.10.1"
-coreI18n = "1.0.0"
 coilComposeCore = "3.0.0-alpha06"
 ksp = "2.1.0-1.0.29"
 androidx-room = "2.7.2"
@@ -28,10 +24,8 @@ androidx-sqliteBundled = "2.5.2"
 buildConfig = "5.5.0"
 koin = "3.6.0-Beta4"
 koin-compose = "1.2.0-Beta4"
-slf4jSimpleVersion = "2.0.13"
 truthVersion = "1.4.4"
 turbineVersion = "1.1.0"
-realm = "1.16.0"
 napier = "2.7.1"
 kover = "0.8.3"
 
@@ -49,24 +43,19 @@ ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
-ktor-client-js = { group = "io.ktor", name = "ktor-client-js", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-client-serialization = { group = "io.ktor", name = "ktor-client-serialization", version.ref = "ktor" }
 ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-client-json = { group = "io.ktor", name = "ktor-client-json", version.ref = "ktor" }
 ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }
-androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidx-appcompat" }
 androidx-biometric = { group = "androidx.biometric", name = "biometric", version.ref = "biometric" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
 androidx-lifecycle-viewmodel-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
-kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
-androidx-fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragmentKtx" }
-kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
-kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
-androidx-core-i18n = { group = "androidx.core", name = "core-i18n", version.ref = "coreI18n" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "androidx-room" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "androidx-room" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "androidx-room" }
@@ -77,10 +66,8 @@ koin-core = { group = "io.insert-koin", name = "koin-core" }
 koin-compose = { group = "io.insert-koin", name = "koin-compose" }
 koin-compose-viewmodel = { group = "io.insert-koin", name = "koin-compose-viewmodel", version.ref = "koin-compose" }
 androidx-compose-material-iconsExtended = { group = "androidx.compose.material", name = "material-icons-extended-android", version.ref = "icons-extended" }
-slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4jSimpleVersion" }
 truth = { module = "com.google.truth:truth", version.ref = "truthVersion" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbineVersion" }
-realm-library-base = { module = "io.realm.kotlin:library-base", version.ref = "realm" }
 napier = { module = "io.github.aakira:napier", version.ref = "napier" }
 
 [bundles]
@@ -96,5 +83,4 @@ kotlinxSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 androidxRoom = { id = "androidx.room", version.ref = "androidx-room" }
 gradleBuildConfig = { id = "com.github.gmazzo.buildconfig", version.ref = "buildConfig" }
-realm = { id = "io.realm.kotlin", version.ref = "realm" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
