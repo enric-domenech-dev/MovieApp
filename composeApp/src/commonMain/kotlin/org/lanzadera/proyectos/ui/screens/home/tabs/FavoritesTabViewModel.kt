@@ -30,10 +30,15 @@ import org.lanzadera.proyectos.domain.usecase.favorites.ToggleGameFavoriteUseCas
 import org.lanzadera.proyectos.domain.usecase.favorites.ToggleMovieFavoriteUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.ToggleTvShowFavoriteUseCase
 import org.lanzadera.proyectos.domain.usecase.movies.ObserveWatchedMoviesUseCase
+import org.lanzadera.proyectos.domain.usecase.settings.ObserveMoviesFiltersUseCase
+import org.lanzadera.proyectos.domain.usecase.settings.ObserveSeriesFiltersUseCase
+import org.lanzadera.proyectos.domain.usecase.settings.UpdateMoviesFiltersUseCase
+import org.lanzadera.proyectos.domain.usecase.settings.UpdateSeriesFiltersUseCase
 import org.lanzadera.proyectos.ui.mapper.toUI
 import org.lanzadera.proyectos.ui.models.FavoriteItemUI
 import org.lanzadera.proyectos.ui.models.FavoriteItemWithInfoUI
 import org.lanzadera.proyectos.ui.models.FavoriteTypeUI
+import org.lanzadera.proyectos.ui.models.shouldShowWithFilters
 import org.lanzadera.proyectos.utils.DateUtils
 import org.lanzadera.proyectos.utils.Logger
 import kotlin.coroutines.cancellation.CancellationException
@@ -58,7 +63,11 @@ class FavoritesTabViewModel(
     private val toggleGameFavoriteUseCase: ToggleGameFavoriteUseCase,
     private val observeAllWatchedEpisodesUseCase: ObserveAllWatchedEpisodesUseCase,
     private val getFavoriteDetailsUseCase: GetFavoriteDetailsUseCase,
-    private val observeWatchedMoviesUseCase: ObserveWatchedMoviesUseCase
+    private val observeWatchedMoviesUseCase: ObserveWatchedMoviesUseCase,
+    private val observeSeriesFiltersUseCase: ObserveSeriesFiltersUseCase,
+    private val observeMoviesFiltersUseCase: ObserveMoviesFiltersUseCase,
+    private val updateSeriesFiltersUseCase: UpdateSeriesFiltersUseCase,
+    private val updateMoviesFiltersUseCase: UpdateMoviesFiltersUseCase
 ) : ViewModel() {
 
     // Basic favorites list
@@ -72,6 +81,8 @@ class FavoritesTabViewModel(
             .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     // TV Shows with next unwatched episode
+    data class EpisodeCheckResult(val nextEpisode: NextEpisodeInfo?, val isInProduction: Boolean)
+    
     val seriesWithUnwatchedEpisodes: StateFlow<List<TvShowWithNextEpisode>> = combine(
         getFavoriteDetailsUseCase.observeFavoriteTvShows(),
         allWatchedEpisodes
@@ -87,15 +98,37 @@ class FavoritesTabViewModel(
             Logger.d("SIGUIENDO: Analizando ${show.name} (ID: $showId)", tag = "FavoritesTabViewModel")
 
             // Find next unwatched episode
-            val nextEpisode = findNextUnwatchedEpisode(seasons, showId, watched, today)
+            val result = findNextUnwatchedEpisodeWithStatus(seasons, showId, watched, today)
 
-            if (nextEpisode != null) {
-                Logger.d("SIGUIENDO:   - Próximo episodio: ${nextEpisode.episodeCode} - ${nextEpisode.displayText}", tag = "FavoritesTabViewModel")
-                TvShowWithNextEpisode(show, nextEpisode)
+            if (result.nextEpisode != null) {
+                Logger.d(
+                    "SIGUIENDO:   - Próximo episodio: ${result.nextEpisode.episodeCode} - ${result.nextEpisode.displayText}",
+                    tag = "FavoritesTabViewModel"
+                )
+                TvShowWithNextEpisode(show, result.nextEpisode)
             } else {
-                Logger.d("SIGUIENDO:   - No hay más episodios por ver", tag = "FavoritesTabViewModel")
+                Logger.d(
+                    "SIGUIENDO:   - No hay más episodios por ver (en producción: ${result.isInProduction})",
+                    tag = "FavoritesTabViewModel"
+                )
                 null
             }
+        }
+    }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    // Series in production (no episodes with air dates yet)
+    val seriesInProduction: StateFlow<List<TvShow>> = combine(
+        getFavoriteDetailsUseCase.observeFavoriteTvShows(),
+        allWatchedEpisodes
+    ) { favoriteTvShows, watched ->
+        val today = DateUtils.getTodayInUserTimezone()
+
+        favoriteTvShows.filter { show ->
+            val showId = show.id?.toString() ?: return@filter false
+            val seasons = show.seasons ?: return@filter false
+
+            val result = findNextUnwatchedEpisodeWithStatus(seasons, showId, watched, today)
+            result.nextEpisode == null && result.isInProduction
         }
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
@@ -110,8 +143,8 @@ class FavoritesTabViewModel(
             val showId = show.id?.toString() ?: return@filter false
             val seasons = show.seasons ?: return@filter false
 
-            // If no next episode, it's finished
-            findNextUnwatchedEpisode(seasons, showId, watched, today) == null
+            val result = findNextUnwatchedEpisodeWithStatus(seasons, showId, watched, today)
+            result.nextEpisode == null && !result.isInProduction
         }
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
@@ -171,8 +204,9 @@ class FavoritesTabViewModel(
         moviesWithReleaseInfo,
         seriesWithUnwatchedEpisodes,
         watchedMoviesWithInfo,
-        finishedSeries
-    ) { movies, series, watchedMovies, finishedShows ->
+        finishedSeries,
+        seriesInProduction
+    ) { movies, series, watchedMovies, finishedShows, inProductionShows ->
         val movieItems = movies.map { movieWithRelease ->
             FavoriteItemWithInfo.MovieItem(
                 movieWithRelease = movieWithRelease,
@@ -209,15 +243,53 @@ class FavoritesTabViewModel(
             )
         }
 
-        // Sort: unwatched available first, then by days until available, then completed
-        val sortedDomainItems = (movieItems + seriesItems + watchedMovieItems + finishedSeriesItems).sortedWith(
-            compareBy<FavoriteItemWithInfo> { it.isCompleted }
-                .thenByDescending { item -> if (!item.isCompleted) item.isAvailable else false }
-                .thenBy { item ->
-                    if (!item.isCompleted && !item.isAvailable) {
-                        item.daysUntilAvailable ?: Int.MAX_VALUE
+        val inProductionSeriesItems = inProductionShows.map { tvShow ->
+            FavoriteItemWithInfo.InProductionSeriesItem(
+                tvShow = tvShow,
+                id = tvShow.id?.toString() ?: "",
+                posterUrl = tvShow.posterPath,
+                updatedAt = Clock.System.now().toEpochMilliseconds()
+            )
+        }
+
+        // Sort: 1) Disponibles, 2) Próximamente (por días), 3) En Producción, 4) Series Finalizadas sin episodios pendientes
+        val sortedDomainItems =
+            (movieItems + seriesItems + watchedMovieItems + finishedSeriesItems + inProductionSeriesItems).sortedWith(
+                compareBy<FavoriteItemWithInfo> { item ->
+                    // Check if series is ended/cancelled AND has no more episodes to watch
+                    val isSeriesEndedAndCompleted = when (item) {
+                        is FavoriteItemWithInfo.TvShowItem -> {
+                            // Si tiene próximo episodio, no está completada aunque esté ended
+                            false
+                        }
+
+                        is FavoriteItemWithInfo.InProductionSeriesItem -> {
+                            // Series en producción nunca están completadas
+                            false
+                        }
+
+                        is FavoriteItemWithInfo.FinishedSeriesItem -> {
+                            // Si está en FinishedSeriesItem, no tiene más episodios por ver
+                            val status = item.tvShow.status?.lowercase()
+                            status == "ended" || status == "canceled" || status == "cancelled"
+                        }
+
+                        is FavoriteItemWithInfo.WatchedMovieItem -> false
+                        is FavoriteItemWithInfo.MovieItem -> false
+                    }
+
+                    when {
+                        isSeriesEndedAndCompleted -> 4 // Series finalizadas SIN episodios por ver
+                        item.isAvailable && !item.isCompleted -> 0 // Disponibles primero (incluye ended con episodios)
+                        item.daysUntilAvailable != null -> 1 // Próximamente segundo
+                        else -> 2 // En producción tercero
+                    }
+                }.thenBy { item ->
+                    // Dentro de "Próximamente", ordenar por días ascendente
+                    if (!item.isCompleted && !item.isAvailable && item.daysUntilAvailable != null) {
+                        item.daysUntilAvailable
                     } else {
-                        -1
+                        Int.MAX_VALUE
                     }
                 }
         )
@@ -226,33 +298,103 @@ class FavoritesTabViewModel(
         sortedDomainItems.map { it.toUI() }
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    // Filter states
+    // Filter states for content types (mantener como antes para los chips principales)
     private val _showMovies = MutableStateFlow(false)
     val showMovies: StateFlow<Boolean> = _showMovies.asStateFlow()
     
     private val _showSeries = MutableStateFlow(true)
     val showSeries: StateFlow<Boolean> = _showSeries.asStateFlow()
 
+    // Filter states for series status (desde repositorio)
+    val showAvailableSeries: StateFlow<Boolean> = observeSeriesFiltersUseCase
+        .observeShowAvailableSeries()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
+
+    val showUpcomingSeries: StateFlow<Boolean> = observeSeriesFiltersUseCase
+        .observeShowUpcomingSeries()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
+
+    val showInProductionSeries: StateFlow<Boolean> = observeSeriesFiltersUseCase
+        .observeShowInProductionSeries()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
+
+    val showEndedSeries: StateFlow<Boolean> = observeSeriesFiltersUseCase
+        .observeShowEndedSeries()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
+
+    // Filter states for movies status (desde repositorio)
+    val showAvailableMovies: StateFlow<Boolean> = observeMoviesFiltersUseCase
+        .observeShowAvailableMovies()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
+
+    val showUpcomingMovies: StateFlow<Boolean> = observeMoviesFiltersUseCase
+        .observeShowUpcomingMovies()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
+
     // Filtered favorites based on active filters
-    val filteredFavoritesWithInfo: StateFlow<List<FavoriteItemWithInfoUI>> = combine(
-        favoritesWithInfo,
-        showMovies,
-        showSeries
-    ) { items, moviesEnabled, seriesEnabled ->
-        when {
-            !moviesEnabled && !seriesEnabled -> emptyList() // No filters active
-            moviesEnabled && seriesEnabled -> items // All items
-            moviesEnabled -> items.filter { 
-                it is FavoriteItemWithInfoUI.MovieItem || 
-                it is FavoriteItemWithInfoUI.WatchedMovieItem 
-            }
-            seriesEnabled -> items.filter { 
-                it is FavoriteItemWithInfoUI.TvShowItem || 
-                it is FavoriteItemWithInfoUI.FinishedSeriesItem 
-            }
-            else -> emptyList()
+    val filteredFavoritesWithInfo: StateFlow<List<FavoriteItemWithInfoUI>> = favoritesWithInfo
+        .combine(showMovies) { items, movies -> items to movies }
+        .combine(showSeries) { (items, movies), series -> Triple(items, movies, series) }
+        .combine(showAvailableSeries) { (items, movies, series), availSeries ->
+            items to mapOf(
+                "movies" to movies,
+                "series" to series,
+                "availSeries" to availSeries
+            )
         }
-    }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+        .combine(showUpcomingSeries) { (items, map), upSeries ->
+            items to (map + ("upSeries" to upSeries))
+        }
+        .combine(showInProductionSeries) { (items, map), prodSeries ->
+            items to (map + ("prodSeries" to prodSeries))
+        }
+        .combine(showEndedSeries) { (items, map), endSeries ->
+            items to (map + ("endSeries" to endSeries))
+        }
+        .combine(showAvailableMovies) { (items, map), availMovies ->
+            items to (map + ("availMovies" to availMovies))
+        }
+        .combine(showUpcomingMovies) { (items, map), upMovies ->
+            val moviesEnabled = map["movies"] as Boolean
+            val seriesEnabled = map["series"] as Boolean
+            val availableSeries = map["availSeries"] as Boolean
+            val upcomingSeries = map["upSeries"] as Boolean
+            val inProductionSeries = map["prodSeries"] as Boolean
+            val endedSeries = map["endSeries"] as Boolean
+            val availableMovies = map["availMovies"] as Boolean
+            val upcomingMovies = upMovies
+
+            when {
+                !moviesEnabled && !seriesEnabled -> emptyList() // No filters active
+                moviesEnabled && seriesEnabled -> items.filter { item ->
+                    item.shouldShowWithFilters(
+                        availableSeries, upcomingSeries, inProductionSeries, endedSeries,
+                        availableMovies, upcomingMovies
+                    )
+                }
+
+                moviesEnabled -> items.filter { item ->
+                    (item is FavoriteItemWithInfoUI.MovieItem || item is FavoriteItemWithInfoUI.WatchedMovieItem) &&
+                            item.shouldShowWithFilters(
+                                availableSeries, upcomingSeries, inProductionSeries, endedSeries,
+                                availableMovies, upcomingMovies
+                            )
+                }
+
+                seriesEnabled -> items.filter { item ->
+                    (item is FavoriteItemWithInfoUI.TvShowItem ||
+                            item is FavoriteItemWithInfoUI.FinishedSeriesItem ||
+                            item is FavoriteItemWithInfoUI.InProductionSeriesItem) &&
+                            item.shouldShowWithFilters(
+                                availableSeries, upcomingSeries, inProductionSeries, endedSeries,
+                                availableMovies, upcomingMovies
+                            )
+                }
+
+                else -> emptyList()
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     // Loading and error states
     private val _isRefreshing = MutableStateFlow(false)
@@ -318,22 +460,77 @@ class FavoritesTabViewModel(
     }
 
     /**
-     * Find the next unwatched episode for a TV show.
-     * 
-     * @return NextEpisodeInfo if found, null if all episodes are watched
+     * Toggle series status filters.
      */
-    private fun findNextUnwatchedEpisode(
+    fun toggleAvailableSeries() {
+        viewModelScope.launch {
+            updateSeriesFiltersUseCase.updateShowAvailableSeries(!showAvailableSeries.value)
+        }
+    }
+
+    fun toggleUpcomingSeries() {
+        viewModelScope.launch {
+            updateSeriesFiltersUseCase.updateShowUpcomingSeries(!showUpcomingSeries.value)
+        }
+    }
+
+    fun toggleInProductionSeries() {
+        viewModelScope.launch {
+            updateSeriesFiltersUseCase.updateShowInProductionSeries(!showInProductionSeries.value)
+        }
+    }
+
+    fun toggleEndedSeries() {
+        viewModelScope.launch {
+            updateSeriesFiltersUseCase.updateShowEndedSeries(!showEndedSeries.value)
+        }
+    }
+
+    /**
+     * Toggle movies status filters.
+     */
+    fun toggleAvailableMovies() {
+        viewModelScope.launch {
+            updateMoviesFiltersUseCase.updateShowAvailableMovies(!showAvailableMovies.value)
+        }
+    }
+
+    fun toggleUpcomingMovies() {
+        viewModelScope.launch {
+            updateMoviesFiltersUseCase.updateShowUpcomingMovies(!showUpcomingMovies.value)
+        }
+    }
+
+    /**
+     * Find the next unwatched episode for a TV show with production status.
+     *
+     * @return EpisodeCheckResult with next episode info and production status
+     */
+    private fun findNextUnwatchedEpisodeWithStatus(
         seasons: List<Season>,
         showId: String,
         watched: List<WatchedEpisode>,
         today: LocalDate
-    ): NextEpisodeInfo? {
+    ): EpisodeCheckResult {
         // Sort seasons by number (ignore season 0 - specials)
         val sortedSeasons = seasons.filter { (it.seasonNumber ?: 0) > 0 }.sortedBy { it.seasonNumber ?: 0 }
 
         for (season in sortedSeasons) {
             val seasonNumber = season.seasonNumber ?: continue
-            val episodes = season.episodes ?: continue
+            val episodes = season.episodes
+
+            // Skip seasons with 0 episodes (in production, not yet available)
+            if (episodes.isNullOrEmpty()) {
+                val episodeCount = season.episodeCount ?: 0
+                if (episodeCount == 0) {
+                    Logger.d(
+                        "SIGUIENDO:   - Temporada $seasonNumber tiene 0 episodios (en producción)",
+                        tag = "FavoritesTabViewModel"
+                    )
+                    return EpisodeCheckResult(nextEpisode = null, isInProduction = true)
+                }
+                continue
+            }
 
             // Sort episodes by number
             val sortedEpisodes = episodes.sortedBy { it.episodeNumber ?: 0 }
@@ -349,8 +546,97 @@ class FavoritesTabViewModel(
                 }
 
                 if (!isWatched) {
-                    // This is the next unwatched episode
+                    // Check if episode has an air date
                     val airDate = episode.airDate
+                    if (airDate == null) {
+                        Logger.d(
+                            "SIGUIENDO:   - Episodio S${seasonNumber}E${episodeNumber} sin fecha de emisión (en producción)",
+                            tag = "FavoritesTabViewModel"
+                        )
+                        return EpisodeCheckResult(nextEpisode = null, isInProduction = true)
+                    }
+
+                    // This is the next unwatched episode with a valid air date
+                    val isAired = DateUtils.hasDatePassed(airDate)
+                    val daysUntilAir = DateUtils.daysUntilDate(airDate, adjustForTimezone = true)?.let { days ->
+                        if (days > 0) days else null
+                    }
+
+                    return EpisodeCheckResult(
+                        nextEpisode = NextEpisodeInfo(
+                            seasonNumber = seasonNumber,
+                            episodeNumber = episodeNumber,
+                            episodeName = episode.name,
+                            airDate = airDate,
+                            isAired = isAired,
+                            daysUntilAir = daysUntilAir
+                        ),
+                        isInProduction = false
+                    )
+                }
+            }
+        }
+
+        // All episodes watched, not in production
+        return EpisodeCheckResult(nextEpisode = null, isInProduction = false)
+    }
+
+    /**
+     * Find the next unwatched episode for a TV show.
+     *
+     * @return NextEpisodeInfo if found, null if all episodes are watched or series is in production without release dates
+     */
+    private fun findNextUnwatchedEpisode(
+        seasons: List<Season>,
+        showId: String,
+        watched: List<WatchedEpisode>,
+        today: LocalDate
+    ): NextEpisodeInfo? {
+        // Sort seasons by number (ignore season 0 - specials)
+        val sortedSeasons = seasons.filter { (it.seasonNumber ?: 0) > 0 }.sortedBy { it.seasonNumber ?: 0 }
+
+        for (season in sortedSeasons) {
+            val seasonNumber = season.seasonNumber ?: continue
+            val episodes = season.episodes
+
+            // Skip seasons with 0 episodes (in production, not yet available)
+            if (episodes.isNullOrEmpty()) {
+                val episodeCount = season.episodeCount ?: 0
+                if (episodeCount == 0) {
+                    Logger.d(
+                        "SIGUIENDO:   - Temporada $seasonNumber tiene 0 episodios (en producción)",
+                        tag = "FavoritesTabViewModel"
+                    )
+                    return null
+                }
+                continue
+            }
+
+            // Sort episodes by number
+            val sortedEpisodes = episodes.sortedBy { it.episodeNumber ?: 0 }
+
+            for (episode in sortedEpisodes) {
+                val episodeNumber = episode.episodeNumber ?: continue
+
+                // Check if watched
+                val isWatched = watched.any {
+                    it.tvShowId == showId &&
+                            it.seasonNumber == seasonNumber &&
+                            it.episodeNumber == episodeNumber
+                }
+
+                if (!isWatched) {
+                    // Check if episode has an air date
+                    val airDate = episode.airDate
+                    if (airDate == null) {
+                        Logger.d(
+                            "SIGUIENDO:   - Episodio S${seasonNumber}E${episodeNumber} sin fecha de emisión (en producción)",
+                            tag = "FavoritesTabViewModel"
+                        )
+                        return null
+                    }
+
+                    // This is the next unwatched episode with a valid air date
                     val isAired = DateUtils.hasDatePassed(airDate)
                     val daysUntilAir = DateUtils.daysUntilDate(airDate, adjustForTimezone = true)?.let { days ->
                         if (days > 0) days else null

@@ -12,8 +12,10 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,6 +35,7 @@ fun FavoriteItemsGrid(
     showSeries: Boolean,
     onMoviesFilterToggle: () -> Unit,
     onSeriesFilterToggle: () -> Unit,
+    onSettingsClick: () -> Unit,
     onMovieClick: (movieId: Int) -> Unit,
     onTvShowClick: (tvShowId: Int) -> Unit,
     hasNoFavorites: Boolean,
@@ -54,8 +57,18 @@ fun FavoriteItemsGrid(
         item(span = { GridItemSpan(2) }) {
             Row(
                 modifier = Modifier.padding(bottom = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                // Settings button
+                IconButton(onClick = onSettingsClick) {
+                    Icon(
+                        imageVector = Icons.Filled.Settings,
+                        contentDescription = "Filtros",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                
                 FilterChip(
                     selected = showSeries,
                     onClick = onSeriesFilterToggle,
@@ -150,6 +163,13 @@ fun FavoriteItemsGrid(
                 }
 
                 is FavoriteItemWithInfoUI.FinishedSeriesItem -> {
+                    TvShowHeaderFinished(
+                        tvShow = item.tvShow,
+                        onTvShowClick = onTvShowClick
+                    )
+                }
+
+                is FavoriteItemWithInfoUI.InProductionSeriesItem -> {
                     TvShowHeaderFinished(
                         tvShow = item.tvShow,
                         onTvShowClick = onTvShowClick

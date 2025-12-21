@@ -22,6 +22,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
@@ -33,6 +36,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import org.lanzadera.proyectos.ui.components.PlaceholderScreen
+import org.lanzadera.proyectos.ui.components.dialogs.FavoritesFilterDialog
 import org.lanzadera.proyectos.ui.components.sections.BookSection
 import org.lanzadera.proyectos.ui.components.sections.FavoriteItemsGrid
 import org.lanzadera.proyectos.ui.components.sections.GameSection
@@ -176,6 +180,15 @@ private fun FavoritesTabContent(
     val showMovies by viewModel.showMovies.collectAsStateWithLifecycle()
     val showSeries by viewModel.showSeries.collectAsStateWithLifecycle()
 
+    val showAvailableSeries by viewModel.showAvailableSeries.collectAsStateWithLifecycle()
+    val showUpcomingSeries by viewModel.showUpcomingSeries.collectAsStateWithLifecycle()
+    val showInProductionSeries by viewModel.showInProductionSeries.collectAsStateWithLifecycle()
+    val showEndedSeries by viewModel.showEndedSeries.collectAsStateWithLifecycle()
+    val showAvailableMovies by viewModel.showAvailableMovies.collectAsStateWithLifecycle()
+    val showUpcomingMovies by viewModel.showUpcomingMovies.collectAsStateWithLifecycle()
+
+    var showFilterDialog by remember { mutableStateOf(false) }
+
     // Always show the grid with chips, even when empty
     FavoriteItemsGrid(
         items = filteredFavorites,
@@ -183,6 +196,7 @@ private fun FavoritesTabContent(
         showSeries = showSeries,
         onMoviesFilterToggle = { viewModel.toggleMoviesFilter() },
         onSeriesFilterToggle = { viewModel.toggleSeriesFilter() },
+        onSettingsClick = { showFilterDialog = true },
         onMovieClick = onMovieClick,
         onTvShowClick = onTvShowClick,
         hasNoFavorites = allFavorites.isEmpty(),
@@ -191,6 +205,24 @@ private fun FavoritesTabContent(
             .padding(paddingValues)
             .navigationBarsPadding()
     )
+
+    if (showFilterDialog) {
+        FavoritesFilterDialog(
+            showAvailableSeries = showAvailableSeries,
+            showUpcomingSeries = showUpcomingSeries,
+            showInProductionSeries = showInProductionSeries,
+            showEndedSeries = showEndedSeries,
+            showAvailableMovies = showAvailableMovies,
+            showUpcomingMovies = showUpcomingMovies,
+            onAvailableSeriesToggle = { viewModel.toggleAvailableSeries() },
+            onUpcomingSeriesToggle = { viewModel.toggleUpcomingSeries() },
+            onInProductionSeriesToggle = { viewModel.toggleInProductionSeries() },
+            onEndedSeriesToggle = { viewModel.toggleEndedSeries() },
+            onAvailableMoviesToggle = { viewModel.toggleAvailableMovies() },
+            onUpcomingMoviesToggle = { viewModel.toggleUpcomingMovies() },
+            onDismiss = { showFilterDialog = false }
+        )
+    }
 }
 
 @Composable

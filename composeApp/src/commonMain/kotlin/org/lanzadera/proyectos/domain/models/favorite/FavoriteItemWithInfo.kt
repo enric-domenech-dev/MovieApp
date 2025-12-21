@@ -65,4 +65,15 @@ sealed class FavoriteItemWithInfo {
         override val daysUntilAvailable: Int? = null
         override val isCompleted: Boolean = true
     }
+
+    data class InProductionSeriesItem(
+        val tvShow: TvShow,
+        override val id: String,
+        override val posterUrl: String?,
+        override val updatedAt: Long
+    ) : FavoriteItemWithInfo() {
+        override val isAvailable: Boolean = false
+        override val daysUntilAvailable: Int? = null
+        override val isCompleted: Boolean = false
+    }
 }

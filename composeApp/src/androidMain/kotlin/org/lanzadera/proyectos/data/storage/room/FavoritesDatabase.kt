@@ -11,9 +11,10 @@ import org.lanzadera.proyectos.utils.AppContextProvider
         WatchedEpisodeEntity::class,
         WatchedMovieEntity::class,
         FavoriteTvShowEntity::class,
-        FavoriteMovieEntity::class
+        FavoriteMovieEntity::class,
+        SettingsEntity::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = true
 )
 abstract class FavoritesDatabase : RoomDatabase() {
@@ -22,6 +23,7 @@ abstract class FavoritesDatabase : RoomDatabase() {
     abstract fun watchedMovieDao(): WatchedMovieDao
     abstract fun favoriteTvShowDao(): FavoriteTvShowDao
     abstract fun favoriteMovieDao(): FavoriteMovieDao
+    abstract fun settingsDao(): SettingsDao
 
     companion object {
         val instance: FavoritesDatabase by lazy {

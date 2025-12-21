@@ -96,4 +96,11 @@ fun FavoriteItemWithInfo.toUI(): FavoriteItemWithInfoUI = when (this) {
         posterUrl = posterUrl,
         updatedAt = updatedAt
     )
+
+    is FavoriteItemWithInfo.InProductionSeriesItem -> FavoriteItemWithInfoUI.InProductionSeriesItem(
+        tvShow = tvShow.toUI(),
+        id = id,
+        posterUrl = posterUrl,
+        updatedAt = updatedAt
+    )
 }

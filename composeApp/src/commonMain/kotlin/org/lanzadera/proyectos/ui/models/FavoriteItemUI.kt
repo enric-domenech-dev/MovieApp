@@ -104,6 +104,17 @@ sealed class FavoriteItemWithInfoUI {
         override val daysUntilAvailable: Int? = null
         override val isCompleted: Boolean = true
     }
+
+    data class InProductionSeriesItem(
+        val tvShow: TvShowUI,
+        override val id: String,
+        override val posterUrl: String?,
+        override val updatedAt: Long
+    ) : FavoriteItemWithInfoUI() {
+        override val isAvailable: Boolean = false
+        override val daysUntilAvailable: Int? = null
+        override val isCompleted: Boolean = false
+    }
 }
 
 /**

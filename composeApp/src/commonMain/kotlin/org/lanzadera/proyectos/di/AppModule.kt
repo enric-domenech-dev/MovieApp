@@ -38,6 +38,7 @@ import org.lanzadera.proyectos.data.repository.SearchRepositoryImpl
 import org.lanzadera.proyectos.data.repository.TvShowRepositoryImpl
 import org.lanzadera.proyectos.data.repository.WatchedEpisodesRepositoryImpl
 import org.lanzadera.proyectos.data.repository.WatchedMoviesRepositoryImpl
+import org.lanzadera.proyectos.data.repository.createSettingsRepository
 import org.lanzadera.proyectos.domain.repository.BooksRepository
 import org.lanzadera.proyectos.domain.repository.FavoriteDetailsRepository
 import org.lanzadera.proyectos.domain.repository.FavoritesRepository
@@ -45,6 +46,7 @@ import org.lanzadera.proyectos.domain.repository.GameRepository
 import org.lanzadera.proyectos.domain.repository.LoadInitialData
 import org.lanzadera.proyectos.domain.repository.MovieRepository
 import org.lanzadera.proyectos.domain.repository.SearchRepository
+import org.lanzadera.proyectos.domain.repository.SettingsRepository
 import org.lanzadera.proyectos.domain.repository.TvShowRepository
 import org.lanzadera.proyectos.domain.repository.WatchedEpisodesRepository
 import org.lanzadera.proyectos.domain.repository.WatchedMoviesRepository
@@ -67,6 +69,10 @@ import org.lanzadera.proyectos.domain.usecase.movies.ObserveWatchedMoviesUseCase
 import org.lanzadera.proyectos.domain.usecase.movies.ToggleMovieWatchedUseCase
 import org.lanzadera.proyectos.domain.usecase.search.SearchMoviesUseCase
 import org.lanzadera.proyectos.domain.usecase.search.SearchTvShowsUseCase
+import org.lanzadera.proyectos.domain.usecase.settings.ObserveMoviesFiltersUseCase
+import org.lanzadera.proyectos.domain.usecase.settings.ObserveSeriesFiltersUseCase
+import org.lanzadera.proyectos.domain.usecase.settings.UpdateMoviesFiltersUseCase
+import org.lanzadera.proyectos.domain.usecase.settings.UpdateSeriesFiltersUseCase
 import org.lanzadera.proyectos.domain.usecase.tvshows.GetTvShowDetailsUseCase
 import org.lanzadera.proyectos.domain.usecase.tvshows.RefreshTvShowsUseCase
 import org.lanzadera.proyectos.ui.screens.detail.MovieDetailViewModel
@@ -240,6 +246,9 @@ val dataModule = module {
 
     // Watched movies persistence - need provider
     single<WatchedMoviesRepository> { WatchedMoviesRepositoryImpl(createWatchedMoviesDataSource()) }
+
+    // Settings persistence
+    single<SettingsRepository> { createSettingsRepository() }
 }
 
 val viewModelsModule = module {
@@ -267,6 +276,12 @@ val viewModelsModule = module {
     single { GetMovieDetailsUseCase(get()) }
     single { GetFavoriteDetailsUseCase(get()) }
 
+    // Settings UseCases
+    single { ObserveSeriesFiltersUseCase(get()) }
+    single { ObserveMoviesFiltersUseCase(get()) }
+    single { UpdateSeriesFiltersUseCase(get()) }
+    single { UpdateMoviesFiltersUseCase(get()) }
+
     // Repositories
     single<LoadInitialData> { LoadInitialDataImpl(get(), 5, get()) }
     single<BooksRepository> {
@@ -288,7 +303,22 @@ val viewModelsModule = module {
     viewModel { HomeViewModel() }
     
     // Home Tabs - Each tab has its own ViewModel
-    viewModel { FavoritesTabViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel {
+        FavoritesTabViewModel(
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
     viewModel { BooksTabViewModel(getOrNull()) }
     viewModel { FilmsTabViewModel(get()) }
     viewModel { SeriesTabViewModel(getOrNull()) }
