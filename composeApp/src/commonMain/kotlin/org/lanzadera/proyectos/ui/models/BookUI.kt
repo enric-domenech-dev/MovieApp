@@ -29,7 +29,10 @@ data class BookUI(
         get() = authors?.joinToString(", ") ?: "Autor desconocido"
     
     val ratingText: String
-        get() = averageRating?.let { "%.1f".format(it) } ?: "Sin valoración"
+        get() = averageRating?.let { 
+            val rounded = (it * 10).toInt() / 10.0
+            "$rounded" 
+        } ?: "Sin valoración"
     
     val pagesText: String
         get() = pageCount?.let { "$it páginas" } ?: ""

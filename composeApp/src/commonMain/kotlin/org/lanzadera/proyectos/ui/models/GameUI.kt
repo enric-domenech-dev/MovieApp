@@ -23,7 +23,10 @@ data class GameUI(
         get() = !coverUrl.isNullOrEmpty()
     
     val ratingText: String
-        get() = rating?.let { "%.1f".format(it) } ?: "Sin valoración"
+        get() = rating?.let { 
+            val rounded = (it * 10).toInt() / 10.0
+            "$rounded"
+        } ?: "Sin valoración"
     
     val genresText: String
         get() = genres?.joinToString(", ") ?: ""

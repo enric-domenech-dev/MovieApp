@@ -3,7 +3,6 @@ package org.lanzadera.proyectos.domain.usecase.tvshows
 import app.cash.turbine.test
 import kotlinx.coroutines.test.runTest
 import org.lanzadera.proyectos.base.UseCaseTest
-import org.lanzadera.proyectos.domain.models.tvshow.TvShow
 import org.lanzadera.proyectos.fakes.FakeTvShowRepository
 import kotlin.test.BeforeTest
 import kotlin.test.Test

@@ -51,13 +51,11 @@ import kotlinx.datetime.LocalDate
 import movieapp.composeapp.generated.resources.Res
 import movieapp.composeapp.generated.resources.new_edge_logo
 import org.jetbrains.compose.resources.painterResource
-import org.lanzadera.proyectos.ui.models.MovieUI
-import org.lanzadera.proyectos.ui.models.MovieWithReleaseInfoUI
-import org.lanzadera.proyectos.ui.models.MovieDetailUI
 import org.lanzadera.proyectos.ui.models.AggregateCastUI
 import org.lanzadera.proyectos.ui.models.AggregateCrewUI
-import org.lanzadera.proyectos.navigation.Screen
-import org.lanzadera.proyectos.utils.Constants
+import org.lanzadera.proyectos.ui.models.MovieDetailUI
+import org.lanzadera.proyectos.ui.models.MovieUI
+import org.lanzadera.proyectos.ui.models.MovieWithReleaseInfoUI
 
 @Composable
 fun MovieItem(

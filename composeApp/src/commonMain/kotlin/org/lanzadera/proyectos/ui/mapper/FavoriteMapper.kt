@@ -6,9 +6,9 @@ import org.lanzadera.proyectos.domain.models.favorite.FavoriteType
 import org.lanzadera.proyectos.ui.models.FavoriteItemUI
 import org.lanzadera.proyectos.ui.models.FavoriteItemWithInfoUI
 import org.lanzadera.proyectos.ui.models.FavoriteTypeUI
+import org.lanzadera.proyectos.ui.models.MovieWithReleaseInfoUI
 import org.lanzadera.proyectos.ui.models.NextEpisodeInfoUI
 import org.lanzadera.proyectos.ui.models.ReleaseInfoUI
-import org.lanzadera.proyectos.ui.models.MovieWithReleaseInfoUI
 import org.lanzadera.proyectos.ui.models.TvShowWithNextEpisodeUI
 
 /**

@@ -1,7 +1,20 @@
 package org.lanzadera.proyectos.ui.mapper
 
-import org.lanzadera.proyectos.domain.models.tvshow.*
-import org.lanzadera.proyectos.ui.models.*
+import org.lanzadera.proyectos.domain.models.tvshow.TvShow
+import org.lanzadera.proyectos.ui.models.AggregateCastUI
+import org.lanzadera.proyectos.ui.models.AggregateCreditsUI
+import org.lanzadera.proyectos.ui.models.AggregateCrewUI
+import org.lanzadera.proyectos.ui.models.CastRoleUI
+import org.lanzadera.proyectos.ui.models.CreatedByUI
+import org.lanzadera.proyectos.ui.models.CrewJobUI
+import org.lanzadera.proyectos.ui.models.EpisodeUI
+import org.lanzadera.proyectos.ui.models.GenreUI
+import org.lanzadera.proyectos.ui.models.NetworkUI
+import org.lanzadera.proyectos.ui.models.ProductionCompanyUI
+import org.lanzadera.proyectos.ui.models.ProductionCountryUI
+import org.lanzadera.proyectos.ui.models.SeasonUI
+import org.lanzadera.proyectos.ui.models.SpokenLanguageUI
+import org.lanzadera.proyectos.ui.models.TvShowDetailUI
 
 /**
  * Maps domain TvShow (with full details) to UI TvShowDetailUI.

@@ -1,7 +1,31 @@
 package org.lanzadera.proyectos.data.mapper
 
-import org.lanzadera.proyectos.data.dto.game.*
-import org.lanzadera.proyectos.domain.models.game.*
+import org.lanzadera.proyectos.data.dto.game.ArtworkDto
+import org.lanzadera.proyectos.data.dto.game.CompanyDto
+import org.lanzadera.proyectos.data.dto.game.CoverDto
+import org.lanzadera.proyectos.data.dto.game.GameDto
+import org.lanzadera.proyectos.data.dto.game.GameEngineDto
+import org.lanzadera.proyectos.data.dto.game.GameModeDto
+import org.lanzadera.proyectos.data.dto.game.GenreDto
+import org.lanzadera.proyectos.data.dto.game.InvolvedCompanyDto
+import org.lanzadera.proyectos.data.dto.game.KeywordDto
+import org.lanzadera.proyectos.data.dto.game.PlatformDto
+import org.lanzadera.proyectos.data.dto.game.ReleaseDateDto
+import org.lanzadera.proyectos.data.dto.game.ScreenshotDto
+import org.lanzadera.proyectos.data.dto.game.WebsiteDto
+import org.lanzadera.proyectos.domain.models.game.Artwork
+import org.lanzadera.proyectos.domain.models.game.Company
+import org.lanzadera.proyectos.domain.models.game.Cover
+import org.lanzadera.proyectos.domain.models.game.Game
+import org.lanzadera.proyectos.domain.models.game.GameEngine
+import org.lanzadera.proyectos.domain.models.game.GameMode
+import org.lanzadera.proyectos.domain.models.game.Genre
+import org.lanzadera.proyectos.domain.models.game.InvolvedCompany
+import org.lanzadera.proyectos.domain.models.game.Keyword
+import org.lanzadera.proyectos.domain.models.game.Platform
+import org.lanzadera.proyectos.domain.models.game.ReleaseDate
+import org.lanzadera.proyectos.domain.models.game.Screenshot
+import org.lanzadera.proyectos.domain.models.game.Website
 
 // DTO → Domain
 fun GameDto.toDomain() = Game(

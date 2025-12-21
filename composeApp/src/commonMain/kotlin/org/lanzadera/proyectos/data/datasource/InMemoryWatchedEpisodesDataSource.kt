@@ -23,8 +23,7 @@ class InMemoryWatchedEpisodesDataSource : WatchedEpisodesDataSource {
     }
 
     override suspend fun markAsWatched(episode: WatchedEpisode) {
-        val current = watchedEpisodes.value.toMutableList()
-        current.removeIf { it.id == episode.id }
+        val current = watchedEpisodes.value.filterNot { it.id == episode.id }.toMutableList()
         current.add(episode)
         watchedEpisodes.value = current
     }

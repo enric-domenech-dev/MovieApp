@@ -32,8 +32,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import kotlinx.coroutines.delay
-import org.lanzadera.proyectos.ui.models.MovieUI
 import org.lanzadera.proyectos.ui.components.MovieItem
+import org.lanzadera.proyectos.ui.models.MovieUI
 
 @Composable
 fun SectionDialog(

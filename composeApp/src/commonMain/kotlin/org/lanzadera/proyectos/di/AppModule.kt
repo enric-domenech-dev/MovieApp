@@ -22,8 +22,6 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
 import org.lanzadera.proyectos.BuildConfig
-import org.lanzadera.proyectos.utils.Constants
-import org.lanzadera.proyectos.utils.Logger
 import org.lanzadera.proyectos.data.authentication.IGDBAuthManager
 import org.lanzadera.proyectos.data.datasource.FavoritesLocalDataSource
 import org.lanzadera.proyectos.data.datasource.WatchedEpisodesDataSource
@@ -57,10 +55,10 @@ import org.lanzadera.proyectos.domain.usecase.episodes.ToggleEpisodeWatchedUseCa
 import org.lanzadera.proyectos.domain.usecase.favorites.GetFavoriteDetailsUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.ObserveFavoritesUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.SyncFavoritesUseCase
-import org.lanzadera.proyectos.domain.usecase.favorites.ToggleMovieFavoriteUseCase
-import org.lanzadera.proyectos.domain.usecase.favorites.ToggleTvShowFavoriteUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.ToggleBookFavoriteUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.ToggleGameFavoriteUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.ToggleMovieFavoriteUseCase
+import org.lanzadera.proyectos.domain.usecase.favorites.ToggleTvShowFavoriteUseCase
 import org.lanzadera.proyectos.domain.usecase.games.GetGameDetailsUseCase
 import org.lanzadera.proyectos.domain.usecase.games.RefreshGamesUseCase
 import org.lanzadera.proyectos.domain.usecase.load_initial_data.GetInitialDataUseCase
@@ -82,6 +80,8 @@ import org.lanzadera.proyectos.ui.screens.home.tabs.GamesTabViewModel
 import org.lanzadera.proyectos.ui.screens.home.tabs.SeriesTabViewModel
 import org.lanzadera.proyectos.ui.screens.search.SearchViewModel
 import org.lanzadera.proyectos.ui.screens.splash.SplashViewModel
+import org.lanzadera.proyectos.utils.Constants
+import org.lanzadera.proyectos.utils.Logger
 
 val appModule = module {
     single(named("apiBearerToken")) { BuildConfig.API_BEARER_TOKEN }

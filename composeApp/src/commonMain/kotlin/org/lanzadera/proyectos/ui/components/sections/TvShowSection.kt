@@ -25,10 +25,10 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.lanzadera.proyectos.ui.models.TvShowUI
 import org.lanzadera.proyectos.ui.components.TvShowHeader
 import org.lanzadera.proyectos.ui.components.TvShowSubheader
 import org.lanzadera.proyectos.ui.components.dialogs.TvShowSectionDialog
+import org.lanzadera.proyectos.ui.models.TvShowUI
 import org.lanzadera.proyectos.ui.screens.home.SectionMode
 
 @Composable

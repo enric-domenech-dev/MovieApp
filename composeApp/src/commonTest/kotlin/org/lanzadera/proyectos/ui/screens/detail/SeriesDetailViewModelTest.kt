@@ -7,9 +7,6 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.lanzadera.proyectos.domain.models.Result
-import org.lanzadera.proyectos.domain.models.WatchedEpisode
-import org.lanzadera.proyectos.domain.models.favorite.FavoriteItem
 import org.lanzadera.proyectos.domain.models.favorite.FavoriteType
 import org.lanzadera.proyectos.domain.models.tvshow.Episode
 import org.lanzadera.proyectos.domain.models.tvshow.Season
