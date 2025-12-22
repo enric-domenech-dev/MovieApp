@@ -18,7 +18,7 @@ fun FavoriteItem.toUI(): FavoriteItemUI = FavoriteItemUI(
     id = id,
     type = type.toUI(),
     title = title,
-    posterUrl = posterUrl,
+    posterUrl = org.lanzadera.proyectos.ui.utils.normalizeImageUrl(posterUrl),
     overview = overview,
     addedAt = addedAt.toEpochMilliseconds()
 )

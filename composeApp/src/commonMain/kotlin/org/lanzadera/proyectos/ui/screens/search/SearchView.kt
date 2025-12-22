@@ -51,6 +51,7 @@ import movieapp.composeapp.generated.resources.new_edge_logo
 import org.jetbrains.compose.resources.painterResource
 import org.lanzadera.proyectos.ui.models.MovieUI
 import org.lanzadera.proyectos.ui.models.TvShowUI
+import org.lanzadera.proyectos.ui.utils.normalizeImageUrl
 import org.lanzadera.proyectos.utils.Constants.Dimensions.BOTTOM_NAV_BAR_HEIGHT
 import org.lanzadera.proyectos.utils.Strings
 
@@ -256,7 +257,7 @@ fun MovieCard(
             ) {
                 if (!movie.posterPath.isNullOrEmpty()) {
                     AsyncImage(
-                        model = "https://image.tmdb.org/t/p/w500${movie.posterPath}",
+                        model = normalizeImageUrl(movie.posterPath),
                         contentDescription = movie.title,
                         contentScale = ContentScale.FillBounds,
                         modifier = Modifier.fillMaxSize()
@@ -370,7 +371,7 @@ fun TvShowCard(
             ) {
                 if (!tvShow.posterPath.isNullOrEmpty()) {
                     AsyncImage(
-                        model = "https://image.tmdb.org/t/p/w500${tvShow.posterPath}",
+                        model = normalizeImageUrl(tvShow.posterPath),
                         contentDescription = tvShow.name,
                         contentScale = ContentScale.FillBounds,
                         modifier = Modifier.fillMaxSize()

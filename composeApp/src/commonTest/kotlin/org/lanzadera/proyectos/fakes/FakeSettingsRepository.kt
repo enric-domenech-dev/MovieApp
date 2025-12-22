@@ -12,6 +12,9 @@ class FakeSettingsRepository : SettingsRepository {
     private val _showAvailableMovies = MutableStateFlow(true)
     private val _showUpcomingMovies = MutableStateFlow(true)
 
+    private val _showMovies = MutableStateFlow(false)
+    private val _showSeries = MutableStateFlow(true)
+
     override fun observeShowAvailableSeries(): Flow<Boolean> = _showAvailableSeries
 
     override fun observeShowUpcomingSeries(): Flow<Boolean> = _showUpcomingSeries
@@ -23,6 +26,10 @@ class FakeSettingsRepository : SettingsRepository {
     override fun observeShowAvailableMovies(): Flow<Boolean> = _showAvailableMovies
 
     override fun observeShowUpcomingMovies(): Flow<Boolean> = _showUpcomingMovies
+
+    override fun observeShowMovies(): Flow<Boolean> = _showMovies
+
+    override fun observeShowSeries(): Flow<Boolean> = _showSeries
 
     override suspend fun updateShowAvailableSeries(value: Boolean) {
         _showAvailableSeries.value = value
@@ -46,5 +53,13 @@ class FakeSettingsRepository : SettingsRepository {
 
     override suspend fun updateShowUpcomingMovies(value: Boolean) {
         _showUpcomingMovies.value = value
+    }
+
+    override suspend fun updateShowMovies(value: Boolean) {
+        _showMovies.value = value
+    }
+
+    override suspend fun updateShowSeries(value: Boolean) {
+        _showSeries.value = value
     }
 }

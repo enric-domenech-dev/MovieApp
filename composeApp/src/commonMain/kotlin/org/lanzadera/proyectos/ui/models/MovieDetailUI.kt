@@ -39,10 +39,10 @@ data class MovieDetailUI(
     val aggregateCredits: AggregateCreditsUI?
 ) {
     val posterUrl: String
-        get() = posterPath?.let { "https://image.tmdb.org/t/p/w500$it" } ?: ""
+        get() = org.lanzadera.proyectos.ui.utils.normalizeImageUrl(posterPath) ?: ""
     
     val backdropUrl: String
-        get() = backdropPath?.let { "https://image.tmdb.org/t/p/w1280$it" } ?: ""
+        get() = org.lanzadera.proyectos.ui.utils.normalizeImageUrl(backdropPath) ?: ""
     
     val hasValidPoster: Boolean
         get() = !posterPath.isNullOrEmpty()
@@ -132,7 +132,7 @@ data class CastUI(
     val order: Int?
 ) {
     val profileUrl: String
-        get() = profilePath?.let { "https://image.tmdb.org/t/p/w185$it" } ?: ""
+        get() = org.lanzadera.proyectos.ui.utils.normalizeImageUrl(profilePath) ?: ""
 }
 
 data class CrewUI(
@@ -176,7 +176,7 @@ data class ImageUI(
     val height: Int?
 ) {
     val url: String
-        get() = "https://image.tmdb.org/t/p/original$filePath"
+        get() = org.lanzadera.proyectos.ui.utils.normalizeImageUrl(filePath) ?: ""
 }
 
 /**
@@ -217,7 +217,7 @@ data class AggregateCastUI(
     val order: Int?
 ) {
     val profileUrl: String
-        get() = profilePath?.let { "https://image.tmdb.org/t/p/w185$it" } ?: ""
+        get() = org.lanzadera.proyectos.ui.utils.normalizeImageUrl(profilePath) ?: ""
 }
 
 data class AggregateCrewUI(

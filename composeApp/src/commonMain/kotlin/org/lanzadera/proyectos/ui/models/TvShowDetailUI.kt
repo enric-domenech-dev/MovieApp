@@ -45,10 +45,10 @@ data class TvShowDetailUI(
     val nextEpisodeToAir: EpisodeUI?
 ) {
     val posterUrl: String
-        get() = posterPath?.let { "https://image.tmdb.org/t/p/w500$it" } ?: ""
+        get() = org.lanzadera.proyectos.ui.utils.normalizeImageUrl(posterPath) ?: ""
     
     val backdropUrl: String
-        get() = backdropPath?.let { "https://image.tmdb.org/t/p/w1280$it" } ?: ""
+        get() = org.lanzadera.proyectos.ui.utils.normalizeImageUrl(backdropPath) ?: ""
     
     val hasValidPoster: Boolean
         get() = !posterPath.isNullOrEmpty()
@@ -83,7 +83,7 @@ data class SeasonUI(
     val episodes: List<EpisodeUI>?
 ) {
     val posterUrl: String
-        get() = posterPath?.let { "https://image.tmdb.org/t/p/w500$it" } ?: ""
+        get() = org.lanzadera.proyectos.ui.utils.normalizeImageUrl(posterPath) ?: ""
 }
 
 /**
@@ -101,7 +101,7 @@ data class EpisodeUI(
     val voteCount: Int?
 ) {
     val stillUrl: String
-        get() = stillPath?.let { "https://image.tmdb.org/t/p/w500$it" } ?: ""
+        get() = org.lanzadera.proyectos.ui.utils.normalizeImageUrl(stillPath) ?: ""
     
     val episodeCode: String
         get() = "S${seasonNumber?.toString()?.padStart(2, '0')}E${episodeNumber?.toString()?.padStart(2, '0')}"
@@ -120,7 +120,7 @@ data class NetworkUI(
     val originCountry: String?
 ) {
     val logoUrl: String
-        get() = logoPath?.let { "https://image.tmdb.org/t/p/w185$it" } ?: ""
+        get() = org.lanzadera.proyectos.ui.utils.normalizeImageUrl(logoPath) ?: ""
 }
 
 /**
@@ -133,5 +133,5 @@ data class CreatedByUI(
     val gender: Int?
 ) {
     val profileUrl: String
-        get() = profilePath?.let { "https://image.tmdb.org/t/p/w185$it" } ?: ""
+        get() = org.lanzadera.proyectos.ui.utils.normalizeImageUrl(profilePath) ?: ""
 }

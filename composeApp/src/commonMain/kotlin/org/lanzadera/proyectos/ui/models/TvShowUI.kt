@@ -25,10 +25,10 @@ data class TvShowUI(
     val tagline: String?
 ) {
     val posterUrl: String
-        get() = posterPath?.let { "https://image.tmdb.org/t/p/w500$it" } ?: ""
+        get() = org.lanzadera.proyectos.ui.utils.normalizeImageUrl(posterPath) ?: ""
     
     val backdropUrl: String
-        get() = backdropPath?.let { "https://image.tmdb.org/t/p/w1280$it" } ?: ""
+        get() = org.lanzadera.proyectos.ui.utils.normalizeImageUrl(backdropPath) ?: ""
     
     val hasValidPoster: Boolean
         get() = !posterPath.isNullOrEmpty()

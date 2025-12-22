@@ -44,6 +44,7 @@ import org.lanzadera.proyectos.domain.models.favorite.FavoriteType
 import org.lanzadera.proyectos.ui.components.CustomTopAppBar
 import org.lanzadera.proyectos.ui.components.MovieCreditsTab
 import org.lanzadera.proyectos.ui.components.MovieInfoTabContent
+import org.lanzadera.proyectos.ui.utils.normalizeImageUrl
 import org.lanzadera.proyectos.utils.Strings
 
 @Composable
@@ -221,7 +222,7 @@ fun MovieDetailView(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             AsyncImage(
-                                model = "https://image.tmdb.org/t/p/original${movieDetail?.backdropPath}",
+                                model = normalizeImageUrl(movieDetail?.backdropPath),
                                 contentDescription = movieDetail?.title,
                                 contentScale = ContentScale.FillWidth,
                                 modifier = Modifier

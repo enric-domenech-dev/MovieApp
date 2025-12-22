@@ -61,6 +61,7 @@ import org.lanzadera.proyectos.ui.models.SeasonUI
 import org.lanzadera.proyectos.ui.models.TvShowDetailUI
 import org.lanzadera.proyectos.ui.models.TvShowUI
 import org.lanzadera.proyectos.ui.models.TvShowWithNextEpisodeUI
+import org.lanzadera.proyectos.ui.utils.normalizeImageUrl
 
 @Composable
 fun TvShowItem(
@@ -81,7 +82,7 @@ fun TvShowItem(
                 .clip(MaterialTheme.shapes.small)
         ) {
             AsyncImage(
-                model = tvShow.posterUrl,
+                model = normalizeImageUrl(tvShow.posterUrl),
                 contentDescription = tvShow.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
@@ -144,7 +145,7 @@ fun TvShowHeader(
                 .clip(MaterialTheme.shapes.small)
         ) {
             AsyncImage(
-                model = "https://image.tmdb.org/t/p/w500${tvShow.posterPath}",
+                model = normalizeImageUrl(tvShow.posterPath),
                 contentDescription = tvShow.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
@@ -194,7 +195,7 @@ fun TvShowSubheader(
                 .clip(MaterialTheme.shapes.small)
         ) {
             AsyncImage(
-                model = "https://image.tmdb.org/t/p/w500${tvShow.posterPath}",
+                model = normalizeImageUrl(tvShow.posterPath),
                 contentDescription = tvShow.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
@@ -235,7 +236,7 @@ fun CastMemberCard(actor: org.lanzadera.proyectos.domain.models.tvshow.Aggregate
     ) {
         if (!actor.profilePath.isNullOrEmpty()) {
             AsyncImage(
-                model = "https://image.tmdb.org/t/p/w300${actor.profilePath}",
+                model = normalizeImageUrl(actor.profilePath),
                 contentDescription = actor.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -305,7 +306,7 @@ fun CrewMemberCard(crewMember: org.lanzadera.proyectos.domain.models.tvshow.Aggr
     ) {
         if (!crewMember.profilePath.isNullOrEmpty()) {
             AsyncImage(
-                model = "https://image.tmdb.org/t/p/w300${crewMember.profilePath}",
+                model = normalizeImageUrl(crewMember.profilePath),
                 contentDescription = crewMember.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -482,7 +483,7 @@ fun SeriesInfoTab(tvShow: TvShowDetailUI?, modifier: Modifier = Modifier) {
                                         color = MaterialTheme.colorScheme.surfaceContainerLow
                                     ) {
                                         AsyncImage(
-                                            model = "https://image.tmdb.org/t/p/w200${network.logoPath}",
+                                            model = normalizeImageUrl(network.logoPath),
                                             contentDescription = network.name,
                                             contentScale = ContentScale.Fit,
                                             modifier = Modifier
@@ -898,7 +899,7 @@ fun CastMemberCardModern(actor: AggregateCastUI) {
         ) {
             if (!actor.profilePath.isNullOrEmpty()) {
                 AsyncImage(
-                    model = "https://image.tmdb.org/t/p/original${actor.profilePath}",
+                    model = normalizeImageUrl(actor.profilePath),
                     contentDescription = actor.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
@@ -965,7 +966,7 @@ fun CrewMemberCardModern(crewMember: AggregateCrewUI) {
         ) {
             if (!crewMember.profilePath.isNullOrEmpty()) {
                 AsyncImage(
-                    model = "https://image.tmdb.org/t/p/original${crewMember.profilePath}",
+                    model = normalizeImageUrl(crewMember.profilePath),
                     contentDescription = crewMember.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
@@ -1038,7 +1039,7 @@ fun TvShowHeaderWithNextEpisode(
                 .clip(MaterialTheme.shapes.small)
         ) {
             AsyncImage(
-                model = "https://image.tmdb.org/t/p/w500${tvShow.posterPath}",
+                model = normalizeImageUrl(tvShow.posterPath),
                 contentDescription = tvShow.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
@@ -1087,7 +1088,7 @@ fun TvShowHeaderFinished(
                 .clip(MaterialTheme.shapes.small)
         ) {
             AsyncImage(
-                model = "https://image.tmdb.org/t/p/w500${tvShow.posterPath}",
+                model = normalizeImageUrl(tvShow.posterPath),
                 contentDescription = tvShow.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),

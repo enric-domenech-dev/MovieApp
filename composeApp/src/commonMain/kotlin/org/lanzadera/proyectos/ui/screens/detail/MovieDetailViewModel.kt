@@ -99,7 +99,7 @@ class MovieDetailViewModel(
             id = movie.id?.toString() ?: return,
             type = FavoriteType.MOVIE,
             title = movie.title ?: movie.originalTitle.orEmpty(),
-            posterUrl = movie.posterPath?.let { "https://image.tmdb.org/t/p/w500$it" },
+            posterUrl = movie.posterPath?.let { org.lanzadera.proyectos.ui.utils.normalizeImageUrl(it) },
             overview = movie.overview
         )
         viewModelScope.launch { toggleMovieFavoriteUseCase(item) }

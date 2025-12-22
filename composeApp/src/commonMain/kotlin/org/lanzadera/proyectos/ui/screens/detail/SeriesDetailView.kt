@@ -46,6 +46,7 @@ import org.lanzadera.proyectos.ui.components.SeriesCreditsTab
 import org.lanzadera.proyectos.ui.components.SeriesInfoTab
 import org.lanzadera.proyectos.ui.components.SeriesSeasonsTab
 import org.lanzadera.proyectos.ui.models.TvShowUI
+import org.lanzadera.proyectos.ui.utils.normalizeImageUrl
 import org.lanzadera.proyectos.utils.Strings
 
 @Composable
@@ -206,7 +207,7 @@ fun SeriesDetailView(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             AsyncImage(
-                                model = "https://image.tmdb.org/t/p/original${displayedTvShow.backdropPath}",
+                                model = normalizeImageUrl(displayedTvShow.backdropPath),
                                 contentDescription = displayedTvShow.name,
                                 contentScale = ContentScale.FillWidth,
                                 modifier = Modifier

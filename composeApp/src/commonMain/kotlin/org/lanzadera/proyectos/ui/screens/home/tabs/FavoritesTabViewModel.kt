@@ -30,8 +30,10 @@ import org.lanzadera.proyectos.domain.usecase.favorites.ToggleGameFavoriteUseCas
 import org.lanzadera.proyectos.domain.usecase.favorites.ToggleMovieFavoriteUseCase
 import org.lanzadera.proyectos.domain.usecase.favorites.ToggleTvShowFavoriteUseCase
 import org.lanzadera.proyectos.domain.usecase.movies.ObserveWatchedMoviesUseCase
+import org.lanzadera.proyectos.domain.usecase.settings.ObserveContentFiltersUseCase
 import org.lanzadera.proyectos.domain.usecase.settings.ObserveMoviesFiltersUseCase
 import org.lanzadera.proyectos.domain.usecase.settings.ObserveSeriesFiltersUseCase
+import org.lanzadera.proyectos.domain.usecase.settings.UpdateContentFiltersUseCase
 import org.lanzadera.proyectos.domain.usecase.settings.UpdateMoviesFiltersUseCase
 import org.lanzadera.proyectos.domain.usecase.settings.UpdateSeriesFiltersUseCase
 import org.lanzadera.proyectos.ui.mapper.toUI
@@ -39,6 +41,7 @@ import org.lanzadera.proyectos.ui.models.FavoriteItemUI
 import org.lanzadera.proyectos.ui.models.FavoriteItemWithInfoUI
 import org.lanzadera.proyectos.ui.models.FavoriteTypeUI
 import org.lanzadera.proyectos.ui.models.shouldShowWithFilters
+import org.lanzadera.proyectos.ui.utils.normalizeImageUrl
 import org.lanzadera.proyectos.utils.DateUtils
 import org.lanzadera.proyectos.utils.Logger
 import kotlin.coroutines.cancellation.CancellationException
@@ -67,7 +70,9 @@ class FavoritesTabViewModel(
     private val observeSeriesFiltersUseCase: ObserveSeriesFiltersUseCase,
     private val observeMoviesFiltersUseCase: ObserveMoviesFiltersUseCase,
     private val updateSeriesFiltersUseCase: UpdateSeriesFiltersUseCase,
-    private val updateMoviesFiltersUseCase: UpdateMoviesFiltersUseCase
+    private val updateMoviesFiltersUseCase: UpdateMoviesFiltersUseCase,
+    private val observeContentFiltersUseCase: ObserveContentFiltersUseCase,
+    private val updateContentFiltersUseCase: UpdateContentFiltersUseCase
 ) : ViewModel() {
 
     // Basic favorites list
@@ -211,7 +216,7 @@ class FavoritesTabViewModel(
             FavoriteItemWithInfo.MovieItem(
                 movieWithRelease = movieWithRelease,
                 id = movieWithRelease.movie.id?.toString() ?: "",
-                posterUrl = movieWithRelease.movie.posterPath,
+                posterUrl = movieWithRelease.movie.posterPath?.let { normalizeImageUrl(it) }, 
                 updatedAt = Clock.System.now().toEpochMilliseconds()
             )
         }
@@ -220,7 +225,7 @@ class FavoritesTabViewModel(
             FavoriteItemWithInfo.TvShowItem(
                 tvShowWithNext = tvShowWithNext,
                 id = tvShowWithNext.tvShow.id?.toString() ?: "",
-                posterUrl = tvShowWithNext.tvShow.posterPath,
+                posterUrl = tvShowWithNext.tvShow.posterPath?.let { normalizeImageUrl(it) }, 
                 updatedAt = Clock.System.now().toEpochMilliseconds()
             )
         }
@@ -229,7 +234,7 @@ class FavoritesTabViewModel(
             FavoriteItemWithInfo.WatchedMovieItem(
                 movie = movie,
                 id = movie.id?.toString() ?: "",
-                posterUrl = movie.posterPath,
+                posterUrl = movie.posterPath?.let { normalizeImageUrl(it) }, 
                 updatedAt = Clock.System.now().toEpochMilliseconds()
             )
         }
@@ -298,12 +303,15 @@ class FavoritesTabViewModel(
         sortedDomainItems.map { it.toUI() }
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    // Filter states for content types (mantener como antes para los chips principales)
-    private val _showMovies = MutableStateFlow(false)
-    val showMovies: StateFlow<Boolean> = _showMovies.asStateFlow()
-    
-    private val _showSeries = MutableStateFlow(true)
-    val showSeries: StateFlow<Boolean> = _showSeries.asStateFlow()
+    // Filter states for content types (persisted in Settings)
+    // showMovies and showSeries are persisted via use cases so the chips selection survives restarts
+    val showMovies: StateFlow<Boolean> = observeContentFiltersUseCase
+        .observeShowMovies()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    val showSeries: StateFlow<Boolean> = observeContentFiltersUseCase
+        .observeShowSeries()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
     // Filter states for series status (desde repositorio)
     val showAvailableSeries: StateFlow<Boolean> = observeSeriesFiltersUseCase
@@ -449,14 +457,21 @@ class FavoritesTabViewModel(
      * Toggle movies filter.
      */
     fun toggleMoviesFilter() {
-        _showMovies.value = !_showMovies.value
+        viewModelScope.launch {
+            updateMoviesFiltersUseCase.updateShowAvailableMovies(!showMovies.value)
+            // Persist the chip selection
+            updateContentFiltersUseCase.updateShowMovies(!showMovies.value)
+        }
     }
 
     /**
      * Toggle series filter.
      */
     fun toggleSeriesFilter() {
-        _showSeries.value = !_showSeries.value
+        viewModelScope.launch {
+            // Persist the chip selection
+            updateContentFiltersUseCase.updateShowSeries(!showSeries.value)
+        }
     }
 
     /**

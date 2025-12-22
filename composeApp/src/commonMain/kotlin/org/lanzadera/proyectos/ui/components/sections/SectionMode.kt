@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import org.lanzadera.proyectos.domain.models.favorite.FavoriteItem
+import org.lanzadera.proyectos.ui.utils.normalizeImageUrl
 
 @Composable
 fun FavoriteListRow(
@@ -36,7 +37,7 @@ fun FavoriteListRow(
         val poster = item.posterUrl
         if (poster != null) {
             AsyncImage(
-                model = poster,
+                model = normalizeImageUrl(poster),
                 contentDescription = item.title,
                 modifier = Modifier.height(72.dp)
             )

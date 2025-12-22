@@ -42,6 +42,15 @@ class SettingsRepositoryImpl(
         return settingsDao.observeSettings().map { it?.showUpcomingMovies ?: true }
     }
 
+    // Observe content type chips
+    override fun observeShowMovies(): Flow<Boolean> {
+        return settingsDao.observeSettings().map { it?.showMovies ?: false }
+    }
+
+    override fun observeShowSeries(): Flow<Boolean> {
+        return settingsDao.observeSettings().map { it?.showSeries ?: true }
+    }
+
     override suspend fun updateShowAvailableSeries(value: Boolean) {
         ensureSettingsExist()
         settingsDao.updateShowAvailableSeries(value)
@@ -70,5 +79,16 @@ class SettingsRepositoryImpl(
     override suspend fun updateShowUpcomingMovies(value: Boolean) {
         ensureSettingsExist()
         settingsDao.updateShowUpcomingMovies(value)
+    }
+
+    // Update content type chips
+    override suspend fun updateShowMovies(value: Boolean) {
+        ensureSettingsExist()
+        settingsDao.updateShowMovies(value)
+    }
+
+    override suspend fun updateShowSeries(value: Boolean) {
+        ensureSettingsExist()
+        settingsDao.updateShowSeries(value)
     }
 }

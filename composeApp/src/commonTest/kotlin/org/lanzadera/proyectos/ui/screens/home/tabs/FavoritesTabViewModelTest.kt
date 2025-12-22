@@ -78,6 +78,10 @@ class FavoritesTabViewModelTest : ViewModelTest() {
         val observeMoviesFiltersUseCase = ObserveMoviesFiltersUseCase(fakeSettingsRepository)
         val updateSeriesFiltersUseCase = UpdateSeriesFiltersUseCase(fakeSettingsRepository)
         val updateMoviesFiltersUseCase = UpdateMoviesFiltersUseCase(fakeSettingsRepository)
+        val observeContentFiltersUseCase =
+            org.lanzadera.proyectos.domain.usecase.settings.ObserveContentFiltersUseCase(fakeSettingsRepository)
+        val updateContentFiltersUseCase =
+            org.lanzadera.proyectos.domain.usecase.settings.UpdateContentFiltersUseCase(fakeSettingsRepository)
         
         viewModel = FavoritesTabViewModel(
             observeFavoritesUseCase = observeFavoritesUseCase,
@@ -91,7 +95,9 @@ class FavoritesTabViewModelTest : ViewModelTest() {
             observeSeriesFiltersUseCase = observeSeriesFiltersUseCase,
             observeMoviesFiltersUseCase = observeMoviesFiltersUseCase,
             updateSeriesFiltersUseCase = updateSeriesFiltersUseCase,
-            updateMoviesFiltersUseCase = updateMoviesFiltersUseCase
+            updateMoviesFiltersUseCase = updateMoviesFiltersUseCase,
+            observeContentFiltersUseCase = observeContentFiltersUseCase,
+            updateContentFiltersUseCase = updateContentFiltersUseCase
         )
     }
     

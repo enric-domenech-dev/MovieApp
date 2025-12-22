@@ -56,6 +56,7 @@ import org.lanzadera.proyectos.ui.models.AggregateCrewUI
 import org.lanzadera.proyectos.ui.models.MovieDetailUI
 import org.lanzadera.proyectos.ui.models.MovieUI
 import org.lanzadera.proyectos.ui.models.MovieWithReleaseInfoUI
+import org.lanzadera.proyectos.ui.utils.normalizeImageUrl
 
 @Composable
 fun MovieItem(
@@ -76,7 +77,7 @@ fun MovieItem(
                 .clip(MaterialTheme.shapes.small)
         ) {
             AsyncImage(
-                model = movie.posterUrl,
+                model = normalizeImageUrl(movie.posterUrl),
                 contentDescription = movie.title,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
@@ -133,7 +134,7 @@ fun MovieHeader(
                 .clip(MaterialTheme.shapes.small)
         ) {
             AsyncImage(
-                model = "https://image.tmdb.org/t/p/w500${movie.posterPath}",
+                model = normalizeImageUrl(movie.posterPath),
                 contentDescription = movie.title,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
@@ -183,7 +184,7 @@ fun MovieSubheader(
                 .clip(MaterialTheme.shapes.small)
         ) {
             AsyncImage(
-                model = "https://image.tmdb.org/t/p/w500${movie.posterPath}",
+                model = normalizeImageUrl(movie.posterPath),
                 contentDescription = movie.title,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
@@ -464,7 +465,7 @@ fun MovieDetail(movie: MovieDetailUI?, modifier: Modifier = Modifier) {
                         ) {
                             if (!collection.posterPath.isNullOrEmpty()) {
                                 AsyncImage(
-                                    model = "https://image.tmdb.org/t/p/w200${collection.posterPath}",
+                                    model = normalizeImageUrl(collection.posterPath),
                                     contentDescription = collection.name,
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier
@@ -581,7 +582,7 @@ fun MovieCastMemberCard(actor: AggregateCastUI) {
         // Foto del actor
         if (!actor.profilePath.isNullOrEmpty()) {
             AsyncImage(
-                model = "https://image.tmdb.org/t/p/w300${actor.profilePath}",
+                model = normalizeImageUrl(actor.profilePath),
                 contentDescription = actor.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -645,7 +646,7 @@ fun MovieCrewMemberCard(crewMember: AggregateCrewUI) {
         // Foto del personal
         if (!crewMember.profilePath.isNullOrEmpty()) {
             AsyncImage(
-                model = "https://image.tmdb.org/t/p/w300${crewMember.profilePath}",
+                model = normalizeImageUrl(crewMember.profilePath),
                 contentDescription = crewMember.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -883,7 +884,7 @@ fun MovieInfoTabContent(movie: MovieDetailUI?, modifier: Modifier = Modifier) {
                         ) {
                             if (!collection.posterPath.isNullOrEmpty()) {
                                 AsyncImage(
-                                    model = "https://image.tmdb.org/t/p/w200${collection.posterPath}",
+                                    model = normalizeImageUrl(collection.posterPath),
                                     contentDescription = collection.name,
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier
@@ -1003,7 +1004,7 @@ fun MovieHeaderWithReleaseInfo(
                 .clip(MaterialTheme.shapes.small)
         ) {
             AsyncImage(
-                model = "https://image.tmdb.org/t/p/w500${movie.posterPath}",
+                model = normalizeImageUrl(movie.posterPath),
                 contentDescription = movie.title,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),

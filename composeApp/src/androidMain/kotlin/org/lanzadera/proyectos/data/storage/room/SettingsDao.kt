@@ -34,4 +34,10 @@ interface SettingsDao {
 
     @Query("UPDATE settings SET showUpcomingMovies = :value WHERE id = 1")
     suspend fun updateShowUpcomingMovies(value: Boolean)
+
+    @Query("UPDATE settings SET showMovies = :value WHERE id = 1")
+    suspend fun updateShowMovies(value: Boolean)
+
+    @Query("UPDATE settings SET showSeries = :value WHERE id = 1")
+    suspend fun updateShowSeries(value: Boolean)
 }

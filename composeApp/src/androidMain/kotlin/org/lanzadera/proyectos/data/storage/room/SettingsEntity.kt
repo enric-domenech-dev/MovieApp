@@ -12,5 +12,8 @@ data class SettingsEntity(
     val showInProductionSeries: Boolean = true,
     val showEndedSeries: Boolean = true,
     val showAvailableMovies: Boolean = true,
-    val showUpcomingMovies: Boolean = true
+    val showUpcomingMovies: Boolean = true,
+    // Content type chips persistence: show movies and show series selection
+    val showMovies: Boolean = false,
+    val showSeries: Boolean = true
 )

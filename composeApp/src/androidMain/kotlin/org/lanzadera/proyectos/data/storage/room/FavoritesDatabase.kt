@@ -14,7 +14,7 @@ import org.lanzadera.proyectos.utils.AppContextProvider
         FavoriteMovieEntity::class,
         SettingsEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = true
 )
 abstract class FavoritesDatabase : RoomDatabase() {
@@ -31,7 +31,7 @@ abstract class FavoritesDatabase : RoomDatabase() {
                 AppContextProvider.context(),
                 FavoritesDatabase::class.java,
                 "favorites.db"
-            ).fallbackToDestructiveMigration().build()
+            ).fallbackToDestructiveMigration(false).build()
         }
     }
 }

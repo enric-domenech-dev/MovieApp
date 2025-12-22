@@ -93,7 +93,7 @@ class SeriesDetailViewModel(
             id = tvShow.id?.toString() ?: return,
             type = FavoriteType.TV_SHOW,
             title = tvShow.name ?: tvShow.originalName.orEmpty(),
-            posterUrl = tvShow.posterPath?.let { "https://image.tmdb.org/t/p/w500$it" },
+            posterUrl = tvShow.posterPath?.let { org.lanzadera.proyectos.ui.utils.normalizeImageUrl(it) },
             overview = tvShow.overview
         )
         viewModelScope.launch { toggleTvShowFavoriteUseCase(item) }

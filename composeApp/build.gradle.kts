@@ -62,6 +62,8 @@ kotlin {
             implementation(libs.google.accompanist.permissions)
             implementation(libs.kotlinx.coroutines.android)
             implementation(libs.ktor.client.okhttp)
+            implementation(libs.coil.network.okhttp)
+
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.biometric)
@@ -86,7 +88,6 @@ kotlin {
             implementation(libs.coil.compose.core)
             implementation(libs.coil.compose)
             implementation(libs.coil)
-            implementation(libs.coil.network.ktor)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.navigation.compose)
             implementation(compose.runtime)
@@ -169,8 +170,8 @@ android {
         applicationId = "org.lanzadera.proyectos"
         minSdk = libs.versions.androidMinSdk.get().toInt()
         targetSdk = libs.versions.androidTargetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.1"
+        versionCode = 2
+        versionName = "1.2"
 
         val properties = Properties()
         val propertiesFile = project.rootProject.file("local.properties")

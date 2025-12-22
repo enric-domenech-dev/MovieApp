@@ -281,6 +281,8 @@ val viewModelsModule = module {
     single { ObserveMoviesFiltersUseCase(get()) }
     single { UpdateSeriesFiltersUseCase(get()) }
     single { UpdateMoviesFiltersUseCase(get()) }
+    single { org.lanzadera.proyectos.domain.usecase.settings.ObserveContentFiltersUseCase(get()) }
+    single { org.lanzadera.proyectos.domain.usecase.settings.UpdateContentFiltersUseCase(get()) }
 
     // Repositories
     single<LoadInitialData> { LoadInitialDataImpl(get(), 5, get()) }
@@ -305,6 +307,8 @@ val viewModelsModule = module {
     // Home Tabs - Each tab has its own ViewModel
     viewModel {
         FavoritesTabViewModel(
+            get(),
+            get(),
             get(),
             get(),
             get(),
